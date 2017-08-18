@@ -68,8 +68,7 @@ exposure_maps() {
 create_xselect_script() {
   NAME="$1"
   IMGLIST="$2"
-  FILEOUT="$3"
-  RESULT="$4"
+  RESULT="$3"
 
   NAME=$(echo $NAME | tr -c "[:alnum:]\n" "_")
 
@@ -101,8 +100,7 @@ create_xselect_script() {
 create_ximage_script() {
   NAME="$1"
   IMGLIST="$2"
-  FILEOUT="$3"
-  RESULT="$4"
+  RESULT="$3"
 
   NAME=$(echo $NAME | tr -c "[:alnum:]\n" "_")
 

@@ -93,7 +93,6 @@ do
     IFS=$OIFS
 
     # ${SCRIPT} --file=${file[$ncnt]} &
-    sleep 2
     ${CURDIR}/download.sh -d ${FLDS[0]} -o ${FLDS[1]} -a ${DATA_ARCHIVE} &
 
     PID=$!
@@ -116,7 +115,7 @@ do
     then
     unset PIDs[$PID]
     unset CNTs[$PID]
-    [ "$VERBOSE" = "1" ] && echo "Process $PID is finished"
+    # [ "$VERBOSE" = "1" ] && echo "Process $PID is finished"
     fi
   done
 

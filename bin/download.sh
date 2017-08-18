@@ -23,6 +23,7 @@ usage() {
 function download(){
   YYYYMM="$1"
   OBSID="$2"
+  DIR="$3"
 
   LOCAL_DIR="${PWD}/log"
   [ -d $LOCAL_DIR ] || mkdir -p $LOCAL_DIR
@@ -37,12 +38,18 @@ function download(){
 
   echo "Transfer START time: `date`" >> "${FILE_LOG}"
 
-  wget -r --no-verbose --no-parent -nH --wait=2 --random-wait "${TARGET_DIR}" &>> "${FILE_LOG}"
+  (
+    cd $DIR
+    WAIT=$(echo "scale=2 ; 2*$RANDOM/32768" | bc -l)
+    sleep "$WAIT"s
+    wget -r --no-verbose --no-parent -nH --wait=2 --random-wait "${TARGET_DIR}" &>> "${FILE_LOG}"
+  )
 
   echo "Transfer STOP time: `date`" >> "${FILE_LOG}"
 }
 
 
+ARCHIVE="$PWD"
 
 while getopts ":d:o:a:" OPT; do
     case "${OPT}" in
@@ -75,7 +82,11 @@ echo "========================================================="
 TIME_INIT=$(date +%s)
 echo "Downloading ${DATE}, observation $OBSID.."
 
-download "${DATE}" "${OBSID}"
+if [ ! -w ${ARCHIVE} ]; then
+  1>&2 echo "You don't have enough permissions to write to '${ARCHIVE}'. Finishing."
+  exit 1
+fi
+download "${DATE}" "${OBSID}" "$ARCHIVE"
 
 echo "..done."
 TIME_DONE=$(date +%s)
