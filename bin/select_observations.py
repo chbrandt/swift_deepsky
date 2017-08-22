@@ -29,14 +29,16 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12):
             '''
             from datetime import datetime
             try:
-                dt = datetime.strptime(archive_date,'%y/%m/%d %H:%M:%S')
+                # dt = datetime.strptime(archive_date,'%y/%m/%d %H:%M:%S')
+                dt = datetime.strptime(archive_date,'%d/%m/%Y')
             except ValueError as e:
-                #print(archive_date,e)
+                # print(archive_date,e)
                 return None
             year_month = '{:4d}_{:02d}'.format(dt.year,dt.month)
             return year_month
 
         dtf = extract_date(date)
+
         if dtf is None:
             return None
         obs = '{:011d}'.format(obsid)
