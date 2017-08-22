@@ -81,10 +81,16 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12):
                                 ra_list=table_radec['RA'], dec_list=table_radec['DEC'])
     table_object = table_master.loc[match_obs_mask]
 
-    table_object.to_csv(fileout, index=False)
-
     archive_addr = table_object.apply(lambda x:swift_archive_obs_path(x['START_TIME'],x['OBSID']), axis=1)
+
+    from os.path import isdir,dirname
+    if not isdir(dirname(fileout)):
+        print('Needs to create dir for {}'.format(fileout))
+    table_object.to_csv(fileout, index=False)
+    if not isdir(dirname(obsaddrfile)):
+        print('Needs to create dir for {}'.format(obsaddrfile))
     archive_addr.to_csv(obsaddrfile, index=False)
+
 
 
 def resolve_name(name):
@@ -109,6 +115,7 @@ def resolve_name(name):
 
 
 if __name__ == '__main__':
+    import sys
     import argparse
 
     parser = argparse.ArgumentParser(description='Conesearch observations from Swift Master Table')
@@ -134,12 +141,17 @@ if __name__ == '__main__':
 
     if args.name:
         obj = args.name
-        ra,dec = resolve_name(obj)
+        pos = resolve_name(obj)
+        if pos is None:
+            print("\nERROR: Object '{}' not resolved.\n".format(obj))
+            sys.exit(1)
+        ra,dec = pos
     if args.radec:
         radec = args.radec.split(',')
         ra,dec = [ float(c) for c in radec ]
     radius = float(args.radius)
 
+    from os import path
     tablefilein = args.table_in
     tablefileout = args.table_out
     obsaddrfile = args.archive_addr_list

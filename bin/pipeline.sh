@@ -74,10 +74,11 @@ done
 #
 [[ "${TABLE_MASTER}" = /* ]] || TABLE_MASTER="${PWD}/${TABLE_MASTER}"
 [[ "${DATA_ARCHIVE}" = /* ]] || DATA_ARCHIVE="${PWD}/${DATA_ARCHIVE}"
+[[ "${OUTDIR}" = /* ]] || OUTDIR="${PWD}/${OUTDIR}"
 
 # Normalize object name to remove non-alphanumeric characters
 #
-OBJNAME_NORMALIZED=$(echo $OBJECT | tr -d '[:space:]' | tr "+" "p" | tr "-" "m")
+OBJNAME_NORMALIZED=$(echo $OBJECT | tr -d '[:space:].' | tr "+" "p" | tr "-" "m")
 
 # Output and temporary directories to store averything accordingly
 #
@@ -85,6 +86,7 @@ OUTDIR="${OUTDIR}/${OBJNAME_NORMALIZED}"
 TMPDIR="${OUTDIR}/tmp"
 
 if [ -d $OUTDIR ]; then
+  touch ${OUTDIR}/bla.tmp
   rm ${OUTDIR}/*.*
   rm -rf ${TMPDIR}
 else
@@ -108,9 +110,9 @@ OBSLIST="${TMPDIR}/${OBJNAME_NORMALIZED}.archive_addr.txt"
   #
   python ${SCRPT_DIR}/select_observations.py $TABLE_MASTER \
                                             $TABLE_OBJECT \
-                                            --object $OBJECT \
+                                            --object "$OBJECT" \
                                             --archive_addr_list $OBSLIST
-
+  [[ $? -eq 0 ]] || { 1>&2 echo "Exiting."; exit; }
 
   # Download Swift observations; Already present datasets are skipped
   #
@@ -188,6 +190,7 @@ EOF
   rm $XIMAGE_TMP_SCRIPT
 )
 
+FINAL_TABLE="${OUTDIR}/table_flux_detections.adjusted.txt"
 (
   BLOCK='SOSTA'
   cd $OUTDIR
@@ -236,9 +239,9 @@ EOF
   DETECT_FLUX_TABLE="${OUTDIR}/table_flux_detections.txt"
   paste $CTS_DET_FULL $CTS_SOST_FULL $CTS_SOST_SOFT $CTS_SOST_HARD > $DETECT_FLUX_TABLE
 
-  FINAL_TABLE="${OUTDIR}/table_flux_detections.adjusted.txt"
   grep -v "^#" $DETECT_FLUX_TABLE | awk -f ${SCRPT_DIR}/adjust_fluxes.awk > $FINAL_TABLE
-
-  echo "Pipeline finished. Final table: '$FINAL_TABLE'"
-  echo "---"
 )
+
+echo "---"
+echo "Pipeline finished. Final table: '$FINAL_TABLE'"
+echo "---"
