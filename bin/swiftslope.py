@@ -99,7 +99,7 @@ def swiftslope(nh,countrate_hard,countrate_soft,hard_error=None,soft_error=None,
     aerrplus = alpha_plus - alpha
     aerrminus = alpha - alpha_minus
     print ('                    -{:.2f}'.format(aerrminus))
-    print (' energy index=      {:.3f}'.format(alpha))
+    print (' energy index= {:.3f}'.format(alpha))
     print ('                    +{:.2f}'.format(aerrplus))
 
 HARDNESS_MATRIX='''2.985E+19 4.454E+19 6.647E+19 9.919E+19 1.480E+20 2.209E+20 3.296E+20 4.919E+20 7.341E+20 1.095E+21 1.635E+21 2.440E+21 3.640E+21 5.433E+21 8.107E+21 1.210E+22 1.805E+22 2.694E+22 4.021E+22 6.000E+22
