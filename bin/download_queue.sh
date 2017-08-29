@@ -3,9 +3,16 @@ set -u
 
 CURDIR=$(cd `dirname $BASH_SOURCE`; pwd)
 
+# Directory of Swift data archive; where swift 'data' directory tree is.
+# For example, "/.../path/.../swift"
+#
+DATA_ARCHIVE="${PWD}/swift"
+
+# By default, be verbose
+#
 VERBOSE="1"
 
-# Number of procs
+# Number of CPUs
 #
 NPROCS=1
 
@@ -13,25 +20,25 @@ NPROCS=1
 #
 while getopts ":hqn:f:d:" opt
 do
-case $opt in
-  h) echo ""
-   echo " Usage: $(basename $0) [-n ] -f "
-   echo ""
-   echo " Options:"
-   echo " -h : this help message"
-   echo " -n : number or processors to use [default: 1]"
-   echo " -f : observations list file"
-   echo " -d : root data archive directory"
-   echo " -q : quiet run"
-   echo ""
-   exit 0;;
- q) VERBOSE="0";;
- n) NPROCS="$OPTARG";;
- f) OBSLIST="$OPTARG";;
- d) DATA_ARCHIVE="$OPTARG";;
-\?) echo "ERROR: Wrong option $OPTARG ";;
- :) echo "ERROR: Missing value for $OPTARG ";;
-esac
+  case $opt in
+    h) echo ""
+     echo " Usage: $(basename $0) [-n ] -f "
+     echo ""
+     echo " Options:"
+     echo " -h : this help message"
+     echo " -n : number or processors to use [default: 1]"
+     echo " -f : observations list file"
+     echo " -d : swift data archive directory"
+     echo " -q : quiet run"
+     echo ""
+     exit 0;;
+    q) VERBOSE="0";;
+    n) NPROCS="$OPTARG";;
+    f) OBSLIST="$OPTARG";;
+    d) DATA_ARCHIVE="$OPTARG";;
+    \?) echo "ERROR: Wrong option $OPTARG ";;
+    :) echo "ERROR: Missing value for $OPTARG ";;
+  esac
 done
 
 if [ -z "$OBSLIST" ]
@@ -47,6 +54,11 @@ echo "ERROR: file $OBSLIST does not exist. Finishing."
 exit 2
 fi
 
+
+
+SWIFT_ARCHIVE="${DATA_ARCHIVE}/data/obs"
+
+
 #===========================
 # Check PID..
 #
@@ -56,6 +68,7 @@ echo $?
 }
 #===========================
 
+# =====================================================================
 # Read pipeline file names of each selected Halo..
 #
 fcnt=0
@@ -92,14 +105,17 @@ do
     IFS='/' read -ra FLDS <<< ${file[$ncnt]}
     IFS=$OIFS
 
+    DATE=${FLDS[0]}
+    OBSID=${FLDS[1]}
     # ${SCRIPT} --file=${file[$ncnt]} &
-    ${CURDIR}/download.sh -d ${FLDS[0]} -o ${FLDS[1]} -a ${DATA_ARCHIVE} &
+    # ${CURDIR}/download.sh -d ${DATE} -o ${OBSID} -a ${DATA_ARCHIVE} &
+    ${CURDIR}/download_swift_asdc.pl ${OBSID} ${DATE} ${SWIFT_ARCHIVE} &
 
     PID=$!
-    # [ "$VERBOSE" = "1" ] && { echo "Downloading observation '${file[$ncnt]}'"; echo "PID: $PID"; }
     PIDs[$PID]=$PID
     CNTs[$PID]=$ncnt
-    cd - &> /dev/null
+    # [ "$VERBOSE" = "1" ] && { echo "Downloading observation '${file[$ncnt]}'"; echo "PID: $PID"; }
+    # cd - &> /dev/null
 
     echo ""
 
