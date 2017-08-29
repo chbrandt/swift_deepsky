@@ -3,6 +3,11 @@ set -ue
 
 SCRPT_DIR=$(cd `dirname $BASH_SOURCE`; pwd)
 
+# Number of simultaneous processing slots available
+# So far, this is being used only during data download
+#
+NPROCS=10
+
 ########################################################################
 # Swift-Events stacking
 # =====================
@@ -95,35 +100,87 @@ fi
 [ -d $TMPDIR ] || mkdir -p ${TMPDIR}
 
 
+# Size of the field to consider
+#
+RADIUS=12
+
+LOGFILE="${OUTDIR}/pipeline_internals.log"
+export LOGFILE
+
+# Summary
+# -------
+echo "#================================================================"
+echo "# Swift (XRT) deep-sky pipeline"
+echo "# -----------------------------"
+echo "# Pipeline arguments:"
+echo "#  * Swift master table: ${TABLE_MASTER}"
+echo "#  * Swift archive:      ${DATA_ARCHIVE}"
+echo "#  * Object-field name:  ${OBJECT}"
+echo "#    * Normalized name:  ${OBJNAME_NORMALIZED}"
+echo "#  * Output directory:   ${OUTDIR}"
+echo "#    * Temporary files:  ${TMPDIR}"
+echo "#  * Logfile:            ${LOGFILE}"
+echo "#-----------------------.........................................."
+
+echo "# Workflow:"
+echo "# 1.1) Identify all XRT observations inside the requested field;"
+echo "#      Field size is $RADIUS arcmin aroung input object's position."
+echo "# 1.2) Check data archive, download necessary files if missing;"
+echo "#      A maximum of $NPROCS downloads will run concurrently."
+
+# Selected swift table entries
+#
+TABLE_OBJECT="${OUTDIR}/${OBJNAME_NORMALIZED}_observations.csv"
+
+# Stacked events/expomaps
+#
+XSELECT_RESULT="${OUTDIR}/${OBJNAME_NORMALIZED}_sum.evt"
+XIMAGE_RESULT="${OUTDIR}/${OBJNAME_NORMALIZED}_sum.exp"
+
+# Final flux table
+#
+FINAL_TABLE="${OUTDIR}/flux_table.adjusted.txt"
+
+echo "# Pipeline outputs:"
+echo "# * Filtered entries from Master table:"
+echo "TABLE_OBJECT=$TABLE_OBJECT"
+echo "# * Stacked events file:"
+echo "XSELECT_RESULT=$XSELECT_RESULT"
+echo "# * Stacked exposure-maps file:"
+echo "XIMAGE_RESULT=$XIMAGE_RESULT"
+echo "# * Detected objects flux table:"
+echo "FINAL_TABLE=$FINAL_TABLE"
+echo ""
+
 # List of Swift archive observation addresses
 #
 OBSLIST="${TMPDIR}/${OBJNAME_NORMALIZED}.archive_addr.txt"
 (
-  BLOCK='INTRO'
+  BLOCK='DATA_SELECTION'
+  echo "# Block (1) $BLOCK"
   cd $OUTDIR
-
-  # Swift table selected entries file
-  #
-  TABLE_OBJECT="${OUTDIR}/${OBJNAME_NORMALIZED}_observations.csv"
 
   # Select rows/obserations from master table that contain OBJECT
   #
   python ${SCRPT_DIR}/select_observations.py $TABLE_MASTER \
                                             $TABLE_OBJECT \
                                             --object "$OBJECT" \
-                                            --archive_addr_list $OBSLIST
+                                            --archive_addr_list $OBSLIST \
+                                            &>> $LOGFILE
+
   [[ $? -eq 0 ]] || { 1>&2 echo "Exiting."; exit; }
 
   # Download Swift observations; Already present datasets are skipped
   #
-  ${SCRPT_DIR}/download_queue.sh -n 10 -f $OBSLIST -d $DATA_ARCHIVE
+  ${SCRPT_DIR}/download_queue.sh -n $NPROCS -f $OBSLIST -d $DATA_ARCHIVE \
+  &>> $LOGFILE
 
+  echo "# End block ---------------------------------------------------"
 )
 
-XSELECT_RESULT="${OUTDIR}/${OBJNAME_NORMALIZED}_sum.evt"
-XIMAGE_RESULT="${OUTDIR}/${OBJNAME_NORMALIZED}_sum.exp"
 (
-  BLOCK='DATA_SUM'
+  BLOCK='DATA_STACKING'
+  echo "# Block (2) $BLOCK"
   cd $OUTDIR
 
   source ${SCRPT_DIR}/setup_ximage_files.fsh
@@ -146,9 +203,12 @@ XIMAGE_RESULT="${OUTDIR}/${OBJNAME_NORMALIZED}_sum.exp"
 
   # Run the scripts
   #
-  xselect < $XSELECT_SUM_SCRIPT
-  ximage < $XIMAGE_SUM_SCRIPT
+  xselect < $XSELECT_SUM_SCRIPT &>> $LOGFILE
+  ximage < $XIMAGE_SUM_SCRIPT &>> $LOGFILE
+
+  echo "# End block ---------------------------------------------------"
 )
+exit
 
 XSELECT_DET_DEFAULT="${XSELECT_RESULT%.*}.det"
 XSELECT_DET_FULL="${XSELECT_RESULT%.*}.full.det"
@@ -190,7 +250,6 @@ EOF
   rm $XIMAGE_TMP_SCRIPT
 )
 
-FINAL_TABLE="${OUTDIR}/table_flux_detections.adjusted.txt"
 (
   BLOCK='SOSTA'
   cd $OUTDIR

@@ -4,6 +4,8 @@ import astropy
 import pandas
 import datetime
 
+import logging
+
 def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12):
 
     def swift_archive_obs_path(date,obsid):
@@ -32,7 +34,8 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12):
                 # dt = datetime.strptime(archive_date,'%y/%m/%d %H:%M:%S')
                 dt = datetime.strptime(archive_date,'%d/%m/%Y')
             except ValueError as e:
-                # print(archive_date,e)
+                print("ERROR: while processing {}".format(archive_date))
+                print("ERROR: {}".format(e))
                 return None
             year_month = '{:4d}_{:02d}'.format(dt.year,dt.month)
             return year_month
@@ -74,6 +77,9 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12):
         match_mask = coords.separation(coords_search) < radius
         return match_mask
 
+    print("Searching Swift Master table: {}".format(swift_mstr_table))
+    print("Searching observations around position: {},{}".format(ra,dec))
+    print("Search readius: {}".format(radius))
 
     import pandas
     table_master = pandas.read_csv(swift_mstr_table, sep=';', header=0)
@@ -82,8 +88,10 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12):
     match_obs_mask = conesearch(ra, dec, radius=radius,
                                 ra_list=table_radec['RA'], dec_list=table_radec['DEC'])
     table_object = table_master.loc[match_obs_mask]
+    print("Number of observations found: {:d}".format(len(table_object)))
 
     archive_addr = table_object.apply(lambda x:swift_archive_obs_path(x['START_TIME'],x['OBSID']), axis=1)
+    print("Observation addresses: {}".format(archive_addr))
 
     from os.path import isdir,dirname
     if not isdir(dirname(fileout)):
@@ -92,7 +100,7 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12):
     if not isdir(dirname(obsaddrfile)):
         print('Needs to create dir for {}'.format(obsaddrfile))
     archive_addr.to_csv(obsaddrfile, index=False)
-
+    print("Filtered table written to: {}".format(fileout))
 
 
 def resolve_name(name):

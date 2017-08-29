@@ -43,7 +43,7 @@ done
 
 if [ -z "$OBSLIST" ]
 then
-echo "Error: None Observations-list file given. See '$(basename $0) -h'"
+echo "ERROR: None Observations-list file given. See '$(basename $0) -h'"
 exit 1
 fi
 
