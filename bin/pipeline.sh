@@ -120,13 +120,14 @@ echo "#    * Normalized name:  ${OBJNAME_NORMALIZED}"
 echo "#  * Output directory:   ${OUTDIR}"
 echo "#    * Temporary files:  ${TMPDIR}"
 echo "#  * Logfile:            ${LOGFILE}"
-echo "#-----------------------.........................................."
+echo "#................................................................"
 
 echo "# Workflow:"
 echo "# 1.1) Identify all XRT observations inside the requested field;"
 echo "#      Field size is $RADIUS arcmin aroung input object's position."
 echo "# 1.2) Check data archive, download necessary files if missing;"
 echo "#      A maximum of $NPROCS downloads will run concurrently."
+echo "#................................................................"
 
 # Selected swift table entries
 #
@@ -143,13 +144,13 @@ FINAL_TABLE="${OUTDIR}/flux_table.adjusted.txt"
 
 echo "# Pipeline outputs:"
 echo "# * Filtered entries from Master table:"
-echo "TABLE_OBJECT=$TABLE_OBJECT"
+echo "    TABLE_OBJECT=$TABLE_OBJECT"
 echo "# * Stacked events file:"
-echo "XSELECT_RESULT=$XSELECT_RESULT"
+echo "    XSELECT_RESULT=$XSELECT_RESULT"
 echo "# * Stacked exposure-maps file:"
-echo "XIMAGE_RESULT=$XIMAGE_RESULT"
+echo "    XIMAGE_RESULT=$XIMAGE_RESULT"
 echo "# * Detected objects flux table:"
-echo "FINAL_TABLE=$FINAL_TABLE"
+echo "    FINAL_TABLE=$FINAL_TABLE"
 echo ""
 
 # List of Swift archive observation addresses
@@ -168,7 +169,12 @@ OBSLIST="${TMPDIR}/${OBJNAME_NORMALIZED}.archive_addr.txt"
                                             --archive_addr_list $OBSLIST \
                                             &>> $LOGFILE
 
-  [[ $? -eq 0 ]] || { 1>&2 echo "Exiting."; exit; }
+  [[ $? -eq 0 ]] || { 1>&2 echo "Observations selection failed. Exiting."; exit 1; }
+
+  NOBS=$(grep -v "^#" $OBSLIST | grep -v "^\s*$" | wc -l)
+  [[ $NOBS -ne 0 ]] || { 1>&2 echo "No observations selected. Exiting."; exit 1; }
+  echo "# Number of observations selected: $NOBS"
+  unset NOBS
 
   # Download Swift observations; Already present datasets are skipped
   #
@@ -188,10 +194,10 @@ OBSLIST="${TMPDIR}/${OBJNAME_NORMALIZED}.archive_addr.txt"
   # Create two files with filenames list of event-images and exposure-maps
   #
   EVENTSFILE="${TMPDIR}/${OBJNAME_NORMALIZED}_events.txt"
-  event_files $DATA_ARCHIVE $OBSLIST > $EVENTSFILE
+  event_files $DATA_ARCHIVE $OBSLIST > $EVENTSFILE 2>> $LOGFILE
 
   EXMAPSFILE="${TMPDIR}/${OBJNAME_NORMALIZED}_expos.txt"
-  exposure_maps $DATA_ARCHIVE $OBSLIST > $EXMAPSFILE
+  exposure_maps $DATA_ARCHIVE $OBSLIST > $EXMAPSFILE 2>> $LOGFILE
 
   # Create XSelect and XImage scripts to sum event-files and exposure-maps
   #
@@ -208,14 +214,14 @@ OBSLIST="${TMPDIR}/${OBJNAME_NORMALIZED}.archive_addr.txt"
 
   echo "# End block ---------------------------------------------------"
 )
-exit
 
 XSELECT_DET_DEFAULT="${XSELECT_RESULT%.*}.det"
 XSELECT_DET_FULL="${XSELECT_RESULT%.*}.full.det"
 XSELECT_DET_SOFT="${XSELECT_RESULT%.*}.soft.det"
 XSELECT_DET_HARD="${XSELECT_RESULT%.*}.hard.det"
 (
-  BLOCK='DETECT'
+  BLOCK='DETECT_SOURCES'
+  echo "# Block (3) $BLOCK"
   cd $OUTDIR
 
   XIMAGE_TMP_SCRIPT="${TMPDIR}/ximage.xco"
@@ -226,7 +232,7 @@ read/size=1024/expo $XIMAGE_RESULT
 det/bright
 quit
 EOF
-  ximage < $XIMAGE_TMP_SCRIPT
+  ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_FULL
 
   cat > $XIMAGE_TMP_SCRIPT << EOF
@@ -235,7 +241,7 @@ read/size=1024/expo $XIMAGE_RESULT
 det/bright
 quit
 EOF
-  ximage < $XIMAGE_TMP_SCRIPT
+  ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_SOFT
 
   cat > $XIMAGE_TMP_SCRIPT << EOF
@@ -244,14 +250,16 @@ read/size=1024/expo $XIMAGE_RESULT
 det/bright
 quit
 EOF
-  ximage < $XIMAGE_TMP_SCRIPT
+  ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_HARD
 
   rm $XIMAGE_TMP_SCRIPT
+  echo "# End block ---------------------------------------------------"
 )
 
 (
-  BLOCK='SOSTA'
+  BLOCK='COMPUTE_FLUXES'
+  echo "# Block (4) $BLOCK"
   cd $OUTDIR
 
   source ${SCRPT_DIR}/det2sosta.fsh
@@ -265,7 +273,7 @@ EOF
             $XIMAGE_RESULT \
             $LOGFILE_FULL $CTS_DET_FULL \
             > $XIMAGE_TMP_SCRIPT
-  ximage < $XIMAGE_TMP_SCRIPT
+  ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
 
   LOGFILE_SOFT="${OUTDIR}/sosta_soft.log"
   CTS_DET_SOFT="${TMPDIR}/countrates_soft.detect.txt"
@@ -274,7 +282,7 @@ EOF
             $XIMAGE_RESULT \
             $LOGFILE_SOFT $CTS_DET_SOFT \
             > $XIMAGE_TMP_SCRIPT
-  ximage < $XIMAGE_TMP_SCRIPT
+  ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
 
   # det2sosta $XSELECT_DET_FULL $XSELECT_DET_HARD 201 1000 $XIMAGE_RESULT > $XIMAGE_TMP_SCRIPT
   LOGFILE_HARD="${OUTDIR}/sosta_hard.log"
@@ -284,7 +292,7 @@ EOF
             $XIMAGE_RESULT \
             $LOGFILE_HARD $CTS_DET_HARD \
             > $XIMAGE_TMP_SCRIPT
-  ximage < $XIMAGE_TMP_SCRIPT
+  ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
 
   rm $XIMAGE_TMP_SCRIPT
 
@@ -299,6 +307,7 @@ EOF
   paste $CTS_DET_FULL $CTS_SOST_FULL $CTS_SOST_SOFT $CTS_SOST_HARD > $DETECT_FLUX_TABLE
 
   grep -v "^#" $DETECT_FLUX_TABLE | awk -f ${SCRPT_DIR}/adjust_fluxes.awk > $FINAL_TABLE
+  echo "# End block ---------------------------------------------------"
 )
 
 echo "---"

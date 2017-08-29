@@ -1,8 +1,5 @@
 FROM chbrandt/heasoft
 
-RUN yum install -y bc &&\
-    yum clean all
-    
 RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh           && \
     URL='https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh' && \
     wget --quiet $URL -O ~/miniconda.sh       && \
@@ -11,4 +8,11 @@ RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh           
 
 ENV PATH /opt/conda/bin:$PATH
 
-RUN conda install -y -q astropy pandas
+RUN yum install -y bc &&\
+    yum clean all     &&\
+    conda install -y -q astropy pandas &&\
+    curl -L https://cpanmin.us | perl - App::cpanminus &&\
+    cpanm WWW::Mechanize &&\
+    cpanm Carp::Assert
+
+RUN cpanm Archive::Tar

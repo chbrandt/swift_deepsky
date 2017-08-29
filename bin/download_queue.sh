@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-set -u
+set -ue
 
 CURDIR=$(cd `dirname $BASH_SOURCE`; pwd)
 
 # Directory of Swift data archive; where swift 'data' directory tree is.
 # For example, "/.../path/.../swift"
 #
-DATA_ARCHIVE="${PWD}/swift"
+DATA_ARCHIVE="${PWD}"
 
 # By default, be verbose
 #
@@ -28,7 +28,7 @@ do
      echo " -h : this help message"
      echo " -n : number or processors to use [default: 1]"
      echo " -f : observations list file"
-     echo " -d : swift data archive directory"
+     echo " -d : data archive directory, where 'swift' directory is"
      echo " -q : quiet run"
      echo ""
      exit 0;;
@@ -56,7 +56,7 @@ fi
 
 
 
-SWIFT_ARCHIVE="${DATA_ARCHIVE}/data/obs"
+SWIFT_ARCHIVE="${DATA_ARCHIVE}/swift/data/obs"
 
 
 #===========================
@@ -109,7 +109,9 @@ do
     OBSID=${FLDS[1]}
     # ${SCRIPT} --file=${file[$ncnt]} &
     # ${CURDIR}/download.sh -d ${DATE} -o ${OBSID} -a ${DATA_ARCHIVE} &
-    ${CURDIR}/download_swift_asdc.pl ${OBSID} ${DATE} ${SWIFT_ARCHIVE} &
+    DESTDIR="${SWIFT_ARCHIVE}/${DATE}"
+    [[ -d $DESTDIR ]] || mkdir -p $DESTDIR
+    ${CURDIR}/download_swift_asdc.pl ${OBSID} ${DATE} ${DESTDIR} &
 
     PID=$!
     PIDs[$PID]=$PID

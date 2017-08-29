@@ -82,7 +82,7 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12):
     print("Search readius: {}".format(radius))
 
     import pandas
-    table_master = pandas.read_csv(swift_mstr_table, sep=';', header=0)
+    table_master = pandas.read_csv(swift_mstr_table, sep=';', header=0, low_memory=False)
 
     table_radec = table_master[['RA','DEC']]
     match_obs_mask = conesearch(ra, dec, radius=radius,
@@ -91,7 +91,7 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12):
     print("Number of observations found: {:d}".format(len(table_object)))
 
     archive_addr = table_object.apply(lambda x:swift_archive_obs_path(x['START_TIME'],x['OBSID']), axis=1)
-    print("Observation addresses: {}".format(archive_addr))
+    print("Observation addresses: {}".format(archive_addr.values))
 
     from os.path import isdir,dirname
     if not isdir(dirname(fileout)):
