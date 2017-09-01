@@ -5,6 +5,7 @@ import pandas
 import datetime
 
 import logging
+import sys
 
 def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12):
 
@@ -34,8 +35,8 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12):
                 # dt = datetime.strptime(archive_date,'%y/%m/%d %H:%M:%S')
                 dt = datetime.strptime(archive_date,'%d/%m/%Y')
             except ValueError as e:
-                print("ERROR: while processing {}".format(archive_date))
-                print("ERROR: {}".format(e))
+                print("ERROR: while processing {}".format(archive_date),file=sys.stderr)
+                print("ERROR: {}".format(e),file=sys.stderr)
                 return None
             year_month = '{:4d}_{:02d}'.format(dt.year,dt.month)
             return year_month
@@ -72,6 +73,15 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12):
         from astropy.coordinates import Angle,SkyCoord
         radius = Angle(radius,unit='arcmin')
         coords = SkyCoord(ra_centroid, dec_centroid, unit='degree')
+        # ramin = coords.ra - radius
+        # ramax = coords.ra + radius
+        # raind = (ra_list > ramin.value) * (ra_list < ramax.value)
+        # decmin = coords.dec - radius
+        # decmax = coords.dec + radius
+        # decind = (dec_list > decmin.value) * (dec_list < decmax.value)
+        # ind = raind * decind
+        # ra_list = ra_list[ind]
+        # dec_list = dec_list[ind]
         coords_search = SkyCoord(ra_list, dec_list, unit='degree')
 
         match_mask = coords.separation(coords_search) < radius
@@ -153,7 +163,7 @@ if __name__ == '__main__':
         obj = args.name
         pos = resolve_name(obj)
         if pos is None:
-            print("\nERROR: Object '{}' not resolved.\n".format(obj))
+            print("\nERROR: Object '{}' not resolved.\n".format(obj),file=sys.stderr)
             sys.exit(1)
         ra,dec = pos
     if args.radec:

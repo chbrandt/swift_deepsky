@@ -19,10 +19,10 @@ det2sosta() {
   echo "log $LOGFILE"
   echo "read/size=1024/ecol=PI/emin=$EMIN/emax=$EMAX $file"
   echo "read/size=1024/expo $EXPOFILE"
-  echo "cpd test_$EMIN-$EMAX.gif/gif"
+  echo "cpd detection_$EMIN-$EMAX.gif/gif"
   echo 'disp'
 
-  echo "#cts/s error" > $CTSFILE
+  echo "#RA DEC photon_flux[cts/s] photon_flux_error[cts/s]" > $CTSFILE
 
   OLDIFS="$IFS"
   IFS=$'\n' DETECTS=($(grep -v "^!" $FILE))
@@ -35,7 +35,11 @@ det2sosta() {
     ctrate=${FIELDS[1]%%+*}
     _err=${FIELDS[1]##*+}
     errate=${_err#*-}
-    echo "$ctrate $errate" >> $CTSFILE
+
+    ra="${FIELDS[7]}:${FIELDS[8]}:${FIELDS[9]}"
+    dec="${FIELDS[10]}:${FIELDS[11]}:${FIELDS[12]}"
+
+    echo "$ra $dec $ctrate $errate" >> $CTSFILE
 
     # counts=$(echo "scale=0; ($ctrate * $expo)/1" | bc -l)
     counts=$(echo "$ctrate $expo" | awk '{print $1 * $2}')
@@ -44,7 +48,6 @@ det2sosta() {
 
     xpix=${FIELDS[2]}
     ypix=${FIELDS[3]}
-    # echo "x,y $xpix $ypix"
 
     eef_size=0.9
     if [ $counts -lt 100 ]; then

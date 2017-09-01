@@ -98,9 +98,7 @@ def swiftslope(nh,countrate_hard,countrate_soft,hard_error=None,soft_error=None,
     alpha_plus = swift_hardconvert(hardness_minus,nh,hardness_matrix)
     aerrplus = alpha_plus - alpha
     aerrminus = alpha - alpha_minus
-    print ('                    -{:.2f}'.format(aerrminus))
-    print (' energy index= {:.3f}'.format(alpha))
-    print ('                    +{:.2f}'.format(aerrplus))
+    return alpha,aerrplus,aerrminus
 
 HARDNESS_MATRIX='''2.985E+19 4.454E+19 6.647E+19 9.919E+19 1.480E+20 2.209E+20 3.296E+20 4.919E+20 7.341E+20 1.095E+21 1.635E+21 2.440E+21 3.640E+21 5.433E+21 8.107E+21 1.210E+22 1.805E+22 2.694E+22 4.021E+22 6.000E+22
 -1.0 3.713E+00 3.725E+00 3.742E+00 3.768E+00 3.806E+00 3.861E+00 3.944E+00 4.064E+00 4.238E+00 4.492E+00 4.861E+00 5.401E+00 6.207E+00 7.447E+00 9.447E+00 1.290E+01 1.944E+01 3.360E+01 7.032E+01 1.949E+02
@@ -146,9 +144,48 @@ HARDNESS_MATRIX='''2.985E+19 4.454E+19 6.647E+19 9.919E+19 1.480E+20 2.209E+20 3
  3.0 1.082E-02 1.102E-02 1.130E-02 1.174E-02 1.241E-02 1.344E-02 1.506E-02 1.765E-02 2.184E-02 2.879E-02 4.044E-02 6.021E-02 9.372E-02 1.496E-01 2.417E-01 3.989E-01 6.875E-01 1.286E+00 2.717E+00 7.004E+00
 '''
 
-if __name__ == '__main__':
+def print_oneline(alpha,aerrplus,aerrminus):
+    fmt = '{:.3f} +{:.2f} -{:.2f}'
+    print(fmt.format(alpha,aerrplus,aerrminus))
 
-    ct_soft,soft_error = [ float(v) for v in input('Enter count rate and error in 0.3-2.0 keV band: ').split() ]
-    ct_hard,hard_error = [ float(v) for v in input('Enter count rate and error in 2.0-10.0 keV band: ').split() ]
-    nh = float(input('Enter NH: '))
-    swiftslope(nh,ct_hard,ct_soft,hard_error,soft_error)
+def print_original(alpha,aerrplus,aerrminus):
+    print ('                    -{:.2f}'.format(aerrminus))
+    print (' energy index= {:.3f}'.format(alpha))
+    print ('                    +{:.2f}'.format(aerrplus))
+
+if __name__ == '__main__':
+    import sys
+
+    ONELINE=False
+
+    if len(sys.argv) == 1:
+        ct_soft,soft_error = [ float(v) for v in input('Enter countrate and error in 0.3-2.0 keV band: ').split() ]
+        ct_hard,hard_error = [ float(v) for v in input('Enter countrate and error in 2.0-10.0 keV band: ').split() ]
+        nh = float(input('Enter NH: '))
+        # alpha,aerrplus,aerrminus = swiftslope(nh,ct_hard,ct_soft,hard_error,soft_error)
+        # print ('                    -{:.2f}'.format(aerrminus))
+        # print (' energy index= {:.3f}'.format(alpha))
+        # print ('                    +{:.2f}'.format(aerrplus))
+    else:
+        import argparse
+        parser = argparse.ArgumentParser(description='Compute spectrum energy index')
+        parser.add_argument('--soft', type=float, help='Countrate in soft(0.3-2.0 keV) band')
+        parser.add_argument('--soft_error', type=float, help='Countrate error in soft(0.3-2.0 keV) band')
+        parser.add_argument('--hard', type=float, help='Countrate in hard(0.3-2.0 keV) band')
+        parser.add_argument('--hard_error', type=float, help='Countrate error in hard(0.3-2.0 keV) band')
+        parser.add_argument('--nh', type=float, help='Hydrogen column at the flux direction')
+        parser.add_argument('--oneline', action='store_true', help='Output in one line ("slope slope_plus-error slope_minus-error")')
+
+        args = parser.parse_args()
+        ONELINE=args.oneline
+        nh = args.nh
+        ct_hard = args.hard
+        ct_soft = args.soft
+        hard_error = args.hard_error
+        soft_error = args.soft_error
+
+    alpha,aerrplus,aerrminus = swiftslope(nh,ct_hard,ct_soft,hard_error,soft_error)
+    if ONELINE:
+        print_oneline(alpha,aerrplus,aerrminus)
+    else:
+        print_original(alpha,aerrplus,aerrminus)

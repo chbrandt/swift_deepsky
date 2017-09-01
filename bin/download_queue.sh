@@ -122,18 +122,27 @@ do
     echo ""
 
   else
-    sleep 10
+    sleep 5
   fi
 
 
   for PID in ${PIDs[*]};
   do
+    if [ "$(check_process $PID)" -ne "0" ]; then
+      _cnt=${CNTs[$PID]}
+      _file=${file[$_cnt]}
 
-    if [ "$(check_process $PID)" -ne "0" ]
-    then
-    unset PIDs[$PID]
-    unset CNTs[$PID]
-    # [ "$VERBOSE" = "1" ] && echo "Process $PID is finished"
+      wait $PID
+      PSTS=$?
+      if [[ $PSTS -eq 0 ]]; then
+        # [ "$VERBOSE" = "1" ] && \
+        echo "Processing of '$_file' was successfully finished"
+      else
+        # [ "$VERBOSE" = "1" ] && \
+        1>&2 echo "Processing of '$_file' failed"
+      fi
+      unset PIDs[$PID]
+      unset CNTs[$PID]
     fi
   done
 

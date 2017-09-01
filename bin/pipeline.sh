@@ -8,6 +8,8 @@ SCRPT_DIR=$(cd `dirname $BASH_SOURCE`; pwd)
 #
 NPROCS=10
 
+VERBOSE=1
+
 ########################################################################
 # Swift-Events stacking
 # =====================
@@ -61,7 +63,7 @@ OUTDIR="$PWD"
 while getopts ":hqs:f:d:o:" opt; do
   case $opt in
     h) help;;
-    v) VERBOSE=1;;
+    q) VERBOSE=0;;
     s) OBJECT="$OPTARG";;
     f) TABLE_MASTER="$OPTARG";;
     d) DATA_ARCHIVE="$OPTARG";;
@@ -105,29 +107,34 @@ fi
 RADIUS=12
 
 LOGFILE="${OUTDIR}/pipeline_internals.log"
-export LOGFILE
+LOGERROR="${LOGFILE}.error"
+
+function fecho() {
+  [ $VERBOSE -eq 1 ] || return
+  echo "$@" | tee -a $LOGFILE
+}
 
 # Summary
 # -------
-echo "#================================================================"
-echo "# Swift (XRT) deep-sky pipeline"
-echo "# -----------------------------"
-echo "# Pipeline arguments:"
-echo "#  * Swift master table: ${TABLE_MASTER}"
-echo "#  * Swift archive:      ${DATA_ARCHIVE}"
-echo "#  * Object-field name:  ${OBJECT}"
-echo "#    * Normalized name:  ${OBJNAME_NORMALIZED}"
-echo "#  * Output directory:   ${OUTDIR}"
-echo "#    * Temporary files:  ${TMPDIR}"
-echo "#  * Logfile:            ${LOGFILE}"
-echo "#................................................................"
+fecho "#==============================================================="
+fecho "# Swift (XRT) deep-sky pipeline"
+fecho "# -----------------------------"
+fecho "# Pipeline arguments:"
+fecho "#  * Swift master table: ${TABLE_MASTER}"
+fecho "#  * Swift archive:      ${DATA_ARCHIVE}"
+fecho "#  * Object-field name:  ${OBJECT}"
+fecho "#    * Normalized name:  ${OBJNAME_NORMALIZED}"
+fecho "#  * Output directory:   ${OUTDIR}"
+fecho "#    * Temporary files:  ${TMPDIR}"
+fecho "#  * Logfile:            ${LOGFILE}"
+fecho "#..............................................................."
 
-echo "# Workflow:"
-echo "# 1.1) Identify all XRT observations inside the requested field;"
-echo "#      Field size is $RADIUS arcmin aroung input object's position."
-echo "# 1.2) Check data archive, download necessary files if missing;"
-echo "#      A maximum of $NPROCS downloads will run concurrently."
-echo "#................................................................"
+fecho "# Workflow:"
+fecho "# 1.1) Identify all XRT observations inside the requested field;"
+fecho "#      Field size is $RADIUS arcmin around given object/position."
+fecho "# 1.2) Check data archive, download necessary files if missing;"
+fecho "#      A maximum of $NPROCS downloads will run concurrently."
+fecho "#..............................................................."
 
 # Selected swift table entries
 #
@@ -140,67 +147,76 @@ XIMAGE_RESULT="${OUTDIR}/${OBJNAME_NORMALIZED}_sum.exp"
 
 # Final flux table
 #
-FINAL_TABLE="${OUTDIR}/flux_table.adjusted.txt"
+COUNTRATES_TABLE="${OUTDIR}/table_countrates_detections.csv"
+FLUX_TABLE="${OUTDIR}/table_flux_detections.csv"
 
-echo "# Pipeline outputs:"
-echo "# * Filtered entries from Master table:"
-echo "    TABLE_OBJECT=$TABLE_OBJECT"
-echo "# * Stacked events file:"
-echo "    XSELECT_RESULT=$XSELECT_RESULT"
-echo "# * Stacked exposure-maps file:"
-echo "    XIMAGE_RESULT=$XIMAGE_RESULT"
-echo "# * Detected objects flux table:"
-echo "    FINAL_TABLE=$FINAL_TABLE"
-echo ""
+fecho "# Pipeline outputs:"
+fecho "# * Filtered entries from Master table:"
+fecho "    TABLE_OBJECT=$TABLE_OBJECT"
+fecho "# * Stacked events file:"
+fecho "    XSELECT_RESULT=$XSELECT_RESULT"
+fecho "# * Stacked exposure-maps file:"
+fecho "    XIMAGE_RESULT=$XIMAGE_RESULT"
+fecho "# * Detected objects flux table:"
+fecho "    COUNTRATES_TABLE=$COUNTRATES_TABLE"
+fecho "#..............................................................."
 
 # List of Swift archive observation addresses
 #
 OBSLIST="${TMPDIR}/${OBJNAME_NORMALIZED}.archive_addr.txt"
 (
   BLOCK='DATA_SELECTION'
-  echo "# Block (1) $BLOCK"
+  fecho "# Block (1) $BLOCK"
   cd $OUTDIR
 
   # Select rows/obserations from master table that contain OBJECT
   #
+  fecho "# -> Selecting observations.."
   python ${SCRPT_DIR}/select_observations.py $TABLE_MASTER \
                                             $TABLE_OBJECT \
                                             --object "$OBJECT" \
                                             --archive_addr_list $OBSLIST \
-                                            &>> $LOGFILE
+                                            2> $LOGERROR &>> $LOGFILE
 
   [[ $? -eq 0 ]] || { 1>&2 echo "Observations selection failed. Exiting."; exit 1; }
 
   NOBS=$(grep -v "^#" $OBSLIST | grep -v "^\s*$" | wc -l)
   [[ $NOBS -ne 0 ]] || { 1>&2 echo "No observations selected. Exiting."; exit 1; }
-  echo "# Number of observations selected: $NOBS"
+  fecho "#    - Number of observations selected: $NOBS"
+  fecho "  OBSLIST="`cat $OBSLIST`
   unset NOBS
 
   # Download Swift observations; Already present datasets are skipped
   #
+  fecho "# -> Querying/Downloading observations.."
   ${SCRPT_DIR}/download_queue.sh -n $NPROCS -f $OBSLIST -d $DATA_ARCHIVE \
-  &>> $LOGFILE
+    2> $LOGERROR &>> $LOGFILE
 
-  echo "# End block ---------------------------------------------------"
+  fecho "#............................................................."
 )
 
 (
   BLOCK='DATA_STACKING'
-  echo "# Block (2) $BLOCK"
+  fecho "# Block (2) $BLOCK"
   cd $OUTDIR
 
   source ${SCRPT_DIR}/setup_ximage_files.fsh
 
   # Create two files with filenames list of event-images and exposure-maps
   #
+  fecho "# -> Querying archive for event-files:"
   EVENTSFILE="${TMPDIR}/${OBJNAME_NORMALIZED}_events.txt"
-  event_files $DATA_ARCHIVE $OBSLIST > $EVENTSFILE 2>> $LOGFILE
+  event_files $DATA_ARCHIVE $OBSLIST > $EVENTSFILE 2> $LOGERROR
+  fecho "  EVENTSFILE="`cat $EVENTSFILE`
 
+  fecho "# -> ..and exposure-maps:"
   EXMAPSFILE="${TMPDIR}/${OBJNAME_NORMALIZED}_expos.txt"
-  exposure_maps $DATA_ARCHIVE $OBSLIST > $EXMAPSFILE 2>> $LOGFILE
+  exposure_maps $DATA_ARCHIVE $OBSLIST > $EXMAPSFILE 2> $LOGERROR
+  fecho "  EXMAPSFILE="`cat $EXMAPSFILE`
 
   # Create XSelect and XImage scripts to sum event-files and exposure-maps
   #
+  fecho "# -> Generating scripts for stacking data"
   XSELECT_SUM_SCRIPT="${TMPDIR}/events_sum.xcm"
   create_xselect_script $OBJNAME_NORMALIZED $EVENTSFILE $XSELECT_RESULT > $XSELECT_SUM_SCRIPT
 
@@ -209,25 +225,29 @@ OBSLIST="${TMPDIR}/${OBJNAME_NORMALIZED}.archive_addr.txt"
 
   # Run the scripts
   #
+  fecho "# -> Running XSelect (events concatenation).."
   xselect < $XSELECT_SUM_SCRIPT &>> $LOGFILE
+  fecho "# -> Running XImage (exposure-maps stacking).."
   ximage < $XIMAGE_SUM_SCRIPT &>> $LOGFILE
 
-  echo "# End block ---------------------------------------------------"
+  fecho "#..............................................................."
 )
 
 XSELECT_DET_DEFAULT="${XSELECT_RESULT%.*}.det"
 XSELECT_DET_FULL="${XSELECT_RESULT%.*}.full.det"
 XSELECT_DET_SOFT="${XSELECT_RESULT%.*}.soft.det"
+XSELECT_DET_MEDIUM="${XSELECT_RESULT%.*}.medium.det"
 XSELECT_DET_HARD="${XSELECT_RESULT%.*}.hard.det"
 (
-  BLOCK='DETECT_SOURCES'
-  echo "# Block (3) $BLOCK"
+  BLOCK='SOURCES_DETECTION'
+  fecho "# Block (3) $BLOCK"
   cd $OUTDIR
 
   XIMAGE_TMP_SCRIPT="${TMPDIR}/ximage.xco"
 
+  fecho "# -> Detecting bright sources in the FULL band (3-10keV).."
   cat > $XIMAGE_TMP_SCRIPT << EOF
-read/size=1024 $XSELECT_RESULT
+read/size=1024/ecol=PI/emin=30/emax=1000 $XSELECT_RESULT
 read/size=1024/expo $XIMAGE_RESULT
 det/bright
 quit
@@ -235,8 +255,9 @@ EOF
   ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_FULL
 
+  fecho "# -> Detecting bright sources in the SOFT band (0.3-1keV).."
   cat > $XIMAGE_TMP_SCRIPT << EOF
-read/size=1024/ecol=PI/emin=30/emax=200 $XSELECT_RESULT
+read/size=1024/ecol=PI/emin=30/emax=100 $XSELECT_RESULT
 read/size=1024/expo $XIMAGE_RESULT
 det/bright
 quit
@@ -244,6 +265,17 @@ EOF
   ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_SOFT
 
+  fecho "# -> Detecting bright sources in the MEDIUM band(1-2keV).."
+  cat > $XIMAGE_TMP_SCRIPT << EOF
+read/size=1024/ecol=PI/emin=101/emax=200 $XSELECT_RESULT
+read/size=1024/expo $XIMAGE_RESULT
+det/bright
+quit
+EOF
+  ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
+  mv $XSELECT_DET_DEFAULT $XSELECT_DET_MEDIUM
+
+  fecho "# -> Detecting bright sources in the HARD band (2-10keV).."
   cat > $XIMAGE_TMP_SCRIPT << EOF
 read/size=1024/ecol=PI/emin=201/emax=1000 $XSELECT_RESULT
 read/size=1024/expo $XIMAGE_RESULT
@@ -254,12 +286,12 @@ EOF
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_HARD
 
   rm $XIMAGE_TMP_SCRIPT
-  echo "# End block ---------------------------------------------------"
+  fecho "#..............................................................."
 )
 
 (
-  BLOCK='COMPUTE_FLUXES'
-  echo "# Block (4) $BLOCK"
+  BLOCK='COUNTRATES_MEASUREMENT'
+  fecho "# Block (4) $BLOCK"
   cd $OUTDIR
 
   source ${SCRPT_DIR}/det2sosta.fsh
@@ -276,40 +308,225 @@ EOF
   ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
 
   LOGFILE_SOFT="${OUTDIR}/sosta_soft.log"
-  CTS_DET_SOFT="${TMPDIR}/countrates_soft.detect.txt"
+  # CTS_DET_SOFT="${TMPDIR}/countrates_soft.detect.txt"
   det2sosta $XSELECT_DET_FULL \
-            $XSELECT_DET_SOFT 30 200 \
+            $XSELECT_DET_SOFT 30 100 \
             $XIMAGE_RESULT \
-            $LOGFILE_SOFT $CTS_DET_SOFT \
+            $LOGFILE_SOFT $CTS_DET_FULL \
             > $XIMAGE_TMP_SCRIPT
   ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
 
-  # det2sosta $XSELECT_DET_FULL $XSELECT_DET_HARD 201 1000 $XIMAGE_RESULT > $XIMAGE_TMP_SCRIPT
+  LOGFILE_MEDIUM="${OUTDIR}/sosta_medium.log"
+  # CTS_DET_MEDIUM="${TMPDIR}/countrates_medium.detect.txt"
+  det2sosta $XSELECT_DET_FULL \
+            $XSELECT_DET_MEDIUM 101 200 \
+            $XIMAGE_RESULT \
+            $LOGFILE_MEDIUM $CTS_DET_FULL \
+            > $XIMAGE_TMP_SCRIPT
+  ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
+
   LOGFILE_HARD="${OUTDIR}/sosta_hard.log"
-  CTS_DET_HARD="${TMPDIR}/countrates_hard.detect.txt"
+  # CTS_DET_HARD="${TMPDIR}/countrates_hard.detect.txt"
   det2sosta $XSELECT_DET_FULL \
             $XSELECT_DET_HARD 201 1000 \
             $XIMAGE_RESULT \
-            $LOGFILE_HARD $CTS_DET_HARD \
+            $LOGFILE_HARD $CTS_DET_FULL \
             > $XIMAGE_TMP_SCRIPT
   ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
 
   rm $XIMAGE_TMP_SCRIPT
 
   CTS_SOST_FULL="${TMPDIR}/countrates_full.sosta.txt"
-  python ${SCRPT_DIR}/read_detections.py $LOGFILE_FULL  > $CTS_SOST_FULL
+  python ${SCRPT_DIR}/read_detections.py $LOGFILE_FULL 'FULL' > $CTS_SOST_FULL
   CTS_SOST_SOFT="${TMPDIR}/countrates_soft.sosta.txt"
-  python ${SCRPT_DIR}/read_detections.py $LOGFILE_SOFT  > $CTS_SOST_SOFT
+  python ${SCRPT_DIR}/read_detections.py $LOGFILE_SOFT 'SOFT' > $CTS_SOST_SOFT
+  CTS_SOST_MEDIUM="${TMPDIR}/countrates_medium.sosta.txt"
+  python ${SCRPT_DIR}/read_detections.py $LOGFILE_MEDIUM 'MEDIUM' > $CTS_SOST_MEDIUM
   CTS_SOST_HARD="${TMPDIR}/countrates_hard.sosta.txt"
-  python ${SCRPT_DIR}/read_detections.py $LOGFILE_HARD  > $CTS_SOST_HARD
+  python ${SCRPT_DIR}/read_detections.py $LOGFILE_HARD 'HARD' > $CTS_SOST_HARD
 
-  DETECT_FLUX_TABLE="${OUTDIR}/table_flux_detections.txt"
-  paste $CTS_DET_FULL $CTS_SOST_FULL $CTS_SOST_SOFT $CTS_SOST_HARD > $DETECT_FLUX_TABLE
+  COUNTRATES_SOSTA_TABLE="${COUNTRATES_TABLE%.*}.sosta.${COUNTRATES_TABLE##*.}"
+  paste $CTS_DET_FULL \
+        $CTS_SOST_FULL \
+        $CTS_SOST_SOFT \
+        $CTS_SOST_MEDIUM \
+        $CTS_SOST_HARD \
+        > $COUNTRATES_SOSTA_TABLE
+  sed -i 's/\s\{1,\}/;/g' $COUNTRATES_SOSTA_TABLE
 
-  grep -v "^#" $DETECT_FLUX_TABLE | awk -f ${SCRPT_DIR}/adjust_fluxes.awk > $FINAL_TABLE
-  echo "# End block ---------------------------------------------------"
+  grep -v "^#" $COUNTRATES_SOSTA_TABLE \
+    | awk -F ';' -f ${SCRPT_DIR}/adjust_fluxes.awk > $COUNTRATES_TABLE 2> $LOGERROR
+    fecho "#..............................................................."
 )
 
-echo "---"
-echo "Pipeline finished. Final table: '$FINAL_TABLE'"
-echo "---"
+energy_bands() {
+  # Arguments:
+  # $1) BAND is one of 'soft','medium','hard'
+  # $2) OPTE is 'min','max' or 'eff'
+  #     If "$2" is not given, return all values associated with 'BAND'
+  #
+  # Particularly, if "$1" is "list", list the energy bands
+  [[ ${#@} -eq 0 ]] && return 1
+
+  local -A ENERGY_BANDS
+  ENERGY_BANDS[soft]='0.3 0.5 1.0'
+  ENERGY_BANDS[medium]='1.0 1.5 2.0'
+  ENERGY_BANDS[hard]='2.0 5.0 10.0'
+  ENERGY_BANDS[full]='0.3 5.0 10.0'
+
+  local BAND=$1
+  BAND=${BAND,,}
+
+  [[ $BAND == list ]] && { echo "${!ENERGY_BANDS[@]}"; return 0; }
+  [[ ${#@} -lt 2 ]] && { echo "${ENERGY_BANDS[$BAND]}"; return 0; }
+
+  local OPTE=$2
+
+  read -a VALS <<< ${ENERGY_BANDS[$BAND]}
+  local VAL
+  case $OPTE in
+    min) VAL=${VALS[0]};;
+    eff) VAL=${VALS[1]};;
+    max) VAL=${VALS[2]};;
+  esac
+  unset VALS
+  echo $VAL
+}
+
+run_countrates() {
+  local BAND=$1
+  local SLOPE=$2
+  local NH=$3
+  local SAT
+  case $BAND in
+    full)   SAT=25;;
+    soft)   SAT=26;;
+    medium) SAT=27;;
+    hard)   SAT=28;;
+  esac
+  local EFFE=$(energy_bands $BAND eff)
+  local EMIN=$(energy_bands $BAND min)
+  local EMAX=$(energy_bands $BAND max)
+  (
+    cd "${SCRPT_DIR}/countrates"
+    CTS_IN=${TMPDIR}/countrates.in
+    CTS_OUT="${CTS_IN%.in}.out"
+    echo -e "$SAT\n$EMIN $EMAX\n$EFFE\n1\n1\n$SLOPE\n$NH\nemitted\n0" > $CTS_IN
+    # ./countrates < $CTS_IN > $CTS_OUT
+    # local NUFNU=$(grep "nuFnu" $CTS_OUT | tail -n1 | awk '{print $(NF-1)}')
+    local NUFNU=$(./countrates < $CTS_IN | grep "nuFnu" | tail -n1 | awk '{print $(NF-1)}')
+    echo $NUFNU
+  )
+}
+is_null() {
+  local VAL=$1
+  local NULL=-999
+  echo "$VAL $NULL" | awk '{if($1==$2){print "yes"}else{print "no"}}'
+}
+(
+  BLOCK='COUNTRATES_TO_FLUX'
+  fecho "# Block (4) $BLOCK"
+  cd $OUTDIR
+
+  # here we have to use Paolo's 'countrates'.
+  # for each detected source (each source is read from COUNTRATES_TABLE)
+  # get its NH (given RA and DEC read from COUNTRATES_TABLE, use 'nh' tool)
+  # define the middle band values (soft:0.5, medium:1.5, hard:5)
+  # get the slope from swiftslope.py
+  # input them all to 'countrates' to get nuFnu
+  fecho "# -> Converting objects' flux.."
+  echo -n "#RA DEC NH ENERGY_SLOPE FLUX_FULL FLUX_FULL_ERROR"  >> $FLUX_TABLE
+  echo -n " FLUX_SOFT FLUX_SOFT_ERROR FLUX_SOFT_UL"              >> $FLUX_TABLE
+  echo -n " FLUX_MEDIUM FLUX_MEDIUM_ERROR FLUX_MEDIUM_UL"        >> $FLUX_TABLE
+  echo    " FLUX_HARD FLUX_HARD_ERROR FLUX_HARD_UL"              >> $FLUX_TABLE
+
+  for DET in `tail -n +2 $COUNTRATES_TABLE`; do
+    IFS=';' read -a FIELDS <<< ${DET}
+
+    RA=${FIELDS[0]}
+    ra=${RA//:/ }
+    DEC=${FIELDS[1]}
+    dec=${DEC//:/ }
+    NH=$(echo -e "2000\n${ra[*]}\n${dec[*]}" | nh | tail -n1 | awk '{print $NF}')
+    fecho -n "    RA=$RA DEC=$DEC NH=$NH"
+    CT_FULL=${FIELDS[2]}
+    CT_FULL_ERROR=${FIELDS[3]}
+
+    CT_SOFT=${FIELDS[4]}
+    CT_SOFT_ERROR=${FIELDS[5]}
+    CT_MEDIUM=${FIELDS[7]}
+    CT_MEDIUM_ERROR=${FIELDS[8]}
+    ct_softium=$(echo "$CT_SOFT $CT_MEDIUM" | awk '{print $1 + $2}')
+    ct_softium_error=$(echo "$CT_SOFT $CT_MEDIUM" | awk '{if($1>$2){print $1}else{print $2}}')
+    CT_HARD=${FIELDS[10]}
+    CT_HARD_ERROR=${FIELDS[11]}
+    ENERGY_SLOPE=$(${SCRPT_DIR}/swiftslope.py --nh=$NH \
+                                        --soft=$ct_softium \
+                                        --soft_error=$ct_softium_error \
+                                        --hard=$CT_HARD \
+                                        --hard_error=$CT_HARD_ERROR \
+                                        --oneline)
+    ENERGY_SLOPE=$(echo $ENERGY_SLOPE | cut -d' ' -f1)
+    fecho " ENERGY_SLOPE=$ENERGY_SLOPE"
+    CT_SOFT_UL=${FIELDS[6]}
+    CT_MEDIUM_UL=${FIELDS[9]}
+    CT_HARD_UL=${FIELDS[12]}
+    for BAND in `energy_bands list`; do
+      # echo "#  -> Running band: $BAND"
+      NUFNU_FACTOR=$(run_countrates $BAND $ENERGY_SLOPE $NH)
+      fecho "      BAND=$BAND NUFNU_FACTOR=$NUFNU_FACTOR"
+      case $BAND in
+        soft)
+          FLUX_SOFT=$(echo "$NUFNU_FACTOR $CT_SOFT" | awk '{print $1*$2}')
+          FLUX_SOFT_ERROR=$(echo "$NUFNU_FACTOR $CT_SOFT_ERROR" | awk '{print $1*$2}')
+          if [ $(is_null $CT_SOFT_UL) == 'yes' ]; then
+            FLUX_SOFT_UL=$CT_SOFT_UL
+          else
+            FLUX_SOFT_UL=$(echo "$NUFNU_FACTOR $CT_SOFT_UL" | awk '{print $1*$2}')
+          fi
+          fecho "      FLUX_SOFT=$FLUX_SOFT FLUX_SOFT_ERROR=$FLUX_SOFT_ERROR FLUX_SOFT_UL=$FLUX_SOFT_UL"
+          ;;
+        medium)
+          FLUX_MEDIUM=$(echo "$NUFNU_FACTOR $CT_MEDIUM" | awk '{print $1*$2}')
+          FLUX_MEDIUM_ERROR=$(echo "$NUFNU_FACTOR $CT_MEDIUM_ERROR" | awk '{print $1*$2}')
+          if [ $(is_null $CT_MEDIUM_UL) == 'yes' ]; then
+            FLUX_MEDIUM_UL=$CT_MEDIUM_UL
+          else
+            FLUX_MEDIUM_UL=$(echo "$NUFNU_FACTOR $CT_MEDIUM_UL" | awk '{print $1*$2}')
+          fi
+          fecho "      FLUX_MEDIUM=$FLUX_MEDIUM FLUX_MEDIUM_ERROR=$FLUX_MEDIUM_ERROR FLUX_MEDIUM_UL=$FLUX_MEDIUM_UL"
+          ;;
+        hard)
+          FLUX_HARD=$(echo "$NUFNU_FACTOR $CT_HARD" | awk '{print $1*$2}')
+          FLUX_HARD_ERROR=$(echo "$NUFNU_FACTOR $CT_HARD_ERROR" | awk '{print $1*$2}')
+          if [ $(is_null $CT_HARD_UL) == 'yes' ]; then
+            FLUX_HARD_UL=$CT_HARD_UL
+          else
+            FLUX_HARD_UL=$(echo "$NUFNU_FACTOR $CT_HARD_UL" | awk '{print $1*$2}')
+          fi
+          fecho "      FLUX_HARD=$FLUX_HARD FLUX_HARD_ERROR=$FLUX_HARD_ERROR FLUX_HARD_UL=$FLUX_HARD_UL"
+          ;;
+        full)
+          FLUX_FULL=$(echo "$NUFNU_FACTOR $CT_FULL" | awk '{print $1*$2}')
+          FLUX_FULL_ERROR=$(echo "$NUFNU_FACTOR $CT_FULL_ERROR" | awk '{print $1*$2}')
+          # if [ $(is_null $CT_FULL_UL) == 'yes' ]; then
+          #   FLUX_FULL_UL=$CT_FULL_UL
+          # else
+          #   FLUX_FULL_UL=$(echo "$NUFNU_FACTOR $CT_FULL_UL" | awk '{print $1*$2}')
+          # fi
+          # fecho "      FLUX_FULL=$FLUX_FULL FLUX_FULL_ERROR=$FLUX_FULL_ERROR FLUX_FULL_UL=$FLUX_FULL_UL"
+          fecho "      FLUX_FULL=$FLUX_FULL FLUX_FULL_ERROR=$FLUX_FULL_ERROR"
+          ;;
+      esac
+    done
+    echo -n "$RA $DEC $NH $ENERGY_SLOPE $FLUX_FULL $FLUX_FULL_ERROR"  >> $FLUX_TABLE
+    echo -n " $FLUX_SOFT $FLUX_SOFT_ERROR $FLUX_SOFT_UL"              >> $FLUX_TABLE
+    echo -n " $FLUX_MEDIUM $FLUX_MEDIUM_ERROR $FLUX_MEDIUM_UL"        >> $FLUX_TABLE
+    echo    " $FLUX_HARD $FLUX_HARD_ERROR $FLUX_HARD_UL"              >> $FLUX_TABLE
+  done
+  sed -i 's/\s/;/g' $FLUX_TABLE
+  fecho "#..............................................................."
+)
+echo "# ---"
+echo "# Pipeline finished. Final table: '$FLUX_TABLE'"
+echo "# ---"

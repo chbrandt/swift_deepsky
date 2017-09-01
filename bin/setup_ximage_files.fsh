@@ -7,7 +7,7 @@ event_files(){
 
   SWIFT_OBS_ARCHIVE="${DATA_ARCHIVE}/swift/data/obs"
 
-  echo "# Event files"
+  # echo "# Event files"
   for ln in `cat $OBS_ADDR_LIST`
   do
     OIFS=$IFS
@@ -27,7 +27,7 @@ exposure_maps() {
 
   SWIFT_OBS_ARCHIVE="${DATA_ARCHIVE}/swift/data/obs"
 
-  echo "# Event files"
+  # echo "# Exposure maps:"
   for ln in `cat $OBS_ADDR_LIST`
   do
     OIFS=$IFS
