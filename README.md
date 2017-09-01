@@ -17,5 +17,5 @@ The following software are required (tested versions):
   * XImage
 * Perl (v5.10)
   * WWW::Mechanize
-    Carp::Assert
-    Archive::Tar
+  * Carp::Assert
+  * Archive::Tar
