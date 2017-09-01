@@ -13,6 +13,5 @@ RUN yum install -y bc &&\
     conda install -y -q astropy pandas &&\
     curl -L https://cpanmin.us | perl - App::cpanminus &&\
     cpanm WWW::Mechanize &&\
-    cpanm Carp::Assert
-
-RUN cpanm Archive::Tar
+    cpanm Carp::Assert &&\
+    cpanm Archive::Tar
