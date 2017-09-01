@@ -15,3 +15,7 @@ The following software are required (tested versions):
 * HEASoft (v6.21)
   * XSelect
   * XImage
+* Perl (v5.10)
+  * WWW::Mechanize
+    Carp::Assert
+    Archive::Tar
