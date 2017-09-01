@@ -1,0 +1,339 @@
+SATELLITE   XMM
+INSTRUMENT  EPN_Thin_F.
+FILTER      THIN
+FLUX_ENERGY_RANGE 2.0 10.0
+COUNTS_ENERGY_RANGE 0.5 5.0
+FILE_EFF_AREA /countrate/epn_ef20_sdy0_thin.qdp
+SOFT_ENERGY_BAND  0.2 2.0
+MEDIUM_ENERGY_BAND 2.0 7.5
+HARD_ENERGY_BAND  7.5 12.0
+----------------------------------------------------------------
+SATELLITE   XMM
+INSTRUMENT  EPN_Medium_F.
+FILTER      MEDIUM
+FLUX_ENERGY_RANGE 2.0 10.0
+COUNTS_ENERGY_RANGE 0.2 12.
+FILE_EFF_AREA /countrate/epn_ef20_sdy0_medium.qdp
+SOFT_ENERGY_BAND  0.2 2.0
+MEDIUM_ENERGY_BAND 0.2 2.0 
+HARD_ENERGY_BAND  2.0 5.0
+----------------------------------------------------------------
+SATELLITE   XMM
+INSTRUMENT  EPN_Thick_F.
+FILTER      THICK
+FLUX_ENERGY_RANGE 2.0 10.0
+COUNTS_ENERGY_RANGE 0.5 5.0
+FILE_EFF_AREA /countrate/epn_ef20_sdy0_thick.qdp
+SOFT_ENERGY_BAND  0.2 2.0
+MEDIUM_ENERGY_BAND 2.0 7.5
+HARD_ENERGY_BAND  7.5 12.0
+----------------------------------------------------------------
+SATELLITE   XMM
+INSTRUMENT  MOS1_Thin_F.
+FILTER      THIN
+FLUX_ENERGY_RANGE 2.0 10.0
+COUNTS_ENERGY_RANGE 0.5 5.0
+FILE_EFF_AREA /countrate/m1_thin1v9q19t5r5_all_15.qdp
+SOFT_ENERGY_BAND  0.2 2.0
+MEDIUM_ENERGY_BAND 2.0 7.5
+HARD_ENERGY_BAND  7.5 12.0
+----------------------------------------------------------------
+SATELLITE   XMM (counts in 2-10 kev band)
+INSTRUMENT  MOS1_Thin_F.
+FILTER      THIN
+FLUX_ENERGY_RANGE 2.0 10.0
+COUNTS_ENERGY_RANGE 2.0 10.0
+FILE_EFF_AREA /countrate/m1_thin1v9q19t5r5_all_15.qdp
+SOFT_ENERGY_BAND  0.2 2.0
+MEDIUM_ENERGY_BAND 2.0 7.5
+HARD_ENERGY_BAND  7.5 12.0
+----------------------------------------------------------------
+SATELLITE   XMM
+INSTRUMENT  MOS1_Medium_F.
+FILTER      MEDIUM
+FLUX_ENERGY_RANGE 2.0 10.0
+COUNTS_ENERGY_RANGE 0.5 5.0
+FILE_EFF_AREA /countrate/m1_medv9q19t5r5_all_15.qdp
+SOFT_ENERGY_BAND  0.2 2.0
+MEDIUM_ENERGY_BAND 0.2 1.0
+HARD_ENERGY_BAND  1.0 5.0
+----------------------------------------------------------------
+SATELLITE   XMM
+INSTRUMENT  MOS1_Thick_F.
+FILTER      THICK
+FLUX_ENERGY_RANGE 2.0 10.0
+COUNTS_ENERGY_RANGE 0.5 5.0
+FILE_EFF_AREA /countrate/m1_thickv9q19t5r5_all_15.qdp
+SOFT_ENERGY_BAND  0.2 2.0
+MEDIUM_ENERGY_BAND 2.0 7.5
+HARD_ENERGY_BAND  7.5 12.0
+----------------------------------------------------------------
+SATELLITE   XMM
+INSTRUMENT  MOS2_Thin_F.
+FILTER      THIN
+FLUX_ENERGY_RANGE 2.0 10.0
+COUNTS_ENERGY_RANGE 0.5 5.0
+FILE_EFF_AREA /countrate/m2_thin1v9q19t5r5_all_15.qdp
+SOFT_ENERGY_BAND  0.2 2.0
+MEDIUM_ENERGY_BAND 2.0 7.5
+HARD_ENERGY_BAND  7.5 12.0
+----------------------------------------------------------------
+SATELLITE   XMM
+INSTRUMENT  MOS2_Medium_F.
+FILTER      MEDIUM
+FLUX_ENERGY_RANGE 2.0 10.0
+COUNTS_ENERGY_RANGE 0.5 5.0
+FILE_EFF_AREA /countrate/m2_medv9q19t5r5_all_15.qdp
+SOFT_ENERGY_BAND  0.2 2.0
+MEDIUM_ENERGY_BAND 2.0 7.5
+HARD_ENERGY_BAND  7.5 12.0
+----------------------------------------------------------------
+SATELLITE   XMM
+INSTRUMENT  MOS2_Thick_F.
+FILTER      THICK
+FLUX_ENERGY_RANGE 2.0 10.0
+COUNTS_ENERGY_RANGE 0.5 5.0
+FILE_EFF_AREA /countrate/m2_thickv9q19t5r5_all_15.qdp
+SOFT_ENERGY_BAND  0.2 2.0
+MEDIUM_ENERGY_BAND 2.0 7.5
+HARD_ENERGY_BAND  7.5 12.0
+----------------------------------------------------------------
+SATELLITE   ROSAT 
+INSTRUMENT  PSPC-B/FOV_Center
+FILTER      -
+FLUX_ENERGY_RANGE 0.5 2.0
+COUNTS_ENERGY_RANGE 0.1 2.4
+FILE_EFF_AREA /countrate/pspcb_effective_area_ctr.dat
+SOFT_ENERGY_BAND  0.1 0.4
+MEDIUM_ENERGY_BAND 0.4 1.0
+HARD_ENERGY_BAND  1.0 2.4
+----------------------------------------------------------------
+SATELLITE   ROSAT
+INSTRUMENT  PSPC-B/FOV_mid
+FILTER      -
+FLUX_ENERGY_RANGE 0.5 2.0
+COUNTS_ENERGY_RANGE 0.1 2.4
+FILE_EFF_AREA /countrate/pspcb_effective_area_mid.dat
+SOFT_ENERGY_BAND  0.1 0.4
+MEDIUM_ENERGY_BAND 0.4 1.0
+HARD_ENERGY_BAND  1.0 2.4
+----------------------------------------------------------------
+SATELLITE   ROSAT 
+INSTRUMENT  HRI
+FILTER      -
+FLUX_ENERGY_RANGE 0.5 2.
+COUNTS_ENERGY_RANGE 0.1 2.4
+FILE_EFF_AREA /countrate/hri_effective_area.dat
+SOFT_ENERGY_BAND  0.1 0.5
+MEDIUM_ENERGY_BAND 0.5 1.0
+HARD_ENERGY_BAND  1.0 2.0
+----------------------------------------------------------------
+SATELLITE   BEPPOSAX
+INSTRUMENT  MECS23
+FILTER      -
+FLUX_ENERGY_RANGE 2.0 10.0
+COUNTS_ENERGY_RANGE 1.6 10.3
+FILE_EFF_AREA /countrate/m23_effective_area.dat
+SOFT_ENERGY_BAND  1.6 3.5
+MEDIUM_ENERGY_BAND 3.5 5.0
+HARD_ENERGY_BAND  5.0 10.3
+----------------------------------------------------------------
+SATELLITE   BEPPOSAX
+INSTRUMENT  LECS
+FILTER      -
+FLUX_ENERGY_RANGE 2.0 10.0
+COUNTS_ENERGY_RANGE 0.2 10.0
+FILE_EFF_AREA /countrate/legspc_effective_area.dat
+SOFT_ENERGY_BAND  0.3 3.5
+MEDIUM_ENERGY_BAND 3.5 5.0
+HARD_ENERGY_BAND  5.0 10.3
+----------------------------------------------------------------
+SATELLITE   BEPPOSAX
+INSTRUMENT  WFC1
+FILTER      -
+FLUX_ENERGY_RANGE 2.0 10.0
+COUNTS_ENERGY_RANGE 1.73 8.29
+FILE_EFF_AREA /countrate/wfc__effective_area_w1_255_255_01jul01.dat
+SOFT_ENERGY_BAND  1.73 3.25
+MEDIUM_ENERGY_BAND 4.73 7.25
+HARD_ENERGY_BAND  8.0 12.
+----------------------------------------------------------------
+SATELLITE   BEPPOSAX
+INSTRUMENT  WFC2
+FILTER      -
+FLUX_ENERGY_RANGE 2.0 10.0
+COUNTS_ENERGY_RANGE 1.63 7.87
+FILE_EFF_AREA /countrate/wfc__effective_area_w2_255_255_01jul01.dat
+SOFT_ENERGY_BAND  1.63 3.13
+MEDIUM_ENERGY_BAND 4.51 6.91
+HARD_ENERGY_BAND  8.0 12.
+----------------------------------------------------------------
+SATELLITE   BEPPOSAX
+INSTRUMENT  WFC1_12deg
+FILTER      -
+FLUX_ENERGY_RANGE 2.0 10.0
+COUNTS_ENERGY_RANGE 1.73 8.29
+FILE_EFF_AREA /countrate/wfc__effective_area_w1_12deg_01jan00.dat
+SOFT_ENERGY_BAND  1.73 3.25
+MEDIUM_ENERGY_BAND 4.73 7.25
+HARD_ENERGY_BAND  8.0 12.
+----------------------------------------------------------------
+SATELLITE   BEPPOSAX
+INSTRUMENT  WFC1_18deg
+FILTER      -
+FLUX_ENERGY_RANGE 2.0 10.0
+COUNTS_ENERGY_RANGE 1.73 8.29
+FILE_EFF_AREA /countrate/wfc__effective_area_w1_18deg_01jan00.dat
+SOFT_ENERGY_BAND  1.73 3.25
+MEDIUM_ENERGY_BAND 4.73 7.25
+HARD_ENERGY_BAND  8.0 12.
+----------------------------------------------------------------
+SATELLITE   BEPPOSAX
+INSTRUMENT  WFC2_12deg
+FILTER      -
+FLUX_ENERGY_RANGE 2.0 10.0
+COUNTS_ENERGY_RANGE 1.63 7.87
+FILE_EFF_AREA /countrate/wfc__effective_area_w2_12deg_01jan00.dat
+SOFT_ENERGY_BAND  1.73 3.25
+MEDIUM_ENERGY_BAND 4.73 7.25
+HARD_ENERGY_BAND  8.0 12.
+----------------------------------------------------------------
+SATELLITE   BEPPOSAX
+INSTRUMENT  WFC2_18deg
+FILTER      -
+FLUX_ENERGY_RANGE 2.0 10.0
+COUNTS_ENERGY_RANGE 1.63 7.87
+FILE_EFF_AREA /countrate/wfc__effective_area_w2_18deg_01jan00.dat
+SOFT_ENERGY_BAND  1.73 3.25
+MEDIUM_ENERGY_BAND 4.73 7.25
+HARD_ENERGY_BAND  8.0 12.
+----------------------------------------------------------------
+SATELLITE   EINSTEIN
+INSTRUMENT  IPC
+FILTER      -
+FLUX_ENERGY_RANGE 0.3 3.5
+COUNTS_ENERGY_RANGE 0.3 3.5
+FILE_EFF_AREA /countrate/ipc_effective_area.dat
+SOFT_ENERGY_BAND  0.3 0.5
+MEDIUM_ENERGY_BAND 0.5 2.0
+HARD_ENERGY_BAND  2.0 3.3
+----------------------------------------------------------------
+SATELLITE   EINSTEIN
+INSTRUMENT  HRI
+FILTER      -
+FLUX_ENERGY_RANGE 0.15 4.0
+COUNTS_ENERGY_RANGE 0.12 4.0
+FILE_EFF_AREA /countrate/einstein_hri_effective_area.dat
+SOFT_ENERGY_BAND  0.3 0.5
+MEDIUM_ENERGY_BAND 0.5 4.0
+HARD_ENERGY_BAND  2.0 4.3
+----------------------------------------------------------------
+SATELLITE   JET-X
+INSTRUMENT  CCD
+FILTER      -
+FLUX_ENERGY_RANGE 2.0 10.
+COUNTS_ENERGY_RANGE 0.3 10.
+FILE_EFF_AREA /countrate/jetx_ccd_effective_area.dat
+SOFT_ENERGY_BAND  0.3 1.5
+MEDIUM_ENERGY_BAND 1.5 4.0
+HARD_ENERGY_BAND  4.0 10.0
+----------------------------------------------------------------
+SATELLITE   Swift (cts in 0.3-10.0 keV band)
+INSTRUMENT  XRT
+FILTER      -
+FLUX_ENERGY_RANGE 0.3 10.
+COUNTS_ENERGY_RANGE 0.3 10.
+FILE_EFF_AREA /countrate/xrt_PC_0-12_final.dat
+SOFT_ENERGY_BAND  0.3 1.0
+MEDIUM_ENERGY_BAND 1.0 2.0
+HARD_ENERGY_BAND  2.0 10.0
+----------------------------------------------------------------
+SATELLITE   Swift (cts in 0.3-1.0 keV band)
+INSTRUMENT  XRT
+FILTER      -
+FLUX_ENERGY_RANGE 0.3 1.0
+COUNTS_ENERGY_RANGE 0.3 1.0
+FILE_EFF_AREA /countrate/xrt_PC_0-12_final.dat
+SOFT_ENERGY_BAND  0.3 1.0
+MEDIUM_ENERGY_BAND 1.0 2.0
+HARD_ENERGY_BAND  2.0 10.0
+----------------------------------------------------------------
+SATELLITE   Swift (cts in 1.0-2.0 keV band)
+INSTRUMENT  XRT
+FILTER      -
+FLUX_ENERGY_RANGE 1.0 2.0
+COUNTS_ENERGY_RANGE 1.0 2.0
+FILE_EFF_AREA /countrate/xrt_PC_0-12_final.dat
+SOFT_ENERGY_BAND  0.3 1.0
+MEDIUM_ENERGY_BAND 1.0 2.0
+HARD_ENERGY_BAND  2.0 10.0
+----------------------------------------------------------------
+SATELLITE   Swift (cts in 2-10 keV band)
+INSTRUMENT  XRT
+FILTER      -
+FLUX_ENERGY_RANGE  2. 10.
+COUNTS_ENERGY_RANGE 2. 10.
+FILE_EFF_AREA /countrate/xrt_PC_0-12_final.dat
+SOFT_ENERGY_BAND  0.3 1.0
+MEDIUM_ENERGY_BAND 1.0 2.0
+HARD_ENERGY_BAND  2.0 10.0
+----------------------------------------------------------------
+SATELLITE   Swift (cts in 2-8 keV band)
+INSTRUMENT  XRT
+FILTER      -
+FLUX_ENERGY_RANGE  2. 8.
+COUNTS_ENERGY_RANGE 2. 8.
+FILE_EFF_AREA /countrate/xrt_PC_0-12_final.dat
+SOFT_ENERGY_BAND  0.5 2.5
+MEDIUM_ENERGY_BAND 2.5 5.0
+HARD_ENERGY_BAND  2.5 10.0
+----------------------------------------------------------------
+SATELLITE   Swift (cts in 0.1-2.4 keV band)
+INSTRUMENT  XRT
+FILTER      -
+FLUX_ENERGY_RANGE  0.1 2.4
+COUNTS_ENERGY_RANGE 0.3 2.4
+FILE_EFF_AREA /countrate/xrt_PC_0-12_final.dat
+SOFT_ENERGY_BAND  0.1 2.5
+MEDIUM_ENERGY_BAND 2.5 5.0
+HARD_ENERGY_BAND  2.5 10.0
+----------------------------------------------------------------
+SATELLITE   Swift (cts in 0.1-10.0 keV band)
+INSTRUMENT  XRT
+FILTER      -
+FLUX_ENERGY_RANGE  0.1 10.0
+COUNTS_ENERGY_RANGE 0.1 10.0
+FILE_EFF_AREA /countrate/xrt_PC_0-12_final.dat
+SOFT_ENERGY_BAND  0.5 2.5
+MEDIUM_ENERGY_BAND 2.5 5.0
+HARD_ENERGY_BAND  2.5 10.0
+----------------------------------------------------------------
+SATELLITE   SIMBOL-X
+INSTRUMENT  CZT
+FILTER      -
+FLUX_ENERGY_RANGE 4.0 87.
+COUNTS_ENERGY_RANGE 4.1 87.
+FILE_EFF_AREA /countrate/sx_czt.qdp
+SOFT_ENERGY_BAND  4.1 10.0
+MEDIUM_ENERGY_BAND 10.0 30.0
+HARD_ENERGY_BAND  30.0 80.0
+----------------------------------------------------------------
+SATELLITE   NUSTAR-FPMA
+INSTRUMENT  FPMA
+FILTER      -
+FLUX_ENERGY_RANGE 5.0 79.
+COUNTS_ENERGY_RANGE 2.0 79.
+FILE_EFF_AREA /countrate/nustar_fpma.qdp
+SOFT_ENERGY_BAND  5.0 10.0
+MEDIUM_ENERGY_BAND 10.0 30.0
+HARD_ENERGY_BAND  30.0 80.0
+----------------------------------------------------------------
+SATELLITE   NUSTAR-FPMB
+INSTRUMENT  FPMB
+FILTER      -
+FLUX_ENERGY_RANGE 5.0 79.
+COUNTS_ENERGY_RANGE 2.0 79.
+FILE_EFF_AREA /countrate/nustar_fpma.qdp
+SOFT_ENERGY_BAND  5.0 10.0
+MEDIUM_ENERGY_BAND 10.0 30.0
+HARD_ENERGY_BAND  30.0 80.0
