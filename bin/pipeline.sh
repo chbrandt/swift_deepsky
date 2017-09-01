@@ -243,8 +243,8 @@ XSELECT_DET_HARD="${XSELECT_RESULT%.*}.hard.det"
   fecho "# Block (3) $BLOCK"
   cd $OUTDIR
 
-  XIMAGE_TMP_SCRIPT="${TMPDIR}/ximage.xco"
 
+  XIMAGE_TMP_SCRIPT="${TMPDIR}/ximage.detect_full.xco"
   fecho "# -> Detecting bright sources in the FULL band (3-10keV).."
   cat > $XIMAGE_TMP_SCRIPT << EOF
 read/size=1024/ecol=PI/emin=30/emax=1000 $XSELECT_RESULT
@@ -255,6 +255,7 @@ EOF
   ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_FULL
 
+  XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_soft.xco
   fecho "# -> Detecting bright sources in the SOFT band (0.3-1keV).."
   cat > $XIMAGE_TMP_SCRIPT << EOF
 read/size=1024/ecol=PI/emin=30/emax=100 $XSELECT_RESULT
@@ -265,6 +266,7 @@ EOF
   ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_SOFT
 
+  XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_medium.xco
   fecho "# -> Detecting bright sources in the MEDIUM band(1-2keV).."
   cat > $XIMAGE_TMP_SCRIPT << EOF
 read/size=1024/ecol=PI/emin=101/emax=200 $XSELECT_RESULT
@@ -275,6 +277,7 @@ EOF
   ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_MEDIUM
 
+  XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_hard.xco
   fecho "# -> Detecting bright sources in the HARD band (2-10keV).."
   cat > $XIMAGE_TMP_SCRIPT << EOF
 read/size=1024/ecol=PI/emin=201/emax=1000 $XSELECT_RESULT
@@ -285,7 +288,7 @@ EOF
   ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_HARD
 
-  rm $XIMAGE_TMP_SCRIPT
+  # rm $XIMAGE_TMP_SCRIPT
   fecho "#..............................................................."
 )
 
@@ -296,8 +299,8 @@ EOF
 
   source ${SCRPT_DIR}/det2sosta.fsh
 
-  XIMAGE_TMP_SCRIPT="${TMPDIR}/ximage.xco"
 
+  XIMAGE_TMP_SCRIPT="${TMPDIR}/ximage.sosta_full.xco"
   LOGFILE_FULL="${OUTDIR}/sosta_full.log"
   CTS_DET_FULL="${TMPDIR}/countrates_full.detect.txt"
   det2sosta $XSELECT_DET_FULL \
@@ -307,6 +310,7 @@ EOF
             > $XIMAGE_TMP_SCRIPT
   ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
 
+  XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_soft.xco
   LOGFILE_SOFT="${OUTDIR}/sosta_soft.log"
   # CTS_DET_SOFT="${TMPDIR}/countrates_soft.detect.txt"
   det2sosta $XSELECT_DET_FULL \
@@ -316,6 +320,7 @@ EOF
             > $XIMAGE_TMP_SCRIPT
   ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
 
+  XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_medium.xco
   LOGFILE_MEDIUM="${OUTDIR}/sosta_medium.log"
   # CTS_DET_MEDIUM="${TMPDIR}/countrates_medium.detect.txt"
   det2sosta $XSELECT_DET_FULL \
@@ -325,6 +330,7 @@ EOF
             > $XIMAGE_TMP_SCRIPT
   ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
 
+  XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_hard.xco
   LOGFILE_HARD="${OUTDIR}/sosta_hard.log"
   # CTS_DET_HARD="${TMPDIR}/countrates_hard.detect.txt"
   det2sosta $XSELECT_DET_FULL \
@@ -334,7 +340,7 @@ EOF
             > $XIMAGE_TMP_SCRIPT
   ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
 
-  rm $XIMAGE_TMP_SCRIPT
+  # rm $XIMAGE_TMP_SCRIPT
 
   CTS_SOST_FULL="${TMPDIR}/countrates_full.sosta.txt"
   python ${SCRPT_DIR}/read_detections.py $LOGFILE_FULL 'FULL' > $CTS_SOST_FULL
