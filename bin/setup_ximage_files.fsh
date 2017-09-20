@@ -91,7 +91,7 @@ create_ximage_script() {
     echo 'save_image'
   done
   echo "display"
-  echo "write_ima/template=all/file='$RESULT'"
+  echo "write_ima/template=all/file=\"$RESULT\""
   echo "exit"
 }
 

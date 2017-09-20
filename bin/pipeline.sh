@@ -10,6 +10,10 @@ NPROCS=10
 
 VERBOSE=1
 
+# Default size of the field to consider (in arc-minutes)
+#
+RADIUS=12
+
 ########################################################################
 # Swift-Events stacking
 # =====================
@@ -42,39 +46,123 @@ VERBOSE=1
 ########################################################################
 help() {
   echo ""
-  echo " Usage: $(basename $0) -f <swift_table.csv> -s <object_name> -d <swift_archive>"
+  echo " Usage: $(basename $0) -f <swift_table.csv> -d <swift_archive> {--object <name> | --ra <value> --dec <value> }"
   echo ""
   echo " Options:"
-  echo "  -h : this help message"
-  echo "  -d : root data archive directory (where 'swift' directories tree is)"
-  echo "  -f : Swift master table"
-  echo "  -o : output directory; default is the current directory"
-  echo "  -s : name of object to select"
-  echo "  -v : verbose"
+  echo "  -h|--help         : this help message"
+  echo "  -q|--quiet        : verbose"
   echo ""
-  exit 0
+  echo "  -d|--data_archive : root data archive directory (where 'swift' directories tree is)"
+  echo "  -f|--master_table : Swift master table"
+  echo "  -o|--outdir       : output directory; default is the current directory"
+  echo ""
+  echo "  --object          : name of object to use as central field position: RA,DEC"
+  echo "  --ra              : Right Ascension (in DEGREES)"
+  echo "  --dec             : Declination (in DEGREES)"
+  echo "  --radius          : Radius (in ARC-MINUTES) around RA,DEC to search for observations. Default is '$RADIUS' (arcmin)"
+  echo ""
 }
 trap help ERR
 
 [ "${#@}" -eq 0 ] && help
 
+POS_RA=360
+POS_DEC=180
+OBJECT=''
+
 OUTDIR="$PWD"
 
-while getopts ":hqs:f:d:o:" opt; do
-  case $opt in
-    h) help;;
-    q) VERBOSE=0;;
-    s) OBJECT="$OPTARG";;
-    f) TABLE_MASTER="$OPTARG";;
-    d) DATA_ARCHIVE="$OPTARG";;
-    o) OUTDIR="$OPTARG";;
-    \?) echo "ERROR: Wrong option $OPTARG ";;
-    :) echo "ERROR: Missing value for $OPTARG ";;
-  esac
+while [[ $# -gt 0 ]]
+do
+  case $1 in
+    -h|--help)
+      help
+      exit 0
+      ;;
+    -q|--quiet)
+      VERBOSE=0
+      ;;
+    -f|--master_table)
+      TABLE_MASTER=$2
+      shift
+      ;;
+    -d|--data_archive)
+      DATA_ARCHIVE=$2
+      shift
+      ;;
+    -o|--outdir)
+      OUTDIR=$2
+      shift
+      ;;
+    --object)
+      OBJECT=$2
+      shift
+      ;;
+    --ra)
+      POS_RA=$2
+      shift
+      ;;
+    --dec)
+      POS_DEC=$2
+      shift
+      ;;
+    --radius)
+      RADIUS=$2
+      shift
+      ;;
+    --)
+      shift
+      break;;
+    --*)
+      echo "$0: error - unrecognized option $1" 1>&2
+      help
+      exit 1;;
+    -?)
+      echo "$0: error - unrecognized option $1" 1>&2
+      help
+      exit 1;;
+    *)
+      break;;
+    esac
+    shift
 done
 
+# while getopts ":hqs:f:d:o:" opt; do
+#   case $opt in
+#     h) help;;
+#     q) VERBOSE=0;;
+#     s) OBJECT="$OPTARG";;
+#     f) TABLE_MASTER="$OPTARG";;
+#     d) DATA_ARCHIVE="$OPTARG";;
+#     o) OUTDIR="$OPTARG";;
+#     \?) echo "ERROR: Wrong option $OPTARG ";;
+#     :) echo "ERROR: Missing value for $OPTARG ";;
+#   esac
+# done
+
+# First of all we verify and resolve the position/object argument(s)
+# since they are the central figures here.
+#
+if [[ $POS_RA -eq 360 || $POS_DEC -eq 180 ]]; then
+  if [ -z $OBJECT ]; then
+    1>&2 echo -e "\nERROR: Provide a (central) position through RA,DEC or Object name\n"
+    help
+    exit 1
+  else
+    # Normalize object name to remove non-alphanumeric characters
+    #
+    RUN_LABEL=$(echo $OBJECT | tr -d '[:space:].' | tr "+" "p" | tr "-" "m")
+    POS=$(python ${SCRPT_DIR}/object2position.py $OBJECT | cut -d':' -f2 | tr -d '[:space:]')
+    POS_RA=$(echo $POS | cut -d',' -f1)
+    POS_DEC=$(echo $POS | cut -d',' -f2)
+  fi
+else
+  [[ ${POS_RA%.*} -lt 360 && ${POS_RA%.*} -ge 0 ]] || { 1>&2 echo -e "\nERROR: RA expected to be between [0:360], instead '$POS_RA' was given\n"; exit1; }
+  [[ ${POS_DEC%.*} -gt -90 && ${POS_DEC%.*} -lt 90 ]] || { 1>&2 echo -e "\nERROR: DEC expected to be between [-90:90], instead '$POS_DEC' was given\n"; exit1; }
+  RUN_LABEL=$(echo "${POS_RA}_${POS_DEC}_${RADIUS}" | tr '.' '_' | tr "+" "p" | tr "-" "m")
+fi
+
 : ${TABLE_MASTER:?'Argument -f must be specified'}
-: ${OBJECT:?'Argument -s must be specified'}
 : ${DATA_ARCHIVE:?'Argument -d must be specified'}
 
 # Guarantee input (table and data) files are in absolute-path format
@@ -83,13 +171,9 @@ done
 [[ "${DATA_ARCHIVE}" = /* ]] || DATA_ARCHIVE="${PWD}/${DATA_ARCHIVE}"
 [[ "${OUTDIR}" = /* ]] || OUTDIR="${PWD}/${OUTDIR}"
 
-# Normalize object name to remove non-alphanumeric characters
-#
-OBJNAME_NORMALIZED=$(echo $OBJECT | tr -d '[:space:].' | tr "+" "p" | tr "-" "m")
-
 # Output and temporary directories to store averything accordingly
 #
-OUTDIR="${OUTDIR}/${OBJNAME_NORMALIZED}"
+OUTDIR="${OUTDIR}/${RUN_LABEL}"
 TMPDIR="${OUTDIR}/tmp"
 
 if [ -d $OUTDIR ]; then
@@ -101,10 +185,6 @@ else
 fi
 [ -d $TMPDIR ] || mkdir -p ${TMPDIR}
 
-
-# Size of the field to consider
-#
-RADIUS=12
 
 LOGFILE="${OUTDIR}/pipeline_internals.log"
 LOGERROR="${LOGFILE}.error"
@@ -123,7 +203,7 @@ fecho "# Pipeline arguments:"
 fecho "#  * Swift master table: ${TABLE_MASTER}"
 fecho "#  * Swift archive:      ${DATA_ARCHIVE}"
 fecho "#  * Object-field name:  ${OBJECT}"
-fecho "#    * Normalized name:  ${OBJNAME_NORMALIZED}"
+fecho "#    * Normalized name:  ${RUN_LABEL}"
 fecho "#  * Output directory:   ${OUTDIR}"
 fecho "#    * Temporary files:  ${TMPDIR}"
 fecho "#  * Logfile:            ${LOGFILE}"
@@ -138,12 +218,12 @@ fecho "#..............................................................."
 
 # Selected swift table entries
 #
-TABLE_OBJECT="${OUTDIR}/${OBJNAME_NORMALIZED}_observations.csv"
+TABLE_OBJECT="${OUTDIR}/${RUN_LABEL}_observations.csv"
 
 # Stacked events/expomaps
 #
-XSELECT_RESULT="${OUTDIR}/${OBJNAME_NORMALIZED}_sum.evt"
-XIMAGE_RESULT="${OUTDIR}/${OBJNAME_NORMALIZED}_sum.exp"
+XSELECT_RESULT="${OUTDIR}/${RUN_LABEL}_sum.evt"
+XIMAGE_RESULT="${OUTDIR}/${RUN_LABEL}_sum.exp"
 
 # Final flux table
 #
@@ -163,7 +243,7 @@ fecho "#..............................................................."
 
 # List of Swift archive observation addresses
 #
-OBSLIST="${TMPDIR}/${OBJNAME_NORMALIZED}.archive_addr.txt"
+OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
 (
   BLOCK='DATA_SELECTION'
   fecho "# Block (1) $BLOCK"
@@ -174,7 +254,8 @@ OBSLIST="${TMPDIR}/${OBJNAME_NORMALIZED}.archive_addr.txt"
   fecho "# -> Selecting observations.."
   python ${SCRPT_DIR}/select_observations.py $TABLE_MASTER \
                                             $TABLE_OBJECT \
-                                            --object "$OBJECT" \
+                                            --position "${POS_RA},${POS_DEC}" \
+                                            --radius $RADIUS \
                                             --archive_addr_list $OBSLIST \
                                             2> $LOGERROR &>> $LOGFILE
 
@@ -205,12 +286,12 @@ OBSLIST="${TMPDIR}/${OBJNAME_NORMALIZED}.archive_addr.txt"
   # Create two files with filenames list of event-images and exposure-maps
   #
   fecho "# -> Querying archive for event-files:"
-  EVENTSFILE="${TMPDIR}/${OBJNAME_NORMALIZED}_events.txt"
+  EVENTSFILE="${TMPDIR}/${RUN_LABEL}_events.txt"
   event_files $DATA_ARCHIVE $OBSLIST > $EVENTSFILE 2> $LOGERROR
   fecho "  EVENTSFILE="`cat $EVENTSFILE`
 
   fecho "# -> ..and exposure-maps:"
-  EXMAPSFILE="${TMPDIR}/${OBJNAME_NORMALIZED}_expos.txt"
+  EXMAPSFILE="${TMPDIR}/${RUN_LABEL}_expos.txt"
   exposure_maps $DATA_ARCHIVE $OBSLIST > $EXMAPSFILE 2> $LOGERROR
   fecho "  EXMAPSFILE="`cat $EXMAPSFILE`
 
@@ -218,10 +299,10 @@ OBSLIST="${TMPDIR}/${OBJNAME_NORMALIZED}.archive_addr.txt"
   #
   fecho "# -> Generating scripts for stacking data"
   XSELECT_SUM_SCRIPT="${TMPDIR}/events_sum.xcm"
-  create_xselect_script $OBJNAME_NORMALIZED $EVENTSFILE $XSELECT_RESULT > $XSELECT_SUM_SCRIPT
+  create_xselect_script $RUN_LABEL $EVENTSFILE $XSELECT_RESULT > $XSELECT_SUM_SCRIPT
 
   XIMAGE_SUM_SCRIPT="${TMPDIR}/expos_sum.xco"
-  create_ximage_script $OBJNAME_NORMALIZED $EXMAPSFILE $XIMAGE_RESULT > $XIMAGE_SUM_SCRIPT
+  create_ximage_script $RUN_LABEL $EXMAPSFILE $XIMAGE_RESULT > $XIMAGE_SUM_SCRIPT
 
   # Run the scripts
   #
@@ -368,12 +449,18 @@ EOF
 (
   BLOCK='COUNTRATES_TO_FLUX'
   fecho "# Block (4) $BLOCK"
+  #
+  # Here we take the countrates measurements from the last block,
+  # saved in file '$COUNTRATES_TABLE', which are in units of `cts/s`,
+  # and transform them to energy flux, in `erg/s/cm2`.
+  # We will use Paolo's countrates code, which takes the integrated
+  # (photon) flux, energy slope and transform it accordingly.
+  #
   cd $OUTDIR
 
-  source ${SCRPT_DIR}/pipeline.fsh
+  source ${SCRPT_DIR}/countrates.fsh
 
-  # here we have to use Paolo's 'countrates'.
-  # for each detected source (each source is read from COUNTRATES_TABLE)
+  # For each detected source (each source is read from COUNTRATES_TABLE)
   # get its NH (given RA and DEC read from COUNTRATES_TABLE, use 'nh' tool)
   # define the middle band values (soft:0.5, medium:1.5, hard:5)
   # get the slope from swiftslope.py
@@ -387,23 +474,44 @@ EOF
   for DET in `tail -n +2 $COUNTRATES_TABLE`; do
     IFS=';' read -a FIELDS <<< ${DET}
 
+    # RA and Dec are the first two columns (in COUNTRATES_TABLE);
+    # they are colon-separated, which we have to substitute by spaces
+    #
     RA=${FIELDS[0]}
     ra=${RA//:/ }
     DEC=${FIELDS[1]}
     dec=${DEC//:/ }
+
+    # NH comes from ftool's `nh` tool
+    #
     NH=$(echo -e "2000\n${ra[*]}\n${dec[*]}" | nh | tail -n1 | awk '{print $NF}')
     fecho -n "    RA=$RA DEC=$DEC NH=$NH"
+
+    # Countrates:
+    #
     CT_FULL=${FIELDS[2]}
     CT_FULL_ERROR=${FIELDS[3]}
-
+    #
     CT_SOFT=${FIELDS[4]}
     CT_SOFT_ERROR=${FIELDS[5]}
+    CT_SOFT_UL=${FIELDS[6]}
+    #
     CT_MEDIUM=${FIELDS[7]}
     CT_MEDIUM_ERROR=${FIELDS[8]}
-    ct_softium=$(echo "$CT_SOFT $CT_MEDIUM" | awk '{print $1 + $2}')
-    ct_softium_error=$(echo "$CT_SOFT $CT_MEDIUM" | awk '{if($1>$2){print $1}else{print $2}}')
+    CT_MEDIUM_UL=${FIELDS[9]}
+    #
     CT_HARD=${FIELDS[10]}
     CT_HARD_ERROR=${FIELDS[11]}
+    CT_HARD_UL=${FIELDS[12]}
+
+    # The `Swifslope` tool computes the slope of flux between hard(2-10keV)
+    # and soft(0.3-2keV) bands. It's soft band definition comprises
+    # *our* soft+medium (0.3-1keV + 1-2keV) definition.
+    # That's why we are adding the soft+medium fluxes
+    ct_softium=$(echo "$CT_SOFT $CT_MEDIUM" | awk '{print $1 + $2}')
+    ct_softium_error=$(echo "$CT_SOFT_ERROR $CT_MEDIUM_ERROR" \
+      | awk '{s=$1; m=$2; if(s<0){s=0}; if(m<0){m=0}; print( sqrt(s*s + m*m) )}')
+
     ENERGY_SLOPE=$(${SCRPT_DIR}/swiftslope.py --nh=$NH \
                                         --soft=$ct_softium \
                                         --soft_error=$ct_softium_error \
@@ -411,10 +519,16 @@ EOF
                                         --hard_error=$CT_HARD_ERROR \
                                         --oneline)
     ENERGY_SLOPE=$(echo $ENERGY_SLOPE | cut -d' ' -f1)
+    ENERGY_SLOPE_plus=$(echo $ENERGY_SLOPE | cut -d' ' -f2)
+    ENERGY_SLOPE_minus=$(echo $ENERGY_SLOPE | cut -d' ' -f3)
+    SLOPE_OK=$(echo "$ENERGY_SLOPE_plus $ENERGY_SLOPE_minus" | awk '{dif=$1-$2; if(dif<0.8){print "yes"}else{print "no"}}')
+    if [[ $SLOPE_OK == 'no' ]];
+    then
+      ENERGY_SLOPE='0.8'
+      # fecho " # ENERGY_SLOPE was changed because estimate error was too big (>0.8)"
+    fi
     fecho " ENERGY_SLOPE=$ENERGY_SLOPE"
-    CT_SOFT_UL=${FIELDS[6]}
-    CT_MEDIUM_UL=${FIELDS[9]}
-    CT_HARD_UL=${FIELDS[12]}
+
     for BAND in `energy_bands list`; do
       # echo "#  -> Running band: $BAND"
       NUFNU_FACTOR=$(run_countrates $BAND $ENERGY_SLOPE $NH)

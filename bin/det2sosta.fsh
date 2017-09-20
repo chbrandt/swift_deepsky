@@ -36,8 +36,8 @@ det2sosta() {
     _err=${FIELDS[1]##*+}
     errate=${_err#*-}
 
-    ra="${FIELDS[7]}:${FIELDS[8]}:${FIELDS[9]}"
-    dec="${FIELDS[10]}:${FIELDS[11]}:${FIELDS[12]}"
+    ra="${FIELDS[5]}:${FIELDS[6]}:${FIELDS[7]}"
+    dec="${FIELDS[8]}:${FIELDS[9]}:${FIELDS[10]}"
 
     echo "$ra $dec $ctrate $errate" >> $CTSFILE
 
