@@ -10,7 +10,7 @@ energy_bands() {
   local -A ENERGY_BANDS
   ENERGY_BANDS[soft]='0.3 0.5 1.0'
   ENERGY_BANDS[medium]='1.0 1.5 2.0'
-  ENERGY_BANDS[hard]='2.0 5.0 10.0'
+  ENERGY_BANDS[hard]='2.0 4.5 10.0'
   ENERGY_BANDS[full]='0.3 5.0 10.0'
 
   local BAND=$1

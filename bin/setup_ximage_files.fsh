@@ -52,6 +52,8 @@ create_xselect_script() {
   NUMEVTFILES=${#EVTFILES[@]}
 
   echo "xsel"
+  # echo "log ${TMPDIR}/xselect_eventssum.log"
+
   i=0
   _FILE=${EVTFILES[$i]##*/}
   cp ${EVTFILES[$i]} "${TMPDIR}/${_FILE}"
@@ -79,6 +81,8 @@ create_ximage_script() {
   RESULT="$3"
 
   NAME=$(echo $NAME | tr -c "[:alnum:]\n" "_")
+
+  # echo "log ${TMPDIR}/ximage_expossum.log"
 
   echo "cpd  ${NAME}_sum.gif/gif"
   read -a IMAGES <<< `grep -v "^#" $IMGLIST`

@@ -10,7 +10,7 @@
 
 
 BEGIN{
-  printf "RA;DEC";
+  printf "#RA;DEC";
   printf ";(FULL:photon_flux[ph.s-1]);(FULL:photon_flux_error[ph.s-1])";
   printf ";(SOFT:photon_flux[ph.s-1]);(SOFT:photon_flux_error[ph.s-1]);(SOFT:upper_limit[ph.s-1])";
   printf ";(MEDIUM:photon_flux[ph.s-1]);(MEDIUM:photon_flux_error[ph.s-1]);(MEDIUM:upper_limit[ph.s-1])";
