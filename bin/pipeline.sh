@@ -50,20 +50,27 @@ NULL_VALUE=-999
 ########################################################################
 help() {
   echo ""
-  echo " Usage: $(basename $0) -d <swift_archive> {--object <name> | --ra <value> --dec <value> }"
+  echo " Usage: $(basename $0) -d <data> { --ra <degrees> --dec <degrees> | --object <name> }"
+  echo ""
+  echo " Arguments:"
+  echo "  --ra     VALUE    : Right Ascension (in DEGREES)"
+  echo "  --dec    VALUE    : Declination (in DEGREES)"
+  echo "  --object NAME     : name of object to use as center of the field."
+  echo "                      If given, CDS/Simbad is queried for the position"
+  echo "                      associated with 'NAME'"
+  echo "  --radius VALUE    : Radius (in ARC-MINUTES) around RA,DEC to search for observations. Default is '$RADIUS' (arcmin)"
+  echo "  -d|--data_archive : data archive directory; Where Swift directories-tree is."
+  echo "                      This directory is supposed to contain the last 2 levels"
+  echo "                      os Swift archive usual structure: 'data_archive'/START_TIME/OBSID"
   echo ""
   echo " Options:"
+  echo "  -f|--master_table : Swift master-table. This table relates RA,DEC,START_TIME,OBSID."
+  echo "                      The 'master_table' should be a CSV file with these columns"
+  echo "  -o|--outdir       : output directory; default is the current one."
+  echo "                      In 'outdir', a directory for every file from this run is created."
+  echo ""
   echo "  -h|--help         : this help message"
   echo "  -q|--quiet        : verbose"
-  echo ""
-  echo "  -d|--data_archive : root data archive directory (where 'swift' directories tree is)"
-  echo "  -f|--master_table : Swift master table"
-  echo "  -o|--outdir       : output directory; default is the current directory"
-  echo ""
-  echo "  --object          : name of object to use as central field position: RA,DEC"
-  echo "  --ra              : Right Ascension (in DEGREES)"
-  echo "  --dec             : Declination (in DEGREES)"
-  echo "  --radius          : Radius (in ARC-MINUTES) around RA,DEC to search for observations. Default is '$RADIUS' (arcmin)"
   echo ""
 }
 trap help ERR
@@ -129,20 +136,6 @@ do
     esac
     shift
 done
-
-# while getopts ":hqs:f:d:o:" opt; do
-#   case $opt in
-#     h) help;;
-#     q) VERBOSE=0;;
-#     s) OBJECT="$OPTARG";;
-#     f) TABLE_MASTER="$OPTARG";;
-#     d) DATA_ARCHIVE="$OPTARG";;
-#     o) OUTDIR="$OPTARG";;
-#     \?) echo "ERROR: Wrong option $OPTARG ";;
-#     :) echo "ERROR: Missing value for $OPTARG ";;
-#   esac
-# done
-
 
 # First of all, we verify and resolve the position/object argument(s)
 # since they are the central figures here.
