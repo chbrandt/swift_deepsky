@@ -15,3 +15,8 @@ RUN yum install -y bc &&\
     cpanm WWW::Mechanize &&\
     cpanm Carp::Assert &&\
     cpanm Archive::Tar
+
+COPY bin /pipeline
+RUN cd /pipeline/countrates && ./compile.sh && cd -
+
+ENV EXECAPP=/pipeline/pipeline.sh

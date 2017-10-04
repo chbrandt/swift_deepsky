@@ -100,8 +100,11 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12):
     table_object = table_master.loc[match_obs_mask]
     print("Number of observations found: {:d}".format(len(table_object)))
 
-    archive_addr = table_object.apply(lambda x:swift_archive_obs_path(x['START_TIME'],x['OBSID']), axis=1)
-    print("Observation addresses: {}".format(archive_addr.values))
+    if len(table_object) > 0:
+        archive_addr = table_object.apply(lambda x:swift_archive_obs_path(x['START_TIME'],x['OBSID']), axis=1)
+        print("Observation addresses: {}".format(archive_addr.values))
+    else:
+        archive_addr = pandas.DataFrame()
 
     from os.path import isdir,dirname
     if not isdir(dirname(fileout)):

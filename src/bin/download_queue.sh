@@ -16,6 +16,9 @@ VERBOSE="1"
 #
 NPROCS=1
 
+
+TMPDIR="${PWD}"
+
 # GetOptions..
 #
 while getopts ":hqn:f:d:" opt
@@ -110,8 +113,16 @@ do
     # ${SCRIPT} --file=${file[$ncnt]} &
     # ${CURDIR}/download.sh -d ${DATE} -o ${OBSID} -a ${DATA_ARCHIVE} &
     DESTDIR="${SWIFT_ARCHIVE}/${DATE}"
+
+    [[ -d ${DESTDIR}/${OBSID} ]] && continue
+
     [[ -d $DESTDIR ]] || mkdir -p $DESTDIR
-    ${CURDIR}/download_swift_asdc.pl ${OBSID} ${DATE} ${DESTDIR} &
+
+    TARBALL="${TMPDIR}/${OBSID}.tar"
+    ${CURDIR}/download_swift_asdc.pl ${OBSID} \
+                                     ${DATE} \
+                                     ${TARBALL} \
+                                     ${DESTDIR} && rm $TARBALL &
 
     PID=$!
     PIDs[$PID]=$PID
