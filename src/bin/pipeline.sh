@@ -311,17 +311,17 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   #
   print "# -> Generating scripts for stacking data"
   XSELECT_SUM_SCRIPT="${TMPDIR}/events_sum.xcm"
-  create_xselect_script $RUN_LABEL $EVENTSFILE $EVENTSSUM_RESULT > $XSELECT_SUM_SCRIPT
+  create_xselect_script $RUN_LABEL $EVENTSFILE "./${EVENTSSUM_RESULT#$PWD}" > $XSELECT_SUM_SCRIPT
 
   XIMAGE_SUM_SCRIPT="${TMPDIR}/expos_sum.xco"
-  create_ximage_script $RUN_LABEL $EXMAPSFILE $EXPOSSUM_RESULT > $XIMAGE_SUM_SCRIPT
+  create_ximage_script $RUN_LABEL $EXMAPSFILE "./${EXPOSSUM_RESULT#$PWD}" > $XIMAGE_SUM_SCRIPT
 
   # Run the scripts
   #
   print "# -> Running XSelect (events concatenation).."
-  xselect < $XSELECT_SUM_SCRIPT >> $LOGFILE
+  xselect @"./${XSELECT_SUM_SCRIPT#$PWD}" #>> $LOGFILE
   print "# -> Running XImage (exposure-maps stacking).."
-  ximage < $XIMAGE_SUM_SCRIPT >> $LOGFILE
+  ximage @"./${XIMAGE_SUM_SCRIPT#$PWD}" #>> $LOGFILE
 
   [[ -f xselect.log ]] && mv xselect.log $TMPDIR
 

@@ -46,9 +46,12 @@ create_xselect_script() {
   EVTLIST="$2"
   RESULT="$3"
 
+  TMPDIRREL="./${TMPDIR#$PWD}"
+
   NAME=$(echo $NAME | tr -c "[:alnum:]\n" "_")
 
-  read -a EVTFILES <<< `grep -v "^#" $EVTLIST`
+  read -a EVTFILES <<< `grep -v "^#" ${EVTLIST}`
+
   NUMEVTFILES=${#EVTFILES[@]}
 
   echo "xsel"
@@ -58,7 +61,7 @@ create_xselect_script() {
   _FILE=${EVTFILES[$i]##*/}
   cp ${EVTFILES[$i]} "${TMPDIR}/${_FILE}"
   echo "read ev $_FILE"
-  echo "${TMPDIR}/"
+  echo "${TMPDIRREL}/"
   echo "yes"
   for ((i=1; i<$NUMEVTFILES; i++)); do
     _FILE=${EVTFILES[$i]##*/}
@@ -80,6 +83,8 @@ create_ximage_script() {
   IMGLIST="$2"
   RESULT="$3"
 
+  TMPDIRREL="./${TMPDIR#$PWD}"
+
   NAME=$(echo $NAME | tr -c "[:alnum:]\n" "_")
 
   # echo "log ${TMPDIR}/ximage_expossum.log"
@@ -87,10 +92,17 @@ create_ximage_script() {
   echo "cpd  ${NAME}_sum.gif/gif"
   read -a IMAGES <<< `grep -v "^#" $IMGLIST`
   NUMIMAGES=${#IMAGES[@]}
+
   i=0
-  echo "read/size=1024  ${IMAGES[$i]}"
+  _FILE=${IMAGES[$i]##*/}
+  _FILE=${TMPDIRREL}/${_FILE}
+  cp ${IMAGES[$i]} "${_FILE}"
+  echo "read/size=1024  ${_FILE}"
   for ((i=1; i<$NUMIMAGES; i++)); do
-    echo "read/size=1024  ${IMAGES[$i]}"
+    _FILE=${IMAGES[$i]##*/}
+    _FILE=${TMPDIRREL}/${_FILE}
+    cp ${IMAGES[$i]} "${_FILE}"
+    echo "read/size=1024  ${_FILE}"
     echo 'sum_image'
     echo 'save_image'
   done
