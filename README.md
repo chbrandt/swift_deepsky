@@ -13,10 +13,14 @@ The following software(version) is necessary to run the pipeline:
 * Python3 (v3.6.2)
   * Pandas (v0.20)
   * Astropy (v2.0)
-* Perl (v5.10) ----- Use `CPAN-minus` to ease your life: type `cpan App::cpanminus`
-  * WWW::Mechanize - `cpan WWW::Mechanize`
-  * Carp::Assert   - `cpan Carp::Assert`
-  * Archive::Tar   - `cpan Archive::Tar`
+* Perl (v5.10)
+  * WWW::Mechanize
+  * Carp::Assert
+  * Archive::Tar
+  * Use CPAN- to ease your life: **$ cpan App::cpanminus**
+    * cpan WWW::Mechanize
+    * cpan Carp::Assert
+    * cpan Archive::Tar
 * Bash (v3)
   * `awk`
   * `tar`
