@@ -11,17 +11,20 @@ The following software(version) is necessary to run the pipeline:
   * `awk`
   * `tar`
   * `gfortran`
+
 * HEASoft (v6.21)
   * XSelect
   * XImage
+
 * Python3 (v3.6.2)
   * Pandas (v0.20)
   * Astropy (v2.0)
+
 * Perl (v5.10)
   * WWW::Mechanize
   * Carp::Assert
   * Archive::Tar
-  * Use CPAN- to ease your life ($ cpan App::cpanminus)
+  * Use CPAN to ease your life ($ cpan App::cpanminus)
     * cpan WWW::Mechanize
     * cpan Carp::Assert
     * cpan Archive::Tar
@@ -67,4 +70,3 @@ Space Agency (swift.asdc.asi.it) only if not there yet.
 The default Swift master table --relating (RA,DEC) coordinates to epoch of observation
 (START_TIME) to observation-id (OBSID)-- is shipped together and it contains all Swift
 observations as of September/2017.
-
