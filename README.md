@@ -7,6 +7,10 @@ Oh, and HEASoft; you have to have it: https://heasarc.nasa.gov/lheasoft/
 ## Setup
 The following software(version) is necessary to run the pipeline:
 
+* Bash (v3)
+  * `awk`
+  * `tar`
+  * `gfortran`
 * HEASoft (v6.21)
   * XSelect
   * XImage
@@ -17,14 +21,10 @@ The following software(version) is necessary to run the pipeline:
   * WWW::Mechanize
   * Carp::Assert
   * Archive::Tar
-  * Use CPAN- to ease your life: **$ cpan App::cpanminus**
+  * Use CPAN- to ease your life ($ cpan App::cpanminus)
     * cpan WWW::Mechanize
     * cpan Carp::Assert
     * cpan Archive::Tar
-* Bash (v3)
-  * `awk`
-  * `tar`
-  * `gfortran`
 
 ## Run
 The pipeline needs a point on the sky (Right Ascension, Declination) and a radius value;
