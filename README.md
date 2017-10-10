@@ -7,20 +7,20 @@ Oh, and HEASoft; you have to have it: https://heasarc.nasa.gov/lheasoft/
 ## Setup
 The following software(version) is necessary to run the pipeline:
 
-* Bash (v4)
-  * `awk`
-  * `tar`
-  * `gfortran`
 * HEASoft (v6.21)
   * XSelect
   * XImage
 * Python3 (v3.6.2)
-  * Pandas (v0.20.2)
+  * Pandas (v0.20)
   * Astropy (v2.0)
-* Perl (v5.10)
-  * WWW::Mechanize
-  * Carp::Assert
-  * Archive::Tar
+* Perl (v5.10) ----- Use `CPAN-minus` to ease your life: type `cpan App::cpanminus`
+  * WWW::Mechanize - `cpan WWW::Mechanize`
+  * Carp::Assert   - `cpan Carp::Assert`
+  * Archive::Tar   - `cpan Archive::Tar`
+* Bash (v3)
+  * `awk`
+  * `tar`
+  * `gfortran`
 
 ## Run
 The pipeline needs a point on the sky (Right Ascension, Declination) and a radius value;
