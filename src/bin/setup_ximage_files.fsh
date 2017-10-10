@@ -11,7 +11,7 @@ event_files(){
   for ln in `cat $OBS_ADDR_LIST`
   do
     OIFS=$IFS
-    IFS='/' read -ra FLDS <<< $ln
+    IFS='/' read -ra FLDS <<< "$ln"
     IFS=$OIFS
     DATADIR="${SWIFT_OBS_ARCHIVE}/${FLDS[0]}/${FLDS[1]}"
     [ -d $DATADIR ] || continue
@@ -31,7 +31,7 @@ exposure_maps() {
   for ln in `cat $OBS_ADDR_LIST`
   do
     OIFS=$IFS
-    IFS='/' read -ra FLDS <<< $ln
+    IFS='/' read -ra FLDS <<< "$ln"
     IFS=$OIFS
     DATADIR="${SWIFT_OBS_ARCHIVE}/${FLDS[0]}/${FLDS[1]}"
     [ -d $DATADIR ] || continue

@@ -319,9 +319,9 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   # Run the scripts
   #
   print "# -> Running XSelect (events concatenation).."
-  xselect < $XSELECT_SUM_SCRIPT &>> $LOGFILE
+  xselect < $XSELECT_SUM_SCRIPT >> $LOGFILE
   print "# -> Running XImage (exposure-maps stacking).."
-  ximage < $XIMAGE_SUM_SCRIPT &>> $LOGFILE
+  ximage < $XIMAGE_SUM_SCRIPT >> $LOGFILE
 
   [[ -f xselect.log ]] && mv xselect.log $TMPDIR
 
@@ -353,7 +353,7 @@ read/size=1024/expo $EXPOSSUM_RESULT
 det/bright
 quit
 EOF
-  ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
+  ximage < $XIMAGE_TMP_SCRIPT >> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_FULL
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_soft.xco
@@ -364,7 +364,7 @@ read/size=1024/expo $EXPOSSUM_RESULT
 det/bright
 quit
 EOF
-  ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
+  ximage < $XIMAGE_TMP_SCRIPT >> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_SOFT
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_medium.xco
@@ -375,7 +375,7 @@ read/size=1024/expo $EXPOSSUM_RESULT
 det/bright
 quit
 EOF
-  ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
+  ximage < $XIMAGE_TMP_SCRIPT >> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_MEDIUM
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_hard.xco
@@ -386,7 +386,7 @@ read/size=1024/expo $EXPOSSUM_RESULT
 det/bright
 quit
 EOF
-  ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
+  ximage < $XIMAGE_TMP_SCRIPT >> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_HARD
 
   # rm $XIMAGE_TMP_SCRIPT
@@ -417,7 +417,7 @@ EOF
             $LOGFILE_FULL $CTS_DET_FULL \
             $RUN_LABEL \
             > $XIMAGE_TMP_SCRIPT
-  ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
+  ximage < $XIMAGE_TMP_SCRIPT >> $LOGFILE
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_soft.xco
   LOGFILE_SOFT="${TMPDIR}/sosta_soft.log"
@@ -427,7 +427,7 @@ EOF
             $LOGFILE_SOFT $CTS_DET_FULL \
             $RUN_LABEL \
             > $XIMAGE_TMP_SCRIPT
-  ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
+  ximage < $XIMAGE_TMP_SCRIPT >> $LOGFILE
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_medium.xco
   LOGFILE_MEDIUM="${TMPDIR}/sosta_medium.log"
@@ -437,7 +437,7 @@ EOF
             $LOGFILE_MEDIUM $CTS_DET_FULL \
             $RUN_LABEL \
             > $XIMAGE_TMP_SCRIPT
-  ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
+  ximage < $XIMAGE_TMP_SCRIPT >> $LOGFILE
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_hard.xco
   LOGFILE_HARD="${TMPDIR}/sosta_hard.log"
@@ -447,7 +447,7 @@ EOF
             $LOGFILE_HARD $CTS_DET_FULL \
             $RUN_LABEL \
             > $XIMAGE_TMP_SCRIPT
-  ximage < $XIMAGE_TMP_SCRIPT &>> $LOGFILE
+  ximage < $XIMAGE_TMP_SCRIPT >> $LOGFILE
 
   # rm $XIMAGE_TMP_SCRIPT
 

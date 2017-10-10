@@ -105,11 +105,12 @@ do
 
     # ln -s ../${file[$ncnt]} ${file[$ncnt]}
     OIFS=$IFS
-    IFS='/' read -ra FLDS <<< ${file[$ncnt]}
+    IFS='/' read -ra FLDS <<< "${file[$ncnt]}"
     IFS=$OIFS
 
     DATE=${FLDS[0]}
     OBSID=${FLDS[1]}
+
     # ${SCRIPT} --file=${file[$ncnt]} &
     # ${CURDIR}/download.sh -d ${DATE} -o ${OBSID} -a ${DATA_ARCHIVE} &
     DESTDIR="${SWIFT_ARCHIVE}/${DATE}"
@@ -119,23 +120,24 @@ do
     [[ -d $DESTDIR ]] || mkdir -p $DESTDIR
 
     TARBALL="${TMPDIR}/${OBSID}.tar"
+
     ${CURDIR}/download_swift_asdc.pl ${OBSID} \
                                      ${DATE} \
                                      ${TARBALL} \
-                                     ${DESTDIR} && rm $TARBALL &
-
+                                     ${DESTDIR} &
     PID=$!
     PIDs[$PID]=$PID
     CNTs[$PID]=$ncnt
-    # [ "$VERBOSE" = "1" ] && { echo "Downloading observation '${file[$ncnt]}'"; echo "PID: $PID"; }
-    # cd - &> /dev/null
+    # Since we gave $DESTDIR above, we may now delete the tarball
+    [ -f $TARBALL ] && rm $TARBALL
 
     echo ""
 
   else
-    sleep 5
+    sleep 1
   fi
 
+  [ "$ncnt" -eq "$fcnt" -a "${#PIDs[@]}" -eq "0" ] && break
 
   for PID in ${PIDs[*]};
   do
@@ -157,8 +159,4 @@ do
     fi
   done
 
-  [ "$ncnt" -eq "$fcnt" -a "${#PIDs[*]}" -eq "0" ] && break
-
 done
-
-# End
