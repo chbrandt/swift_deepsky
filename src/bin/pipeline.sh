@@ -251,6 +251,7 @@ print "# * Detected objects final flux table:"
 print "    FLUX_TABLE=$FLUX_TABLE"
 print "#..............................................................."
 
+DATA_ARCHIVE="${DATA_ARCHIVE}/obs"
 
 # List of Swift archive observation addresses
 #

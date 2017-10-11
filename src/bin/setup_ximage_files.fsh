@@ -5,7 +5,7 @@ event_files(){
   DATA_ARCHIVE="$1"
   OBS_ADDR_LIST="$2"
 
-  SWIFT_OBS_ARCHIVE="${DATA_ARCHIVE}/swift/data/obs"
+  SWIFT_OBS_ARCHIVE="${DATA_ARCHIVE}"
 
   # echo "# Event files"
   for ln in `cat $OBS_ADDR_LIST`
@@ -25,7 +25,7 @@ exposure_maps() {
   DATA_ARCHIVE="$1"
   OBS_ADDR_LIST="$2"
 
-  SWIFT_OBS_ARCHIVE="${DATA_ARCHIVE}/swift/data/obs"
+  SWIFT_OBS_ARCHIVE="${DATA_ARCHIVE}"
 
   # echo "# Exposure maps:"
   for ln in `cat $OBS_ADDR_LIST`
