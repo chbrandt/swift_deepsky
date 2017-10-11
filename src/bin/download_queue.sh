@@ -59,7 +59,7 @@ fi
 
 
 
-SWIFT_ARCHIVE="${DATA_ARCHIVE}/swift/data/obs"
+SWIFT_ARCHIVE="${DATA_ARCHIVE}/obs"
 
 
 #===========================
