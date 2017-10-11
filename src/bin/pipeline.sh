@@ -269,7 +269,7 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
                                             --position "${POS_RA},${POS_DEC}" \
                                             --radius $RADIUS \
                                             --archive_addr_list $OBSLIST \
-                                            2>> $LOGERROR >> $LOGFILE
+                                            #2>> $LOGFILE #>> $LOGFILE
 
   [[ $? -eq 0 ]] || { 1>&2 echo "Observations selection failed. Exiting."; exit 1; }
 
@@ -283,7 +283,7 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   #
   print "# -> Querying/Downloading observations.."
   ${SCRPT_DIR}/download_queue.sh -n $NPROCS -f $OBSLIST -d $DATA_ARCHIVE \
-    2>> $LOGERROR >> $LOGFILE
+    #2>> $LOGFILE #>> $LOGFILE
 
   print "#............................................................."
 )
@@ -299,12 +299,12 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   #
   print "# -> Querying archive for event-files:"
   EVENTSFILE="${TMPDIR}/${RUN_LABEL}_events.txt"
-  event_files $DATA_ARCHIVE $OBSLIST > $EVENTSFILE 2> $LOGERROR
+  event_files $DATA_ARCHIVE $OBSLIST > $EVENTSFILE #2> $LOGFILE
   print "  EVENTSFILE="`cat $EVENTSFILE`
 
   print "# -> ..and exposure-maps:"
   EXMAPSFILE="${TMPDIR}/${RUN_LABEL}_expos.txt"
-  exposure_maps $DATA_ARCHIVE $OBSLIST > $EXMAPSFILE 2> $LOGERROR
+  exposure_maps $DATA_ARCHIVE $OBSLIST > $EXMAPSFILE #2> $LOGFILE
   print "  EXMAPSFILE="`cat $EXMAPSFILE`
 
   # Create XSelect and XImage scripts to sum event-files and exposure-maps
@@ -348,45 +348,45 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
   XIMAGE_TMP_SCRIPT="${TMPDIR}/ximage.detect_full.xco"
   print "# -> Detecting bright sources in the FULL band (0.3-10keV).."
   cat > $XIMAGE_TMP_SCRIPT << EOF
-read/size=1024/ecol=PI/emin=30/emax=1000 $EVENTSSUM_RESULT
-read/size=1024/expo $EXPOSSUM_RESULT
+read/size=1024/ecol=PI/emin=30/emax=1000 "./${EVENTSSUM_RESULT#$PWD}"
+read/size=1024/expo "./${EXPOSSUM_RESULT#$PWD}"
 det/bright
 quit
 EOF
-  ximage < $XIMAGE_TMP_SCRIPT >> $LOGFILE
+  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_FULL
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_soft.xco
   print "# -> Detecting bright sources in the SOFT band (0.3-1keV).."
   cat > $XIMAGE_TMP_SCRIPT << EOF
-read/size=1024/ecol=PI/emin=30/emax=100 $EVENTSSUM_RESULT
-read/size=1024/expo $EXPOSSUM_RESULT
+read/size=1024/ecol=PI/emin=30/emax=100 "./${EVENTSSUM_RESULT#$PWD}"
+read/size=1024/expo "./${EXPOSSUM_RESULT#$PWD}"
 det/bright
 quit
 EOF
-  ximage < $XIMAGE_TMP_SCRIPT >> $LOGFILE
+  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_SOFT
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_medium.xco
   print "# -> Detecting bright sources in the MEDIUM band(1-2keV).."
   cat > $XIMAGE_TMP_SCRIPT << EOF
-read/size=1024/ecol=PI/emin=101/emax=200 $EVENTSSUM_RESULT
-read/size=1024/expo $EXPOSSUM_RESULT
+read/size=1024/ecol=PI/emin=101/emax=200 "./${EVENTSSUM_RESULT#$PWD}"
+read/size=1024/expo "./${EXPOSSUM_RESULT#$PWD}"
 det/bright
 quit
 EOF
-  ximage < $XIMAGE_TMP_SCRIPT >> $LOGFILE
+  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_MEDIUM
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_hard.xco
   print "# -> Detecting bright sources in the HARD band (2-10keV).."
   cat > $XIMAGE_TMP_SCRIPT << EOF
-read/size=1024/ecol=PI/emin=201/emax=1000 $EVENTSSUM_RESULT
-read/size=1024/expo $EXPOSSUM_RESULT
+read/size=1024/ecol=PI/emin=201/emax=1000 "./${EVENTSSUM_RESULT#$PWD}"
+read/size=1024/expo "./${EXPOSSUM_RESULT#$PWD}"
 det/bright
 quit
 EOF
-  ximage < $XIMAGE_TMP_SCRIPT >> $LOGFILE
+  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_HARD
 
   # rm $XIMAGE_TMP_SCRIPT
@@ -417,7 +417,7 @@ EOF
             $LOGFILE_FULL $CTS_DET_FULL \
             $RUN_LABEL \
             > $XIMAGE_TMP_SCRIPT
-  ximage < $XIMAGE_TMP_SCRIPT >> $LOGFILE
+  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_soft.xco
   LOGFILE_SOFT="${TMPDIR}/sosta_soft.log"
@@ -427,7 +427,7 @@ EOF
             $LOGFILE_SOFT $CTS_DET_FULL \
             $RUN_LABEL \
             > $XIMAGE_TMP_SCRIPT
-  ximage < $XIMAGE_TMP_SCRIPT >> $LOGFILE
+  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_medium.xco
   LOGFILE_MEDIUM="${TMPDIR}/sosta_medium.log"
@@ -437,7 +437,7 @@ EOF
             $LOGFILE_MEDIUM $CTS_DET_FULL \
             $RUN_LABEL \
             > $XIMAGE_TMP_SCRIPT
-  ximage < $XIMAGE_TMP_SCRIPT >> $LOGFILE
+  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_hard.xco
   LOGFILE_HARD="${TMPDIR}/sosta_hard.log"
@@ -447,7 +447,7 @@ EOF
             $LOGFILE_HARD $CTS_DET_FULL \
             $RUN_LABEL \
             > $XIMAGE_TMP_SCRIPT
-  ximage < $XIMAGE_TMP_SCRIPT >> $LOGFILE
+  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
 
   # rm $XIMAGE_TMP_SCRIPT
 
@@ -471,16 +471,16 @@ EOF
         $CTS_SOST_MEDIUM \
         $CTS_SOST_HARD \
         > $COUNTRATES_SOSTA_TABLE
-  sed -i 's/\s\{1,\}/;/g' $COUNTRATES_SOSTA_TABLE
+  # sed -i.bak 's/[[:space:]]/;/g' $COUNTRATES_SOSTA_TABLE
 
   # And finally adjust the (countrate) fluxes.
   # Such fix seems necessary because sosta returns lower (countrate) numbers
   # which we don't exactly know why. So we weight each band measurement
   # done by Sosta by the measurement done before by Detect/bright.
   #
-  grep -v "^#" $COUNTRATES_SOSTA_TABLE \
-    | awk -F ';' -f ${SCRPT_DIR}/adjust_fluxes.awk > $COUNTRATES_TABLE 2> $LOGERROR
-    print "#..............................................................."
+  tail -n +2 $COUNTRATES_SOSTA_TABLE \
+    | awk -f ${SCRPT_DIR}/adjust_fluxes.awk > $COUNTRATES_TABLE #2> $LOGFILE
+  print "#..............................................................."
 )
 
 (
@@ -510,7 +510,7 @@ EOF
   echo    ";HARD_4.5keV:flux[mW/m2];HARD_4.5keV:flux_error[mW/m2];HARD_4.5keV:upper_limit[mW/m2]"       >> $FLUX_TABLE
 
   for DET in `tail -n +2 $COUNTRATES_TABLE`; do
-    IFS=';' read -a FIELDS <<< ${DET}
+    IFS=';' read -a FIELDS <<< "${DET}"
 
     # RA and Dec are the first two columns (in COUNTRATES_TABLE);
     # they are colon-separated, which we have to substitute by spaces
@@ -522,7 +522,7 @@ EOF
 
     # NH comes from ftool's `nh` tool
     #
-    NH=$(echo -e "2000\n${ra[*]}\n${dec[*]}" | nh | tail -n1 | awk '{print $NF}')
+    NH=$(nh 2000 \'${ra[*]}\' \'${dec[*]}\' | tail -n1 | awk '{print $NF}')
     print -n "    RA=$RA DEC=$DEC NH=$NH"
 
     # Countrates:
@@ -623,7 +623,7 @@ EOF
     echo -n ";${FLUX_MEDIUM};${FLUX_MEDIUM_ERROR};${FLUX_MEDIUM_UL}"  >> $FLUX_TABLE
     echo    ";${FLUX_HARD};${FLUX_HARD_ERROR};${FLUX_HARD_UL}"        >> $FLUX_TABLE
   done
-  sed -i 's/\s/;/g' $FLUX_TABLE
+  sed -i.bak 's/[[:space:]]/;/g' $FLUX_TABLE
   print "#..............................................................."
 )
 echo "# ---"

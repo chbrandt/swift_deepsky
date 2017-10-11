@@ -7,21 +7,36 @@ energy_bands() {
   # Particularly, if "$1" is "list", list the energy bands
   [[ ${#@} -eq 0 ]] && return 1
 
-  local -A ENERGY_BANDS
-  ENERGY_BANDS[soft]='0.3 0.5 1.0'
-  ENERGY_BANDS[medium]='1.0 1.5 2.0'
-  ENERGY_BANDS[hard]='2.0 4.5 10.0'
-  ENERGY_BANDS[full]='0.3 5.0 10.0'
+  local -a ENERGY_BANDS
+  ENERGY_BANDS[0]='0.3 5.0 10.0'
+  ENERGY_BANDS[1]='0.3 0.5 1.0'
+  ENERGY_BANDS[2]='1.0 1.5 2.0'
+  ENERGY_BANDS[3]='2.0 4.5 10.0'
 
   local BAND=$1
-  BAND=${BAND,,}
+  # BAND=${BAND,,}
 
-  [[ $BAND == list ]] && { echo "${!ENERGY_BANDS[@]}"; return 0; }
-  [[ ${#@} -lt 2 ]] && { echo "${ENERGY_BANDS[$BAND]}"; return 0; }
+  # [[ $BAND == list ]] && { echo "${!ENERGY_BANDS[@]}"; return 0; }
+  [[ $BAND == list ]] && { echo "full soft medium hard"; return 0; }
+  [[ ${#@} -lt 2 ]] && { 1>2 echo "Wrong number of arguments"; return 0; }
+  case $BAND in
+    full)
+      iBAND=0;;
+    soft)
+      iBAND=1;;
+    medium)
+      iBAND=2;;
+    hard)
+      iBAND=3;;
+    *)
+      1>2 echo "Worng option for band: $BAND"
+      return 0;;
+  esac
+
 
   local OPTE=$2
 
-  read -a VALS <<< ${ENERGY_BANDS[$BAND]}
+  read -a VALS <<< "${ENERGY_BANDS[$iBAND]}"
   local VAL
   case $OPTE in
     min) VAL=${VALS[0]};;

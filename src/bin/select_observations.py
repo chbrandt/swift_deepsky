@@ -96,7 +96,8 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12):
 
     table_radec = table_master[['RA','DEC']]
     match_obs_mask = conesearch(ra, dec, radius=radius,
-                                ra_list=table_radec['RA'], dec_list=table_radec['DEC'])
+                                ra_list=table_radec['RA'].values,
+                                dec_list=table_radec['DEC'].values)
     table_object = table_master.loc[match_obs_mask]
     print("Number of observations found: {:d}".format(len(table_object)))
 

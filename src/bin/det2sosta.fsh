@@ -19,9 +19,9 @@ det2sosta() {
   back=$(grep "^! Back" $BACKFILE | awk '{print $NF}')
 
   # echo "log test_$EMIN-$EMAX.txt"
-  echo "log $LOGFILE"
+  echo "log ./${LOGFILE#$PWD}"
   echo "read/size=1024/ecol=PI/emin=${EMIN}/emax=${EMAX} $file"
-  echo "read/size=1024/expo $EXPOFILE"
+  echo "read/size=1024/expo ./${EXPOFILE#$PWD}"
   echo "cpd ${NAME}_sum_band${EMIN}-${EMAX}daeV.gif/gif"
   echo 'disp'
 
@@ -34,7 +34,7 @@ det2sosta() {
   NUMDETECTS=${#DETECTS[@]}
   for ((i=0; i<$NUMDETECTS; i++)); do
 
-    read -a FIELDS <<< ${DETECTS[$i]}
+    read -a FIELDS <<< "${DETECTS[$i]}"
 
     ctrate=${FIELDS[1]%%+*}
     _err=${FIELDS[1]##*+}

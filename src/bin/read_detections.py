@@ -85,7 +85,7 @@ for i,line in enumerate(fp.readlines()):
     if 'upper' in line:
         fields = line.split()
         ul =  fields[5]
-    if '[XIMAGE> sosta' in line:
+    if 'sosta' in line:
         if back is None:
             continue
         if ul != None:
