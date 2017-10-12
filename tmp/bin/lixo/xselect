@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+docker run --rm --entrypoint /entrypoint.sh -v $PWD:/work chbrandt/heasoft xselect "$@"
