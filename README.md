@@ -1,7 +1,6 @@
 # Swift DeepSky
 This pipeline combines multiple Swift-XRT observations of a given position of the sky.
-The pipeline components were written using Python, Bash, Perl and even Fortran77 ;)
-(I know...nevermind...physicists.)
+The pipeline components were written using Python, Bash, Perl and even Fortran.
 Oh, and HEASoft; you have to have it: https://heasarc.nasa.gov/lheasoft/
 
 ## Setup
