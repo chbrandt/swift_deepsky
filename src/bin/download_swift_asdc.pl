@@ -74,6 +74,7 @@ sub system_unpack_observation {
 
   my @tarcmd = ("tar", "-xf", $tarfile, "--directory", $outdir);
   system(@tarcmd);
+  unlink $tarfile;
 }
 
 

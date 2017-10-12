@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
-set -u
+set +u
 
 event_files(){
   DATA_ARCHIVE="$1"
   OBS_ADDR_LIST="$2"
+  OUT_FILE="$3"
 
   SWIFT_OBS_ARCHIVE="${DATA_ARCHIVE}"
+
+  # FILE_NOT_FOUND
+  # FnF=()
 
   # echo "# Event files"
   for ln in `cat $OBS_ADDR_LIST`
@@ -17,15 +21,30 @@ event_files(){
     [ -d $DATADIR ] || continue
     XRTDIR=${DATADIR}/xrt
     EVTDIR=${XRTDIR}/event
-    ls ${EVTDIR}/*pc*po_cl.evt.gz
+
+    for f in ${EVTDIR}/*pc*po_cl.evt.gz; do
+      if [ -e "$f" ]; then
+        echo "$f" >> $OUT_FILE
+      else
+        # ${FnF[${#FnF[@]}]}="$ln"
+        # $FnF+=("'ln'")
+        1>2 echo "Files not found for observation: $ln"
+        break
+      fi
+    done
   done
+  # echo "${FnF}"
 }
 
 exposure_maps() {
   DATA_ARCHIVE="$1"
   OBS_ADDR_LIST="$2"
+  OUT_FILE="$3"
 
   SWIFT_OBS_ARCHIVE="${DATA_ARCHIVE}"
+
+  # FILE_NOT_FOUND
+  # FnF=()
 
   # echo "# Exposure maps:"
   for ln in `cat $OBS_ADDR_LIST`
@@ -37,8 +56,19 @@ exposure_maps() {
     [ -d $DATADIR ] || continue
     XRTDIR=${DATADIR}/xrt
     EXPDIR=${XRTDIR}/products
-    ls ${EXPDIR}/*pc*ex.img.gz
+
+    for f in ${EXPDIR}/*pc*ex.img.gz; do
+      if [ -e "$f" ]; then
+        echo "$f" >> $OUT_FILE
+      else
+        # ${FnF[${#FnF[@]}]}="$ln"
+        # $FnF+=("'ln'")
+        1>2 echo "Files not found for observation: $ln"
+        break
+      fi
+    done
   done
+  # echo "${FnF}"
 }
 
 create_xselect_script() {
