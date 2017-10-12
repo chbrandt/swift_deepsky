@@ -48,6 +48,8 @@ You probably have `cpan` in your machine, should be as easy as:
 # cpan Carp::Assert
 # cpan Archive::Tar
 ```
+If something blocked you, see if CPAN-Minus can help you.
+Try `cpan App::cpanminus`. That should work smooth, then retry the above commands.
 
 ### HEASoft
 Following the instructions from https://heasarc.nasa.gov/lheasoft/install.html
