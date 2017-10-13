@@ -517,13 +517,14 @@ EOF
     # they are colon-separated, which we have to substitute by spaces
     #
     RA=${FIELDS[0]}
-    ra=${RA//:/ }
     DEC=${FIELDS[1]}
-    dec=${DEC//:/ }
+    coords=$(bash ${SCRPT_DIR}/sex2deg.sh "$RA" "$DEC" | tail -n1)
+    ra=$(echo $coords | cut -d' ' -f1)
+    dec=$(echo $coords | cut -d' ' -f2)
 
     # NH comes from ftool's `nh` tool
     #
-    NH=$(nh 2000 \'${ra[*]}\' \'${dec[*]}\' | tail -n1 | awk '{print $NF}')
+    NH=$(nh 2000 $ra $dec | tail -n1 | awk '{print $NF}')
     print -n "    RA=$RA DEC=$DEC NH=$NH"
 
     # Countrates:

@@ -35,7 +35,6 @@ _convra() {
   local h=$(echo $ra | cut -d':' -f1)
   local m=$(echo $ra | cut -d':' -f2)
   local s=$(echo $ra | cut -d':' -f3)
-  #echo "RA: $h , $m , $s"
   h=$(_hour2sec $h)
   m=$(_min2sec $m)
   s=$(echo "$h $m $s" | awk '{print $1+$2+$3}')
@@ -48,11 +47,10 @@ _convdec() {
   local d=$(echo $dec | cut -d':' -f1)
   local m=$(echo $dec | cut -d':' -f2)
   local s=$(echo $dec | cut -d':' -f3)
-  #echo "DEC: $d , $m , $s"
   m=$(_min2sec $m)
   s=$(echo "$m $s" | awk '{print $1+$2}')
-  local sig=$(echo $d | awk '{print $1/sqrt($1*$1)}')
-  local d=$(echo "$s 3600 $d $sig" | awk '{d=($4*$1/$2)+$3; printf "%.5f",d}')
+  local pm=$([[ ${d} =~ ^[0-9] ]] && echo '+1' || echo "${d:0:1}1")
+  local d=$(echo "$s 3600 $d $pm" | awk '{d=($4*$1/$2)+$3; printf "%.5f",d}')
   echo "$d"
 }
 
