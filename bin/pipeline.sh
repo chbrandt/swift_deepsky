@@ -68,6 +68,7 @@ help() {
   echo "  -d|--data_archive : data archive directory; Where Swift directories-tree is."
   echo "                      This directory is supposed to contain the last 2 levels"
   echo "                      os Swift archive usual structure: 'data_archive'/START_TIME/OBSID"
+  echo "  -l|--label LABEL  : Label output files. Otherwise object NAME or ra,dec VALUEs will be used."
   echo ""
   echo " Options:"
   echo "  -f|--master_table : Swift master-table. This table relates RA,DEC,START_TIME,OBSID."
@@ -99,38 +100,33 @@ OUTDIR="$PWD"
 POS_RA=''
 POS_DEC=''
 OBJECT=''
+LABEL=''
 
 while [[ $# -gt 0 ]]
 do
   case $1 in
     -h|--help)
-      help;exit 0;;
+      help; exit 0;;
     -q|--quiet)
       VERBOSE=0;;
+    -l|--label)
+      LABEL=$2; shift;;
     -f|--master_table)
-      TABLE_MASTER=$2
-      shift;;
+      TABLE_MASTER=$2; shift;;
     -d|--data_archive)
-      DATA_ARCHIVE=$2
-      shift;;
+      DATA_ARCHIVE=$2; shift;;
     -o|--outdir)
-      OUTDIR=$2
-      shift;;
+      OUTDIR=$2; shift;;
     --object)
-      OBJECT=$2
-      shift;;
+      OBJECT=$2; shift;;
     --ra)
-      POS_RA=$2
-      shift;;
+      POS_RA=$2; shift;;
     --dec)
-      POS_DEC=$2
-      shift;;
+      POS_DEC=$2; shift;;
     --radius)
-      RADIUS=$2
-      shift;;
+      RADIUS=$2; shift;;
     --)
-      shift
-      break;;
+      shift; break;;
     --*)
       echo "$0: error - unrecognized option $1" 1>&2
       help;exit 1;;
@@ -164,6 +160,8 @@ else
   [[ ${POS_DEC%.*} -gt -90 && ${POS_DEC%.*} -lt 90 ]] || { 1>&2 echo -e "\nERROR: DEC expected to be between [-90:90], instead '$POS_DEC' was given\n"; exit1; }
   RUN_LABEL=$(echo "${POS_RA}_${POS_DEC}_${RADIUS}" | tr '.' '_' | tr "+" "p" | tr "-" "m")
 fi
+
+[[ -n $LABEL ]] && RUN_LABEL="$LABEL"
 
 # Sanity-check:
 : ${POS_RA:?'Oops! RA is not defined!?'}
