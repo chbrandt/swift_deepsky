@@ -3,6 +3,7 @@ This pipeline combines multiple Swift-XRT observations of a given position of th
 The pipeline components were written using Python, Bash, Perl and even Fortran.
 Oh, and HEASoft; you have to have it: https://heasarc.nasa.gov/lheasoft/
 
+
 ## Setup
 The following software(version) is necessary to run the pipeline:
 
@@ -23,6 +24,18 @@ The following software(version) is necessary to run the pipeline:
   * `awk`
   * `tar`
   * `gfortran`
+
+
+## Install
+Once the dependencies were satisfied, (See "Setup dependencies" below)
+to install the package is a two-steps process.
+
+First we have to compile a small fortran code inside `~/bin/countrates`.
+Just `cd` into this directory and execute the script `compile.sh`.
+
+The second step is actually optional: to include `~/bin` in your `PATH`
+variable f you want to simplify your calls to `~/bin/pipeline.sh`.
+
 
 ## Setup dependencies
 
