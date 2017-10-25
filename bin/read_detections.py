@@ -57,11 +57,11 @@ error=None
 cnt=None
 
 SEP=' '
-print(SEP.join(['({0}:photon_flux[ph.s-1])',
-                '({0}:photon_flux_error[ph.s-1])',
-                '({0}:upper_limit[ph.s-1])',
-                '({0}:expected_background[ph])',
-                '({0}:detected_counts[ph])']).format(BAND))
+print(SEP.join(['(photon_flux_{0}(ph.s-1))',
+                '(photon_flux_error_{0}(ph.s-1))',
+                '(upper_limit_{0}(ph.s-1))',
+                '(expected_background_{0}(ph))',
+                '(detected_counts_{0}(ph))']).format(BAND))
 def print_fluxes(flux,error,ul,expect,cnt):
     fmt="{1}{0}{2}{0}{3}{0}{4}{0}{5}"
     print(fmt.format(SEP,flux,error,ul,expect,cnt))

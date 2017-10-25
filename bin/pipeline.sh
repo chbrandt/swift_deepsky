@@ -502,11 +502,11 @@ EOF
   # input them all to 'countrates' to get nuFnu
   print "# -> Converting objects' flux.."
 
-  echo -n "#RA;DEC;NH;ENERGY_SLOPE"                                                                     > $FLUX_TABLE
-  echo -n ";FULL_5keV:flux[mW/m2];FULL_5keV:flux_error[mW/m2]"                                          >> $FLUX_TABLE
-  echo -n ";SOFT_0.5keV:flux[mW/m2];SOFT_0.5keV:flux_error[mW/m2];SOFT_0.5keV:upper_limit[mW/m2]"       >> $FLUX_TABLE
-  echo -n ";MEDIUM_1.5keV:flux[mW/m2];MEDIUM_1.5keV:flux_error[mW/m2];MEDIUM_1.5keV:upper_limit[mW/m2]" >> $FLUX_TABLE
-  echo    ";HARD_4.5keV:flux[mW/m2];HARD_4.5keV:flux_error[mW/m2];HARD_4.5keV:upper_limit[mW/m2]"       >> $FLUX_TABLE
+  echo -n "#RA;DEC;NH;ENERGY_SLOPE;ENERGY_SLOPE_ERROR"                                                                     > $FLUX_TABLE
+  echo -n ";flux_5keV(erg.s-1.cm-2);flux_error_5keV(erg.s-1.cm-2)"                                          >> $FLUX_TABLE
+  echo -n ";flux_0.5keV(erg.s-1.cm-2);flux_error_0.5keV(erg.s-1.cm-2);upper_limit_0.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE
+  echo -n ";flux_1.5keV(erg.s-1.cm-2);flux_error_1.5keV(erg.s-1.cm-2);upper_limit_1.5keV(erg.s-1.cm-2)" >> $FLUX_TABLE
+  echo    ";flux_4.5keV(erg.s-1.cm-2);flux_error_4.5keV(erg.s-1.cm-2);upper_limit_4.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE
 
   for DET in `tail -n +2 $COUNTRATES_TABLE`; do
     IFS=';' read -a FIELDS <<< "${DET}"
@@ -617,7 +617,8 @@ EOF
           ;;
       esac
     done
-    echo -n "${RA};${DEC};${NH};${ENERGY_SLOPE}"                      >> $FLUX_TABLE
+    ENERGY_SLOPE_ERROR="${ENERGY_SLOPE_plus}/${ENERGY_SLOPE_minus}"
+    echo -n "${RA};${DEC};${NH};${ENERGY_SLOPE};${ENERGY_SLOPE_ERROR}">> $FLUX_TABLE
     echo -n ";${FLUX_FULL};${FLUX_FULL_ERROR}"                        >> $FLUX_TABLE
     echo -n ";${FLUX_SOFT};${FLUX_SOFT_ERROR};${FLUX_SOFT_UL}"        >> $FLUX_TABLE
     echo -n ";${FLUX_MEDIUM};${FLUX_MEDIUM_ERROR};${FLUX_MEDIUM_UL}"  >> $FLUX_TABLE
