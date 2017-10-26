@@ -21,9 +21,11 @@ det2sosta() {
   # echo "log test_$EMIN-$EMAX.txt"
   echo "log ./${LOGFILE#$PWD}"
   echo "read/size=1024/ecol=PI/emin=${EMIN}/emax=${EMAX} $file"
-  echo "read/size=1024/expo ./${EXPOFILE#$PWD}"
+  echo 'smooth/wave/sigma=5/back=1.0'
   echo "cpd ${NAME}_sum_band${EMIN}-${EMAX}daeV.gif/gif"
   echo 'disp'
+  echo "read/size=1024/ecol=PI/emin=${EMIN}/emax=${EMAX} $file"
+  echo "read/size=1024/expo ./${EXPOFILE#$PWD}"
 
   # Full-band countrates sub-product (CTSFILE)
   echo "#RA DEC photon_flux[cts/s] photon_flux_error[cts/s]" > $CTSFILE

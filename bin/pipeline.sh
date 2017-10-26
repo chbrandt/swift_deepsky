@@ -503,10 +503,10 @@ EOF
   print "# -> Converting objects' flux.."
 
   echo -n "#RA;DEC;NH;ENERGY_SLOPE;ENERGY_SLOPE_ERROR"                                                                     > $FLUX_TABLE
-  echo -n ";flux_5keV(erg.s-1.cm-2);flux_error_5keV(erg.s-1.cm-2)"                                          >> $FLUX_TABLE
-  echo -n ";flux_0.5keV(erg.s-1.cm-2);flux_error_0.5keV(erg.s-1.cm-2);upper_limit_0.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE
-  echo -n ";flux_1.5keV(erg.s-1.cm-2);flux_error_1.5keV(erg.s-1.cm-2);upper_limit_1.5keV(erg.s-1.cm-2)" >> $FLUX_TABLE
-  echo    ";flux_4.5keV(erg.s-1.cm-2);flux_error_4.5keV(erg.s-1.cm-2);upper_limit_4.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE
+  echo -n ";nufnu_5keV(erg.s-1.cm-2);nufnu_error_5keV(erg.s-1.cm-2)"                                          >> $FLUX_TABLE
+  echo -n ";nufnu_0.5keV(erg.s-1.cm-2);nufnu_error_0.5keV(erg.s-1.cm-2);upper_limit_0.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE
+  echo -n ";nufnu_1.5keV(erg.s-1.cm-2);nufnu_error_1.5keV(erg.s-1.cm-2);upper_limit_1.5keV(erg.s-1.cm-2)" >> $FLUX_TABLE
+  echo    ";nufnu_4.5keV(erg.s-1.cm-2);nufnu_error_4.5keV(erg.s-1.cm-2);upper_limit_4.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE
 
   for DET in `tail -n +2 $COUNTRATES_TABLE`; do
     IFS=';' read -a FIELDS <<< "${DET}"
