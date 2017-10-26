@@ -11,10 +11,10 @@
 
 BEGIN{
   printf "#RA;DEC";
-  printf ";(FULL:photon_flux[ph.s-1]);(FULL:photon_flux_error[ph.s-1])";
-  printf ";(SOFT:photon_flux[ph.s-1]);(SOFT:photon_flux_error[ph.s-1]);(SOFT:upper_limit[ph.s-1])";
-  printf ";(MEDIUM:photon_flux[ph.s-1]);(MEDIUM:photon_flux_error[ph.s-1]);(MEDIUM:upper_limit[ph.s-1])";
-  printf ";(HARD:photon_flux[ph.s-1]);(HARD:photon_flux_error[ph.s-1]);(HARD:upper_limit[ph.s-1])";
+  printf ";countrates_0.3-10keV(ph.s-1);countrates_error_0.3-10keV(ph.s-1)";
+  printf ";countrates_0.3-1keV(ph.s-1);countrates_error_0.3-1keV(ph.s-1);upper_limit_0.3-1keV(ph.s-1)";
+  printf ";countrates_1-2keV(ph.s-1);countrates_error_1-2keV(ph.s-1);upper_limit_1-2keV(ph.s-1)";
+  printf ";countrates_2-10keV(ph.s-1);countrates_error_2-10keV(ph.s-1);upper_limit_2-10keV(ph.s-1)";
   printf "\n";
 }
 {

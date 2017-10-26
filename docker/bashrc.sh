@@ -1,3 +1,3 @@
 HERE=$(cd `dirname $BASH_SOURCE`; pwd)
-PATH="${HERE}/bin:$PATH"
+PATH="${HERE}/bin/links:$PATH"
 export PATH

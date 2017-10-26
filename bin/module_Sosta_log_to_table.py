@@ -50,21 +50,24 @@ fp = open(SOSTAFILE)
 flux_neg=None
 flux_pos=None
 back=None
-pix=None
+size=None
 expo=None
 ul=None
 error=None
-cnt=None
+counts=None
 
 SEP=' '
-print(SEP.join(['(photon_flux_{0}(ph.s-1))',
-                '(photon_flux_error_{0}(ph.s-1))',
-                '(upper_limit_{0}(ph.s-1))',
-                '(expected_background_{0}(ph))',
-                '(detected_counts_{0}(ph))']).format(BAND))
-def print_fluxes(flux,error,ul,expect,cnt):
+print(SEP.join(['photon_flux_{0}(ph.s-1)',
+                'photon_flux_error_{0}(ph.s-1)',
+                'upper_limit_{0}(ph.s-1)',
+                'expected_background_{0}(ph)',
+                'detected_counts_{0}(ph)']).format(BAND))
+# def print_fluxes(flux,error,ul,expect,counts):
+#     fmt="{1}{0}{2}{0}{3}{0}{4}{0}{5}"
+#     print(fmt.format(SEP,flux,error,ul,expect,counts))
+def print_fluxes(flux,error,ul,expect,counts):
     fmt="{1}{0}{2}{0}{3}{0}{4}{0}{5}"
-    print(fmt.format(SEP,flux,error,ul,expect,cnt))
+    print(fmt.format(SEP,flux,error,ul,expect,counts))
 
 for i,line in enumerate(fp.readlines()):
     if 'Background/elemental sq pixel :' in line:
@@ -72,8 +75,8 @@ for i,line in enumerate(fp.readlines()):
         back = fields[4]
     if 'Total' in line:
         fields = line.split()
-        pix = fields[6]
-        cnt = fields[4]
+        size = fields[6]
+        counts = fields[4]
     if '+ vignetting ->' in line:
         fields = line.split()
         flux_neg =  fields[2]
@@ -93,21 +96,27 @@ for i,line in enumerate(fp.readlines()):
             error=None
         else:
             flux=float(flux_pos)
-        expect=float(back) * int(pix) * float(expo)
-        print_fluxes(flux,error,ul,expect,cnt)
+
+        expect=float(back) * int(size) * float(expo)
+
+        print_fluxes(flux, error, ul, expect, counts)
+
+        # Clear variables
         flux_neg=None
         flux_pos=None
         back=None
-        pix=None
+        size=None
         expo=None
         ul=None
         error=None
-        cnt=None
+        counts=None
 
 if ul != None:
     flux=float(flux_neg[2:])
     error=None
 else:
     flux=float(flux_pos)
-expect=float(back) * int(pix) * float(expo)
-print_fluxes(flux,error,ul,expect,cnt)
+
+expect=float(back) * int(size) * float(expo)
+
+print_fluxes(flux, error, ul, expect, counts)
