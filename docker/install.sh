@@ -3,7 +3,7 @@
 source_create(){
   local HERE=$(cd `dirname $BASH_SOURCE`; pwd)
   
-  source ${HERE}/bin/create_heabins.sh
+  source ${HERE}/bin/create_links.sh
   
   echo "Run the following line to make docker-heasoft binaries available"
   echo "on your environment:"

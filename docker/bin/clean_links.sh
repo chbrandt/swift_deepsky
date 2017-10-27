@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
-for f in `cat heasoft_binaries.txt`; do
-  [[ -h links/$f ]] && rm links/$f
+
+HERE=$(cd `dirname $BASH_SOURCE`; pwd)
+HSRC=${HERE}/src
+
+for f in `cat ${HSRC}/heasoft_binaries.txt`; do
+  [[ -h ${HERE}/links/$f ]] && rm ${HERE}/links/$f
 done
-rmdir links 
+rmdir ${HERE}/links 
+
