@@ -40,3 +40,12 @@ source bin/countrates/compile.sh &> bin/countrates/compile.log
 
 # Set docker-heasoft cli
 [[ $WITH_DOCKER == 'yes' ]] && source docker/install.sh
+
+
+echo "#================================================================="
+echo "# Run the following line to make swift-deepsky pipeline available"
+echo "# on your environment:"
+echo "#----------"
+echo "export PATH=\"${PWD}/bin:\$PATH\""
+echo "#----------"
+echo "#================================================================="

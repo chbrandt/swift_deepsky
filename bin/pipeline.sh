@@ -656,6 +656,16 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
   sed -i.bak 's/[[:space:]]/;/g' $FLUX_TABLE
   print "#..............................................................."
 )
+
+# Finally, let's zip some files..
+gzip $EVENTSSUM_RESULT
+gzip $EXPOSSUM_RESULT
+(
+  cd ${TMPDIR}/..
+  TMPDIR=$(basename ${TMPDIR})
+  tar -czf ${TMPDIR}.tgz ${TMPDIR} && rm -rf $TMPDIR
+)
+
 echo "# ---"
 echo "# Pipeline finished. Final table: '$FLUX_TABLE'"
 echo "# ---"
