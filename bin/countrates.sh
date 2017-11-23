@@ -29,7 +29,7 @@ energy_bands() {
 
   # [[ $BAND == list ]] && { echo "${!ENERGY_BANDS[@]}"; return 0; }
   [[ $BAND == list ]] && { echo "full soft medium hard"; return 0; }
-  [[ ${#@} -lt 2 ]] && { 1>2 echo "Wrong number of arguments"; return 0; }
+  [[ ${#@} -lt 2 ]] && { 1>&2 echo "Wrong number of arguments"; return 0; }
   case $BAND in
     full)
       iBAND=0;;
@@ -40,7 +40,7 @@ energy_bands() {
     hard)
       iBAND=3;;
     *)
-      1>2 echo "Worng option for band: $BAND"
+      1>&2 echo "Wrong option for band: $BAND"
       return 0;;
   esac
 

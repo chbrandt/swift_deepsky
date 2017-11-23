@@ -22,7 +22,7 @@ select_event_files(){
       if [ -e "$f" ]; then
         echo "$f" >> $OUT_FILE
       else
-        1>2 echo "Files not found for observation: $ln"
+        1>&2 echo "Files not found for observation: $ln"
         break
       fi
     done
@@ -50,7 +50,7 @@ select_exposure_maps() {
       if [ -e "$f" ]; then
         echo "$f" >> $OUT_FILE
       else
-        1>2 echo "Files not found for observation: $ln"
+        1>&2 echo "Files not found for observation: $ln"
         break
       fi
     done

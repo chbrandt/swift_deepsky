@@ -14,6 +14,7 @@ det2sosta() {
   local CTSFILE="$7"
   local NAME="$8"
   local OUTFILE="$9"
+  local SMOOTH="${10}"
 
   file=$(grep "^! Inpu" $FILE | awk '{print $NF}')
   expo=$(grep "^! Expo" $FILE | awk '{print $NF}')
@@ -22,10 +23,13 @@ det2sosta() {
   # echo "log test_$EMIN-$EMAX.txt"
   echo "log ./${LOGFILE#$PWD}"                                  >> $OUTFILE
   echo "read/size=1024/ecol=PI/emin=${EMIN}/emax=${EMAX} $file" >> $OUTFILE
-  echo "smooth/wave/sigma=5/back=1.0"                           >> $OUTFILE
-  echo "cpd ${NAME}_sum_band${EMIN}-${EMAX}daeV.gif/gif"        >> $OUTFILE
-  echo "disp"                                                   >> $OUTFILE
-  echo "read/size=1024/ecol=PI/emin=${EMIN}/emax=${EMAX} $file" >> $OUTFILE
+  if [[ $SMOOTH == yes ]]
+  then
+    echo "smooth/wave/sigma=5/back=1.0"                           >> $OUTFILE
+    echo "cpd ${NAME}_sum_band${EMIN}-${EMAX}daeV.gif/gif"        >> $OUTFILE
+    echo "disp"                                                   >> $OUTFILE
+    echo "read/size=1024/ecol=PI/emin=${EMIN}/emax=${EMAX} $file" >> $OUTFILE
+  fi
   echo "read/size=1024/expo ./${EXPOFILE#$PWD}"                 >> $OUTFILE
 
   # Full-band countrates sub-product (CTSFILE)

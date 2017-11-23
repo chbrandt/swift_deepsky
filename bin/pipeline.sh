@@ -442,7 +442,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
             $EXPOSSUM_RESULT \
             $LOGFILE_FULL $CTS_DET_FULL \
             $RUN_LABEL \
-            $XIMAGE_TMP_SCRIPT
+            $XIMAGE_TMP_SCRIPT \
+            'yes'
   ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_soft.xco
@@ -452,7 +453,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
             $EXPOSSUM_RESULT \
             $LOGFILE_SOFT $CTS_DET_FULL \
             $RUN_LABEL \
-            $XIMAGE_TMP_SCRIPT
+            $XIMAGE_TMP_SCRIPT \
+            'no'
   ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_medium.xco
@@ -462,7 +464,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
             $EXPOSSUM_RESULT \
             $LOGFILE_MEDIUM $CTS_DET_FULL \
             $RUN_LABEL \
-            $XIMAGE_TMP_SCRIPT
+            $XIMAGE_TMP_SCRIPT \
+            'no'
   ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_hard.xco
@@ -472,7 +475,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
             $EXPOSSUM_RESULT \
             $LOGFILE_HARD $CTS_DET_FULL \
             $RUN_LABEL \
-            $XIMAGE_TMP_SCRIPT
+            $XIMAGE_TMP_SCRIPT \
+            'no'
   ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
 
   # rm $XIMAGE_TMP_SCRIPT
