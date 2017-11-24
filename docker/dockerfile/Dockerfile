@@ -1,24 +1,36 @@
-FROM chbrandt/centos:heasoft
+FROM chbrandt/heasoft
 
 MAINTAINER "Carlos Brandt <carloshenriquebrandt at gmail>"
 
-ENV HEASOFT_TMPDIR  /tmp/heasoft
 
-COPY src $HEASOFT_TMPDIR
+ENV PROFRC /etc/profile.d/thisdocker.sh
 
-RUN source $HEASOFT_TMPDIR/install_heasoft.sh && \
-    install && \
-    rm -rf $HEASOFT_TMPDIR
+RUN grep --quiet "$PROFRC" /etc/bashrc      || \
+    echo "source $PROFRC" >> /etc/bashrc
 
-RUN git clone https://github.com/chbrandt/docker_commons.git && \
-    ln -sf docker_commons/entrypoint.sh /.
 
-COPY home $HEASOFT_TMPDIR
-RUN cat $HEASOFT_TMPDIR/non_interactive.rc \
-        $HEASOFT_TMPDIR/ximage_exit_on_fail.rc \
-        $HEASOFT_TMPDIR/ximage_no_history.rc \
-    >> /etc/.bash_profile && \
-    rm -rf $HEASOFT_TMPDIR
+RUN INSTALLDIR="/usr/local"                                         && \
+    PKG="Miniconda3-latest-Linux-x86_64.sh"                         && \
+    curl https://repo.continuum.io/miniconda/$PKG                   \
+        -o /tmp/miniconda.sh                                        && \
+    chmod +x /tmp/miniconda.sh                                      && \
+    /tmp/miniconda.sh -b -p $INSTALLDIR/anaconda                    && \
+    rm -f /tmp/miniconda.sh                                         && \
+    CONDABIN="$INSTALLDIR/anaconda/bin"                             && \
+    echo "export PATH=$CONDABIN:\$PATH" >> $PROFRC                  && \
+    $CONDABIN/conda install -y pandas astropy
 
-ENTRYPOINT ["/entrypoint.sh"]
 
+RUN yum -y install perl-CPAN && yum clean all && \
+    PERL_MM_USE_DEFAULT=1  && \
+    cpan App::cpanminus    && \
+    cpanm WWW::Mechanize   && \
+    cpanm Carp::Assert     && \
+    cpanm Archive::Tar
+
+
+RUN git clone https://github.com/CBDC/swift_deepsky.git && \
+    cd /swift_deepsky && ./install.sh
+
+
+ENV EXECAPP /swift_deepsky/bin/pipeline.sh
