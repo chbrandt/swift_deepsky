@@ -39,7 +39,7 @@ source bin/countrates/compile.sh &> bin/countrates/compile.log
 [[ $? -eq 0 ]] || exit 1;
 
 # Set docker-heasoft cli
-[[ $WITH_DOCKER == 'yes' ]] && source docker/install.sh
+[[ $WITH_DOCKER == 'yes' ]] && bash docker/install.sh
 
 
 echo "#================================================================="
