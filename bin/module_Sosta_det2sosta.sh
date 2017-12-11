@@ -35,17 +35,24 @@ det2sosta() {
   # drop the full-band detection countrates to this file:
   local CTSFILE="$7"
   local NAME="$8"
+  local OUTFILE="$9"
+  local SMOOTH="${10}"
 
   file=$(grep "^! Input" $FILE | awk '{print $NF}')
   expo=$(grep "^! Exposure" $FILE | awk '{print $NF}')
   back=$(grep "^! Back" $BACKFILE | awk '{print $NF}')
 
   # echo "log test_$EMIN-$EMAX.txt"
-  echo "log ./${LOGFILE#$PWD}"
-  echo "read/size=1024/ecol=PI/emin=${EMIN}/emax=${EMAX} $file"
-  echo "read/size=1024/expo ./${EXPOFILE#$PWD}"
-  echo "cpd ${NAME}_sum_band${EMIN}-${EMAX}daeV.gif/gif"
-  echo 'disp'
+  echo "log ./${LOGFILE#$PWD}"                                  >> $OUTFILE
+  echo "read/size=1024/ecol=PI/emin=${EMIN}/emax=${EMAX} $file" >> $OUTFILE
+  if [[ $SMOOTH == yes ]]
+  then
+    echo "smooth/wave/sigma=5/back=1.0"                           >> $OUTFILE
+    echo "cpd ${NAME}_sum_band${EMIN}-${EMAX}daeV.gif/gif"        >> $OUTFILE
+    echo "disp"                                                   >> $OUTFILE
+    echo "read/size=1024/ecol=PI/emin=${EMIN}/emax=${EMAX} $file" >> $OUTFILE
+  fi
+  echo "read/size=1024/expo ./${EXPOFILE#$PWD}"                 >> $OUTFILE
 
   # Full-band countrates sub-product (CTSFILE)
   echo "#RA DEC photon_flux[cts/s] photon_flux_error[cts/s]" > $CTSFILE
@@ -77,8 +84,8 @@ det2sosta() {
     counts=$(echo "$ctrate $expo_corr" | awk '{print $1 * $2}')
     counts=${counts%%.*}
 
-    xpix=${FIELDS[2]}
-    ypix=${FIELDS[3]}
+    xpx=${FIELDS[2]}
+    ypx=${FIELDS[3]}
 
     eef_size=0.9
     if [ $counts -lt 100 ]; then
@@ -89,12 +96,7 @@ det2sosta() {
       eef_size=0.8
     fi
 
-    echo "sosta/xpix=${xpix}/ypix=${ypix}/back=${back}/eef_s=${eef_size}"
-
-    # for ((j=0; j<${#FIELDS[@]}; j++)); do
-    #   echo ${FIELDS[$j]}
-    # done
+    echo "sosta/xpix=${xpx}/ypix=${ypx}/back=${back}/eef_s=${eef_size}" >> $OUTFILE
   done
-
-  echo 'exit'
+  echo 'exit'                                                           >> $OUTFILE
 }

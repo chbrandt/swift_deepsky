@@ -18,11 +18,15 @@ RADIUS=12
 # Numerical value to be used as null
 NULL_VALUE=-999
 
+is_null() {
+  local VAL=$1
+  echo "$VAL $NULL_VALUE" | awk '{if($1==$2){print "yes"}else{print "no"}}'
+}
+
 function print() {
   [ $VERBOSE -eq 1 ] || return
   echo "$@" | tee -a $LOGFILE
 }
-
 
 ########################################################################
 # Swift-Events stacking
@@ -68,6 +72,7 @@ help() {
   echo "  -d|--data_archive : data archive directory; Where Swift directories-tree is."
   echo "                      This directory is supposed to contain the last 2 levels"
   echo "                      os Swift archive usual structure: 'data_archive'/START_TIME/OBSID"
+  echo "  -l|--label LABEL  : Label output files. Otherwise object NAME or ra,dec VALUEs will be used."
   echo ""
   echo " Options:"
   echo "  -f|--master_table : Swift master-table. This table relates RA,DEC,START_TIME,OBSID."
@@ -99,38 +104,33 @@ OUTDIR="$PWD"
 POS_RA=''
 POS_DEC=''
 OBJECT=''
+LABEL=''
 
 while [[ $# -gt 0 ]]
 do
   case $1 in
     -h|--help)
-      help;exit 0;;
+      help; exit 0;;
     -q|--quiet)
       VERBOSE=0;;
+    -l|--label)
+      LABEL=$2; shift;;
     -f|--master_table)
-      TABLE_MASTER=$2
-      shift;;
+      TABLE_MASTER=$2; shift;;
     -d|--data_archive)
-      DATA_ARCHIVE=$2
-      shift;;
+      DATA_ARCHIVE=$2; shift;;
     -o|--outdir)
-      OUTDIR=$2
-      shift;;
+      OUTDIR=$2; shift;;
     --object)
-      OBJECT=$2
-      shift;;
+      OBJECT=$2; shift;;
     --ra)
-      POS_RA=$2
-      shift;;
+      POS_RA=$2; shift;;
     --dec)
-      POS_DEC=$2
-      shift;;
+      POS_DEC=$2; shift;;
     --radius)
-      RADIUS=$2
-      shift;;
+      RADIUS=$2; shift;;
     --)
-      shift
-      break;;
+      shift; break;;
     --*)
       echo "$0: error - unrecognized option $1" 1>&2
       help;exit 1;;
@@ -164,6 +164,8 @@ else
   [[ ${POS_DEC%.*} -gt -90 && ${POS_DEC%.*} -lt 90 ]] || { 1>&2 echo -e "\nERROR: DEC expected to be between [-90:90], instead '$POS_DEC' was given\n"; exit1; }
   RUN_LABEL=$(echo "${POS_RA}_${POS_DEC}_${RADIUS}" | tr '.' '_' | tr "+" "p" | tr "-" "m")
 fi
+
+[[ -n $LABEL ]] && RUN_LABEL="$LABEL"
 
 # Sanity-check:
 : ${POS_RA:?'Oops! RA is not defined!?'}
@@ -251,6 +253,7 @@ print "# * Detected objects final flux table:"
 print "    FLUX_TABLE=$FLUX_TABLE"
 print "#..............................................................."
 
+DATA_ARCHIVE="${DATA_ARCHIVE}/obs"
 
 # List of Swift archive observation addresses
 #
@@ -289,44 +292,67 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
 )
 
 (
+  # Here we sum (or stack) the event-files as well as the exposure-maps.
+  # This block works in three steps:
+  # 1st) we select event-files and exposure-maps from each observation
+  #      directory listed in '$OBSLIST'
+  # 2nd) we generate the scripts for 'xselect' and 'ximage';
+  #      xselect is used for event-files, while ximage for exposure-maps
+  # 3rd) we run the scripts with the data files
+  #
   BLOCK='DATA_STACKING'
   print "# Block (2) $BLOCK"
   cd $OUTDIR
 
-  source ${SCRPT_DIR}/setup_ximage_files.fsh
+  source ${SCRPT_DIR}/module_Sum_events_maps.sh
 
   # Create two files with filenames list of event-images and exposure-maps
   #
   print "# -> Querying archive for event-files:"
   EVENTSFILE="${TMPDIR}/${RUN_LABEL}_events.txt"
-  event_files $DATA_ARCHIVE $OBSLIST > $EVENTSFILE #2> $LOGFILE
+  select_event_files $DATA_ARCHIVE $OBSLIST $EVENTSFILE 2> FILES_not_FOUND.events.txt #2> $LOGFILE
   print "  EVENTSFILE="`cat $EVENTSFILE`
 
   print "# -> ..and exposure-maps:"
   EXMAPSFILE="${TMPDIR}/${RUN_LABEL}_expos.txt"
-  exposure_maps $DATA_ARCHIVE $OBSLIST > $EXMAPSFILE #2> $LOGFILE
+  select_exposure_maps $DATA_ARCHIVE $OBSLIST $EXMAPSFILE 2> FILES_not_FOUND.expomaps.txt #2> $LOGFILE
   print "  EXMAPSFILE="`cat $EXMAPSFILE`
 
   # Create XSelect and XImage scripts to sum event-files and exposure-maps
   #
   print "# -> Generating scripts for stacking data"
   XSELECT_SUM_SCRIPT="${TMPDIR}/events_sum.xcm"
-  create_xselect_script $RUN_LABEL $EVENTSFILE "./${EVENTSSUM_RESULT#$PWD}" > $XSELECT_SUM_SCRIPT
+  create_xselect_sum_script $RUN_LABEL $EVENTSFILE "./${EVENTSSUM_RESULT#$PWD}" $XSELECT_SUM_SCRIPT
 
   XIMAGE_SUM_SCRIPT="${TMPDIR}/expos_sum.xco"
-  create_ximage_script $RUN_LABEL $EXMAPSFILE "./${EXPOSSUM_RESULT#$PWD}" > $XIMAGE_SUM_SCRIPT
+  create_ximage_sum_script $RUN_LABEL $EXMAPSFILE "./${EXPOSSUM_RESULT#$PWD}" $XIMAGE_SUM_SCRIPT
 
   # Run the scripts
   #
   print "# -> Running XSelect (events concatenation).."
   xselect @"./${XSELECT_SUM_SCRIPT#$PWD}" #>> $LOGFILE
   print "# -> Running XImage (exposure-maps stacking).."
-  ximage @"./${XIMAGE_SUM_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage <"./${XIMAGE_SUM_SCRIPT#$PWD}" #>> $LOGFILE
 
   [[ -f xselect.log ]] && mv xselect.log $TMPDIR
 
   print "#..............................................................."
 )
+
+create_ximage_detbright_script(){
+  EMIN="$1"
+  EMAX="$2"
+  EVENTS="$3"
+  EXPMAP="$4"
+  OUTFILE="$5"
+
+  cat > $OUTFILE << EOF
+read/size=1024/ecol=PI/emin=$EMIN/emax=$EMAX $EVENTS
+read/size=1024/expo $EXPMAP
+det/bright
+quit
+EOF
+}
 
 XSELECT_DET_DEFAULT="${EVENTSSUM_RESULT%.*}.det"
 DET_TMPDIR="${TMPDIR}/${XSELECT_DET_DEFAULT##*/}"
@@ -335,58 +361,58 @@ XSELECT_DET_SOFT="${DET_TMPDIR%.*}.soft.det"
 XSELECT_DET_MEDIUM="${DET_TMPDIR%.*}.medium.det"
 XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
 (
-  # Here we use ximage to detect bright sources in the field.
-  # The "field" now is the result of all observations stacked,
+  # Here we use ximage to detect bright sources in the field;
+  # "field" now is the result of all observations stacked,
   # event-files and exposure-maps.
   # We want to detect such (bright) sources using every photon
   # available, i.e., using the entire x-ray band (0.3keV to 10keV)
+  #
+  # The detections done using the *entire* energy, from 0.3keV to 10keV,
+  # will be effectively used as "the objects" detected, and so listed
+  # in the results. Nevertheless we run 'detect' for each band (keV 0.3-1, 1-2, 2-10)
+  # because we want an estimate of the background on each corresponding band.
+  # Such background level estimate will be used in the next step to adjust
+  # the measurements in each band.
+  #
   BLOCK='SOURCES_DETECTION'
   print "# Block (3) $BLOCK"
   cd $OUTDIR
 
 
-  XIMAGE_TMP_SCRIPT="${TMPDIR}/ximage.detect_full.xco"
   print "# -> Detecting bright sources in the FULL band (0.3-10keV).."
-  cat > $XIMAGE_TMP_SCRIPT << EOF
-read/size=1024/ecol=PI/emin=30/emax=1000 "./${EVENTSSUM_RESULT#$PWD}"
-read/size=1024/expo "./${EXPOSSUM_RESULT#$PWD}"
-det/bright
-quit
-EOF
-  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  XIMAGE_TMP_SCRIPT="${TMPDIR}/ximage.detect_full.xco"
+  create_ximage_detbright_script 30 1000 \
+                                "./${EVENTSSUM_RESULT#$PWD}" \
+                                "./${EXPOSSUM_RESULT#$PWD}" \
+                                "$XIMAGE_TMP_SCRIPT"
+  ximage <"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_FULL
 
-  XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_soft.xco
   print "# -> Detecting bright sources in the SOFT band (0.3-1keV).."
-  cat > $XIMAGE_TMP_SCRIPT << EOF
-read/size=1024/ecol=PI/emin=30/emax=100 "./${EVENTSSUM_RESULT#$PWD}"
-read/size=1024/expo "./${EXPOSSUM_RESULT#$PWD}"
-det/bright
-quit
-EOF
-  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_soft.xco
+  create_ximage_detbright_script 30 100 \
+                                "./${EVENTSSUM_RESULT#$PWD}" \
+                                "./${EXPOSSUM_RESULT#$PWD}" \
+                                "$XIMAGE_TMP_SCRIPT"
+  ximage <"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_SOFT
 
-  XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_medium.xco
   print "# -> Detecting bright sources in the MEDIUM band(1-2keV).."
-  cat > $XIMAGE_TMP_SCRIPT << EOF
-read/size=1024/ecol=PI/emin=101/emax=200 "./${EVENTSSUM_RESULT#$PWD}"
-read/size=1024/expo "./${EXPOSSUM_RESULT#$PWD}"
-det/bright
-quit
-EOF
-  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_medium.xco
+  create_ximage_detbright_script 101 200 \
+                                "./${EVENTSSUM_RESULT#$PWD}" \
+                                "./${EXPOSSUM_RESULT#$PWD}" \
+                                "$XIMAGE_TMP_SCRIPT"
+  ximage <"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_MEDIUM
 
-  XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_hard.xco
   print "# -> Detecting bright sources in the HARD band (2-10keV).."
-  cat > $XIMAGE_TMP_SCRIPT << EOF
-read/size=1024/ecol=PI/emin=201/emax=1000 "./${EVENTSSUM_RESULT#$PWD}"
-read/size=1024/expo "./${EXPOSSUM_RESULT#$PWD}"
-det/bright
-quit
-EOF
-  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_hard.xco
+  create_ximage_detbright_script 201 1000 \
+                                "./${EVENTSSUM_RESULT#$PWD}" \
+                                "./${EXPOSSUM_RESULT#$PWD}" \
+                                "$XIMAGE_TMP_SCRIPT"
+  ximage <"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_HARD
 
   # rm $XIMAGE_TMP_SCRIPT
@@ -401,7 +427,7 @@ EOF
   print "# Block (4) $BLOCK"
   cd $OUTDIR
 
-  source ${SCRPT_DIR}/det2sosta.fsh
+  source ${SCRPT_DIR}/module_Sosta_det2sosta.sh
 
   # To have the countrates as a simple table, in its own file,
   # for future use, we should create it as a sub-products during
@@ -416,8 +442,9 @@ EOF
             $EXPOSSUM_RESULT \
             $LOGFILE_FULL $CTS_DET_FULL \
             $RUN_LABEL \
-            > $XIMAGE_TMP_SCRIPT
-  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+            $XIMAGE_TMP_SCRIPT \
+            'yes'
+  ximage <"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_soft.xco
   LOGFILE_SOFT="${TMPDIR}/sosta_soft.log"
@@ -426,8 +453,9 @@ EOF
             $EXPOSSUM_RESULT \
             $LOGFILE_SOFT $CTS_DET_FULL \
             $RUN_LABEL \
-            > $XIMAGE_TMP_SCRIPT
-  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+            $XIMAGE_TMP_SCRIPT \
+            'no'
+  ximage <"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_medium.xco
   LOGFILE_MEDIUM="${TMPDIR}/sosta_medium.log"
@@ -436,8 +464,9 @@ EOF
             $EXPOSSUM_RESULT \
             $LOGFILE_MEDIUM $CTS_DET_FULL \
             $RUN_LABEL \
-            > $XIMAGE_TMP_SCRIPT
-  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+            $XIMAGE_TMP_SCRIPT \
+            'no'
+  ximage <"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_hard.xco
   LOGFILE_HARD="${TMPDIR}/sosta_hard.log"
@@ -446,8 +475,9 @@ EOF
             $EXPOSSUM_RESULT \
             $LOGFILE_HARD $CTS_DET_FULL \
             $RUN_LABEL \
-            > $XIMAGE_TMP_SCRIPT
-  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+            $XIMAGE_TMP_SCRIPT \
+            'no'
+  ximage <"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
 
   # rm $XIMAGE_TMP_SCRIPT
 
@@ -455,13 +485,17 @@ EOF
   # we now read from this "logfile" and write to a table..
   #
   CTS_SOST_FULL="${TMPDIR}/countrates_full.sosta.txt"
-  python ${SCRPT_DIR}/read_detections.py $LOGFILE_FULL 'FULL' > $CTS_SOST_FULL
+  python ${SCRPT_DIR}/module_Sosta_log_to_table.py $LOGFILE_FULL '0.3-10keV' > $CTS_SOST_FULL
+
   CTS_SOST_SOFT="${TMPDIR}/countrates_soft.sosta.txt"
-  python ${SCRPT_DIR}/read_detections.py $LOGFILE_SOFT 'SOFT' > $CTS_SOST_SOFT
+  python ${SCRPT_DIR}/module_Sosta_log_to_table.py $LOGFILE_SOFT '0.3-1keV' > $CTS_SOST_SOFT
+
   CTS_SOST_MEDIUM="${TMPDIR}/countrates_medium.sosta.txt"
-  python ${SCRPT_DIR}/read_detections.py $LOGFILE_MEDIUM 'MEDIUM' > $CTS_SOST_MEDIUM
+  python ${SCRPT_DIR}/module_Sosta_log_to_table.py $LOGFILE_MEDIUM '1-2keV' > $CTS_SOST_MEDIUM
+
   CTS_SOST_HARD="${TMPDIR}/countrates_hard.sosta.txt"
-  python ${SCRPT_DIR}/read_detections.py $LOGFILE_HARD 'HARD' > $CTS_SOST_HARD
+  python ${SCRPT_DIR}/module_Sosta_log_to_table.py $LOGFILE_HARD '2-10keV' > $CTS_SOST_HARD
+
   # ..make it a CSV..
   COUNTRATES_SOSTA_TABLE="${COUNTRATES_TABLE%.*}.sosta.csv"
   COUNTRATES_SOSTA_TABLE="${TMPDIR}/${COUNTRATES_SOSTA_TABLE##*/}"
@@ -479,7 +513,7 @@ EOF
   # done by Sosta by the measurement done before by Detect/bright.
   #
   tail -n +2 $COUNTRATES_SOSTA_TABLE \
-    | awk -f ${SCRPT_DIR}/adjust_fluxes.awk > $COUNTRATES_TABLE #2> $LOGFILE
+    | awk -f ${SCRPT_DIR}/module_Sosta_adjust_countrates.awk > $COUNTRATES_TABLE #2> $LOGFILE
   print "#..............................................................."
 )
 
@@ -494,7 +528,7 @@ EOF
   print "# Block (5) $BLOCK"
   cd $OUTDIR
 
-  source ${SCRPT_DIR}/countrates.fsh
+  source ${SCRPT_DIR}/countrates.sh
 
   # For each detected source (each source is read from COUNTRATES_TABLE)
   # get its NH (given RA and DEC read from COUNTRATES_TABLE, use 'nh' tool)
@@ -503,11 +537,11 @@ EOF
   # input them all to 'countrates' to get nuFnu
   print "# -> Converting objects' flux.."
 
-  echo -n "#RA;DEC;NH;ENERGY_SLOPE"                                                                     > $FLUX_TABLE
-  echo -n ";FULL_5keV:flux[mW/m2];FULL_5keV:flux_error[mW/m2]"                                          >> $FLUX_TABLE
-  echo -n ";SOFT_0.5keV:flux[mW/m2];SOFT_0.5keV:flux_error[mW/m2];SOFT_0.5keV:upper_limit[mW/m2]"       >> $FLUX_TABLE
-  echo -n ";MEDIUM_1.5keV:flux[mW/m2];MEDIUM_1.5keV:flux_error[mW/m2];MEDIUM_1.5keV:upper_limit[mW/m2]" >> $FLUX_TABLE
-  echo    ";HARD_4.5keV:flux[mW/m2];HARD_4.5keV:flux_error[mW/m2];HARD_4.5keV:upper_limit[mW/m2]"       >> $FLUX_TABLE
+  echo -n "#RA;DEC;NH;ENERGY_SLOPE;ENERGY_SLOPE_ERROR"                                                                     > $FLUX_TABLE
+  echo -n ";nufnu_5keV(erg.s-1.cm-2);nufnu_error_5keV(erg.s-1.cm-2)"                                          >> $FLUX_TABLE
+  echo -n ";nufnu_0.5keV(erg.s-1.cm-2);nufnu_error_0.5keV(erg.s-1.cm-2);upper_limit_0.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE
+  echo -n ";nufnu_1.5keV(erg.s-1.cm-2);nufnu_error_1.5keV(erg.s-1.cm-2);upper_limit_1.5keV(erg.s-1.cm-2)" >> $FLUX_TABLE
+  echo    ";nufnu_4.5keV(erg.s-1.cm-2);nufnu_error_4.5keV(erg.s-1.cm-2);upper_limit_4.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE
 
   for DET in `tail -n +2 $COUNTRATES_TABLE`; do
     IFS=';' read -a FIELDS <<< "${DET}"
@@ -516,13 +550,14 @@ EOF
     # they are colon-separated, which we have to substitute by spaces
     #
     RA=${FIELDS[0]}
-    ra=${RA//:/ }
     DEC=${FIELDS[1]}
-    dec=${DEC//:/ }
+    coords=$(bash ${SCRPT_DIR}/sex2deg.sh "$RA" "$DEC" | tail -n1)
+    ra=$(echo $coords | cut -d' ' -f1)
+    dec=$(echo $coords | cut -d' ' -f2)
 
     # NH comes from ftool's `nh` tool
     #
-    NH=$(nh 2000 \'${ra[*]}\' \'${dec[*]}\' | tail -n1 | awk '{print $NF}')
+    NH=$(nh 2000 $ra $dec | tail -n1 | awk '{print $NF}')
     print -n "    RA=$RA DEC=$DEC NH=$NH"
 
     # Countrates:
@@ -607,17 +642,12 @@ EOF
         full)
           FLUX_FULL=$(echo "$NUFNU_FACTOR $CT_FULL" | awk '{print $1*$2}')
           FLUX_FULL_ERROR=$(echo "$NUFNU_FACTOR $CT_FULL_ERROR" | awk '{print $1*$2}')
-          # if [ $(is_null $CT_FULL_UL) == 'yes' ]; then
-          #   FLUX_FULL_UL=$CT_FULL_UL
-          # else
-          #   FLUX_FULL_UL=$(echo "$NUFNU_FACTOR $CT_FULL_UL" | awk '{print $1*$2}')
-          # fi
-          # print "      FLUX_FULL=$FLUX_FULL FLUX_FULL_ERROR=$FLUX_FULL_ERROR FLUX_FULL_UL=$FLUX_FULL_UL"
           print "      FLUX_FULL=$FLUX_FULL FLUX_FULL_ERROR=$FLUX_FULL_ERROR"
           ;;
       esac
     done
-    echo -n "${RA};${DEC};${NH};${ENERGY_SLOPE}"                      >> $FLUX_TABLE
+    ENERGY_SLOPE_ERROR="${ENERGY_SLOPE_plus}/${ENERGY_SLOPE_minus}"
+    echo -n "${RA};${DEC};${NH};${ENERGY_SLOPE};${ENERGY_SLOPE_ERROR}">> $FLUX_TABLE
     echo -n ";${FLUX_FULL};${FLUX_FULL_ERROR}"                        >> $FLUX_TABLE
     echo -n ";${FLUX_SOFT};${FLUX_SOFT_ERROR};${FLUX_SOFT_UL}"        >> $FLUX_TABLE
     echo -n ";${FLUX_MEDIUM};${FLUX_MEDIUM_ERROR};${FLUX_MEDIUM_UL}"  >> $FLUX_TABLE
@@ -626,6 +656,16 @@ EOF
   sed -i.bak 's/[[:space:]]/;/g' $FLUX_TABLE
   print "#..............................................................."
 )
+
+# Finally, let's zip some files..
+gzip $EVENTSSUM_RESULT
+gzip $EXPOSSUM_RESULT
+(
+  cd ${TMPDIR}/..
+  TMPDIR=$(basename ${TMPDIR})
+  tar -czf ${TMPDIR}.tgz ${TMPDIR} && rm -rf $TMPDIR
+)
+
 echo "# ---"
 echo "# Pipeline finished. Final table: '$FLUX_TABLE'"
 echo "# ---"

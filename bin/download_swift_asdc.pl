@@ -27,6 +27,11 @@ sub open_url {
   return $mech;
 }
 
+# The ASI interface allows we to download sub-folders or individual
+# files from an observation. The following variable, if set to '1',
+# will make the algorithm to download all files from an observation.
+my $ALL_FILES=0;
+
 sub download_observation {
   # Arguments
   # - OBSID (11 digits)
@@ -34,15 +39,19 @@ sub download_observation {
   # - OUTDIR
   my $seq = $_[0];
   my $date = $_[1];
-  # my $outdir = $_[2];
-  # my $tmpdir = $_[2];
   my $tarfile = $_[2];
 
   my $mech = open_url($seq,$date);
   my $form = $mech->form_number(1);
 
   $mech->set_visible( [ radio => "tar" ] );
-  $mech->tick("/","on");
+  if ($ALL_FILES==1) {
+    $mech->tick("/","on");
+  } else {
+    # $mech->tick("/xrt/event","on");
+    # $mech->tick("/xrt/products","on");
+    $mech->tick("/xrt","on");
+  }
   $mech->submit();
 
   # my $tarfile = sprintf("%s/%011d.tar",$tmpdir,$seq);
@@ -74,6 +83,7 @@ sub system_unpack_observation {
 
   my @tarcmd = ("tar", "-xf", $tarfile, "--directory", $outdir);
   system(@tarcmd);
+  unlink $tarfile;
 }
 
 
