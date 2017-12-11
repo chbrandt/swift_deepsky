@@ -94,6 +94,10 @@ trap help ERR
 #
 TABLE_MASTER="${SCRPT_DIR}/SwiftXrt_master.csv"
 
+# Default data archive to use if none given
+#
+DATA_ARCHIVE="./data/"
+
 # Default output dir is the current working dir.
 # By all means, a sub-directory will be created to hold every
 # outputfile (temporary or final)
