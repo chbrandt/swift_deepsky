@@ -43,6 +43,7 @@ det2sosta() {
   back=$(grep "^! Back" $BACKFILE | awk '{print $NF}')
 
   # echo "log test_$EMIN-$EMAX.txt"
+  echo "cpd ${NAME}_sum_band${EMIN}-${EMAX}daeV.gif/gif"        >> $OUTFILE
   echo "log ./${LOGFILE#$PWD}"                                  >> $OUTFILE
   echo "read/size=1024/ecol=PI/emin=${EMIN}/emax=${EMAX} $file" >> $OUTFILE
   if [[ $SMOOTH == yes ]]
@@ -55,7 +56,7 @@ det2sosta() {
   echo "read/size=1024/expo ./${EXPOFILE#$PWD}"                 >> $OUTFILE
 
   # Full-band countrates sub-product (CTSFILE)
-  echo "#RA DEC photon_flux[cts/s] photon_flux_error[cts/s]" > $CTSFILE
+  echo "#RA DEC photon_flux[cts/s] photon_flux_error[cts/s] exptime[s]" > $CTSFILE
 
   OLDIFS="$IFS"
   IFS=$'\n' DETECTS=($(grep -v "^!" $FILE))

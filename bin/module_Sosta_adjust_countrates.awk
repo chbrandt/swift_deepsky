@@ -12,6 +12,7 @@
 BEGIN{
   printf "#RA;DEC";
   printf ";countrates_0.3-10keV(ph.s-1);countrates_error_0.3-10keV(ph.s-1)";
+  printf ";exposure_time(s)";
   printf ";countrates_0.3-1keV(ph.s-1);countrates_error_0.3-1keV(ph.s-1);upper_limit_0.3-1keV(ph.s-1)";
   printf ";countrates_1-2keV(ph.s-1);countrates_error_1-2keV(ph.s-1);upper_limit_1-2keV(ph.s-1)";
   printf ";countrates_2-10keV(ph.s-1);countrates_error_2-10keV(ph.s-1);upper_limit_2-10keV(ph.s-1)";
@@ -22,18 +23,19 @@ BEGIN{
   dec=$2;
   det_cts=$3;
   det_err=$4;
+  exp_time=$5
 
-  cts_full=$5;
-  err_full=$6;
-  cts_soft=$10;
-  err_soft=$11;
-  ul_soft=$12;
-  cts_medium=$15;
-  err_medium=$16;
-  ul_medium=$17;
-  cts_hard=$20;
-  err_hard=$21;
-  ul_hard=$22;
+  cts_full=$6;
+  err_full=$7;
+  cts_soft=$11;
+  err_soft=$12;
+  ul_soft=$13;
+  cts_medium=$16;
+  err_medium=$17;
+  ul_medium=$18;
+  cts_hard=$21;
+  err_hard=$22;
+  ul_hard=$23;
 
   if(ul_soft == "None"){
     ul_soft = -999
@@ -70,6 +72,7 @@ BEGIN{
 
   printf "%s;%s",ra,dec;
   printf ";%.3E;%.3E",det_cts,det_err;
+  printf ";%.1f",exp_time;
   printf ";%.3E;%.3E;%.3E",corr_soft,corr_soft_err,ul_soft;
   printf ";%.3E;%.3E;%.3E",corr_medium,corr_medium_err,ul_medium;
   printf ";%.3E;%.3E;%.3E",corr_hard,corr_hard_err,ul_hard;

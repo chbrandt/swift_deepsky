@@ -336,7 +336,7 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   print "# -> Running XSelect (events concatenation).."
   xselect @"./${XSELECT_SUM_SCRIPT#$PWD}" #>> $LOGFILE
   print "# -> Running XImage (exposure-maps stacking).."
-  ximage <"./${XIMAGE_SUM_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage "@./${XIMAGE_SUM_SCRIPT#$PWD}" #>> $LOGFILE
 
   [[ -f xselect.log ]] && mv xselect.log $TMPDIR
 
@@ -389,7 +389,7 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
                                 "./${EVENTSSUM_RESULT#$PWD}" \
                                 "./${EXPOSSUM_RESULT#$PWD}" \
                                 "$XIMAGE_TMP_SCRIPT"
-  ximage <"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_FULL
 
   print "# -> Detecting bright sources in the SOFT band (0.3-1keV).."
@@ -398,7 +398,7 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
                                 "./${EVENTSSUM_RESULT#$PWD}" \
                                 "./${EXPOSSUM_RESULT#$PWD}" \
                                 "$XIMAGE_TMP_SCRIPT"
-  ximage <"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_SOFT
 
   print "# -> Detecting bright sources in the MEDIUM band(1-2keV).."
@@ -407,7 +407,7 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
                                 "./${EVENTSSUM_RESULT#$PWD}" \
                                 "./${EXPOSSUM_RESULT#$PWD}" \
                                 "$XIMAGE_TMP_SCRIPT"
-  ximage <"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_MEDIUM
 
   print "# -> Detecting bright sources in the HARD band (2-10keV).."
@@ -416,7 +416,7 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
                                 "./${EVENTSSUM_RESULT#$PWD}" \
                                 "./${EXPOSSUM_RESULT#$PWD}" \
                                 "$XIMAGE_TMP_SCRIPT"
-  ximage <"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_HARD
 
   # rm $XIMAGE_TMP_SCRIPT
@@ -448,7 +448,7 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
             $RUN_LABEL \
             $XIMAGE_TMP_SCRIPT \
             'yes'
-  ximage <"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage "@./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_soft.xco
   LOGFILE_SOFT="${TMPDIR}/sosta_soft.log"
@@ -459,7 +459,7 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
             $RUN_LABEL \
             $XIMAGE_TMP_SCRIPT \
             'no'
-  ximage <"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage "@./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_medium.xco
   LOGFILE_MEDIUM="${TMPDIR}/sosta_medium.log"
@@ -470,7 +470,7 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
             $RUN_LABEL \
             $XIMAGE_TMP_SCRIPT \
             'no'
-  ximage <"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage "@./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_hard.xco
   LOGFILE_HARD="${TMPDIR}/sosta_hard.log"
@@ -481,7 +481,7 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
             $RUN_LABEL \
             $XIMAGE_TMP_SCRIPT \
             'no'
-  ximage <"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage "@./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
 
   # rm $XIMAGE_TMP_SCRIPT
 

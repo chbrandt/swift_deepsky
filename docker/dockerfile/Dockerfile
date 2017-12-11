@@ -1,4 +1,4 @@
-FROM chbrandt/heasoft
+FROM chbrandt/heasoft:6.22.1
 
 MAINTAINER "Carlos Brandt <carloshenriquebrandt at gmail>"
 
@@ -18,7 +18,7 @@ RUN INSTALLDIR="/usr/local"                                         && \
     rm -f /tmp/miniconda.sh                                         && \
     CONDABIN="$INSTALLDIR/anaconda/bin"                             && \
     echo "export PATH=$CONDABIN:\$PATH" >> $PROFRC                  && \
-    $CONDABIN/conda install -y pandas astropy
+    $CONDABIN/conda install -y pandas=0.20.3 astropy=2.0.2
 
 
 RUN yum -y install perl-CPAN && yum clean all && \
