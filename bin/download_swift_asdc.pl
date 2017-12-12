@@ -131,7 +131,7 @@ if ($nargs >= 4) {
 #   exit 0;
 # }
 
-say "\nDownloading observation '$obsid'..";
+say "# Downloading observation '$obsid'..";
 # my $filename = download_observation($obsid,$date,$tmpdir);
 download_observation($obsid,$date,$tarfile);
 

@@ -39,7 +39,15 @@ source bin/countrates/compile.sh &> bin/countrates/compile.log
 [[ $? -eq 0 ]] || exit 1;
 
 # Set docker-heasoft cli
-[[ $WITH_DOCKER == 'yes' ]] && bash docker/install.sh
+install_heasoft_docker() {
+  cd docker
+  git clone -b stable 'https://github.com/chbrandt/docker-heasoft.git' \
+    || echo "'docker-heasoft' already here, will ./install.sh using it."
+  bash ./docker-heasoft/install.sh > bashrc
+  cat bashrc && source bashrc
+  cd -
+}
+[[ $WITH_DOCKER == 'yes' ]] && install_heasoft_docker
 
 
 echo "#================================================================="

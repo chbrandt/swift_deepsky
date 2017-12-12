@@ -326,10 +326,16 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   #
   print "# -> Generating scripts for stacking data"
   XSELECT_SUM_SCRIPT="${TMPDIR}/events_sum.xcm"
-  create_xselect_sum_script $RUN_LABEL $EVENTSFILE "./${EVENTSSUM_RESULT#$PWD}" $XSELECT_SUM_SCRIPT
+  create_xselect_sum_script $RUN_LABEL \
+                            $EVENTSFILE \
+                            "./${EVENTSSUM_RESULT#$PWD}" \
+                            $XSELECT_SUM_SCRIPT
 
   XIMAGE_SUM_SCRIPT="${TMPDIR}/expos_sum.xco"
-  create_ximage_sum_script $RUN_LABEL $EXMAPSFILE "./${EXPOSSUM_RESULT#$PWD}" $XIMAGE_SUM_SCRIPT
+  create_ximage_sum_script $RUN_LABEL \
+                           $EXMAPSFILE \
+                           "./${EXPOSSUM_RESULT#$PWD}" \
+                           $XIMAGE_SUM_SCRIPT
 
   # Run the scripts
   #
@@ -546,10 +552,10 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
   echo -n ";nufnu_0.5keV(erg.s-1.cm-2);nufnu_error_0.5keV(erg.s-1.cm-2);upper_limit_0.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE
   echo -n ";nufnu_1.5keV(erg.s-1.cm-2);nufnu_error_1.5keV(erg.s-1.cm-2);upper_limit_1.5keV(erg.s-1.cm-2)" >> $FLUX_TABLE
   echo    ";nufnu_4.5keV(erg.s-1.cm-2);nufnu_error_4.5keV(erg.s-1.cm-2);upper_limit_4.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE
-
+echo head -n1 $COUNTRATES_TABLE
   for DET in `tail -n +2 $COUNTRATES_TABLE`; do
     IFS=';' read -a FIELDS <<< "${DET}"
-
+echo ${FIELDS[*]}
     # RA and Dec are the first two columns (in COUNTRATES_TABLE);
     # they are colon-separated, which we have to substitute by spaces
     #

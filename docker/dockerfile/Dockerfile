@@ -1,4 +1,4 @@
-FROM chbrandt/heasoft:6.22.1
+FROM chbrandt/heasoft:6.15
 
 MAINTAINER "Carlos Brandt <carloshenriquebrandt at gmail>"
 

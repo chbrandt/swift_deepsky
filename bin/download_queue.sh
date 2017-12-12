@@ -82,7 +82,7 @@ do
   file[$fcnt]=$fini
 done
 
-[ "$VERBOSE" = "1" ] && echo "Number of Observations $fcnt"
+[ "$VERBOSE" = "1" ] && echo "# Number of Observations $fcnt"
 
 # Check if any halo was found. If not, finish the run..
 #
