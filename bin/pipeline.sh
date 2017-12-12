@@ -552,10 +552,10 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
   echo -n ";nufnu_0.5keV(erg.s-1.cm-2);nufnu_error_0.5keV(erg.s-1.cm-2);upper_limit_0.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE
   echo -n ";nufnu_1.5keV(erg.s-1.cm-2);nufnu_error_1.5keV(erg.s-1.cm-2);upper_limit_1.5keV(erg.s-1.cm-2)" >> $FLUX_TABLE
   echo    ";nufnu_4.5keV(erg.s-1.cm-2);nufnu_error_4.5keV(erg.s-1.cm-2);upper_limit_4.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE
-echo head -n1 $COUNTRATES_TABLE
+
   for DET in `tail -n +2 $COUNTRATES_TABLE`; do
     IFS=';' read -a FIELDS <<< "${DET}"
-echo ${FIELDS[*]}
+
     # RA and Dec are the first two columns (in COUNTRATES_TABLE);
     # they are colon-separated, which we have to substitute by spaces
     #
@@ -575,17 +575,19 @@ echo ${FIELDS[*]}
     CT_FULL=${FIELDS[2]}
     CT_FULL_ERROR=${FIELDS[3]}
     #
-    CT_SOFT=${FIELDS[4]}
-    CT_SOFT_ERROR=${FIELDS[5]}
-    CT_SOFT_UL=${FIELDS[6]}
+    EXPTIME=${FIELDS[4]}
     #
-    CT_MEDIUM=${FIELDS[7]}
-    CT_MEDIUM_ERROR=${FIELDS[8]}
-    CT_MEDIUM_UL=${FIELDS[9]}
+    CT_SOFT=${FIELDS[5]}
+    CT_SOFT_ERROR=${FIELDS[6]}
+    CT_SOFT_UL=${FIELDS[7]}
     #
-    CT_HARD=${FIELDS[10]}
-    CT_HARD_ERROR=${FIELDS[11]}
-    CT_HARD_UL=${FIELDS[12]}
+    CT_MEDIUM=${FIELDS[8]}
+    CT_MEDIUM_ERROR=${FIELDS[9]}
+    CT_MEDIUM_UL=${FIELDS[10]}
+    #
+    CT_HARD=${FIELDS[11]}
+    CT_HARD_ERROR=${FIELDS[12]}
+    CT_HARD_UL=${FIELDS[13]}
 
     # The `Swifslope` tool computes the slope of flux between hard(2-10keV)
     # and soft(0.3-2keV) bands. It's soft band definition comprises

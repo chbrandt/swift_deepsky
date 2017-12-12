@@ -43,7 +43,7 @@ det2sosta() {
   back=$(grep "^! Back" $BACKFILE | awk '{print $NF}')
 
   # echo "log test_$EMIN-$EMAX.txt"
-  echo "cpd ${NAME}_sum_band${EMIN}-${EMAX}daeV.gif/gif"        >> $OUTFILE
+  # echo "cpd ${NAME}_sum_band${EMIN}-${EMAX}daeV.gif/gif"        >> $OUTFILE
   echo "log ./${LOGFILE#$PWD}"                                  >> $OUTFILE
   echo "read/size=1024/ecol=PI/emin=${EMIN}/emax=${EMAX} $file" >> $OUTFILE
   if [[ $SMOOTH == yes ]]
