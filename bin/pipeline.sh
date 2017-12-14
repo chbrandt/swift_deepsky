@@ -547,7 +547,7 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
   # input them all to 'countrates' to get nuFnu
   print "# -> Converting objects' flux.."
 
-  echo -n "#RA;DEC;NH;ENERGY_SLOPE;ENERGY_SLOPE_ERROR"                                                                     > $FLUX_TABLE
+  echo -n "#RA;DEC;NH;ENERGY_SLOPE;ENERGY_SLOPE_ERROR;EXPOSURE_TIME"                                   > $FLUX_TABLE
   echo -n ";nufnu_5keV(erg.s-1.cm-2);nufnu_error_5keV(erg.s-1.cm-2)"                                          >> $FLUX_TABLE
   echo -n ";nufnu_0.5keV(erg.s-1.cm-2);nufnu_error_0.5keV(erg.s-1.cm-2);upper_limit_0.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE
   echo -n ";nufnu_1.5keV(erg.s-1.cm-2);nufnu_error_1.5keV(erg.s-1.cm-2);upper_limit_1.5keV(erg.s-1.cm-2)" >> $FLUX_TABLE
@@ -576,6 +576,7 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
     CT_FULL_ERROR=${FIELDS[3]}
     #
     EXPTIME=${FIELDS[4]}
+    print -n " EXPTIME=$EXPTIME"
     #
     CT_SOFT=${FIELDS[5]}
     CT_SOFT_ERROR=${FIELDS[6]}
@@ -660,6 +661,7 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
     done
     ENERGY_SLOPE_ERROR="${ENERGY_SLOPE_plus}/${ENERGY_SLOPE_minus}"
     echo -n "${RA};${DEC};${NH};${ENERGY_SLOPE};${ENERGY_SLOPE_ERROR}">> $FLUX_TABLE
+    echo -n ";${EXPTIME}"                                              >> $FLUX_TABLE
     echo -n ";${FLUX_FULL};${FLUX_FULL_ERROR}"                        >> $FLUX_TABLE
     echo -n ";${FLUX_SOFT};${FLUX_SOFT_ERROR};${FLUX_SOFT_UL}"        >> $FLUX_TABLE
     echo -n ";${FLUX_MEDIUM};${FLUX_MEDIUM_ERROR};${FLUX_MEDIUM_UL}"  >> $FLUX_TABLE

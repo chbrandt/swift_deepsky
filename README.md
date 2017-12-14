@@ -6,12 +6,10 @@ This pipeline combines multiple Swift-XRT observations of a given position of th
 The pipeline components were written using Python, Bash, Perl and Fortran.
 HEASoft also, providing tools for x-ray image processing.
 
-To ease the use and portability of this package, a [Docker container is
-also available][dockerhub].
+To ease the use and portability of this package, a [Docker container is also available][dockerhub].
 The use of containers allows us to bypass the setup process and go straight to the data analysis.
 
-See section [#Docker] for instructions on using the *ready-to-use* container
-version; section [#Install] if you want to install the source code.
+See section [Docker](#Docker) for instructions on using the *ready-to-use* container version; section [Install](#Install) if you want to install the source code.
 
 
 ## Running it

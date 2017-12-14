@@ -60,14 +60,13 @@ SEP = ' '
 print(SEP.join(['photon_flux_{0}(ph.s-1)',
                 'photon_flux_error_{0}(ph.s-1)',
                 'upper_limit_{0}(ph.s-1)',
-                'exposure_time_{0}(s)',
                 'expected_background_{0}(ph)',
                 'detected_counts_{0}(ph)']).format(BAND))
 
 
-def print_fluxes(flux, error, ul, expo, expect, counts):
-    fmt = "{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}"
-    print(fmt.format(SEP, flux, error, ul, expo, expect, counts))
+def print_fluxes(flux, error, ul, expect, counts):
+    fmt = "{1}{0}{2}{0}{3}{0}{4}{0}{5}"
+    print(fmt.format(SEP, flux, error, ul, expect, counts))
 
 
 for i, line in enumerate(fp.readlines()):
@@ -109,7 +108,7 @@ for i, line in enumerate(fp.readlines()):
 
         expect = float(back) * int(size) * float(expo)
 
-        print_fluxes(flux, error, ul, expo, expect, counts)
+        print_fluxes(flux, error, ul, expect, counts)
 
         # Clear variables
         flux_neg = None
@@ -129,4 +128,4 @@ else:
 
 expect = float(back) * int(size) * float(expo)
 
-print_fluxes(flux, error, ul, expo, expect, counts)
+print_fluxes(flux, error, ul, expect, counts)

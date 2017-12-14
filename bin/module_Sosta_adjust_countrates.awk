@@ -85,22 +85,18 @@ BEGIN{
 
   cts_full=$6;
   err_full=$7;
-  exp_full = $9;
 
-  cts_soft=$12;
-  err_soft=$13;
-  ul_soft=$14;
-  exp_soft = $15;
+  cts_soft=$11;
+  err_soft=$12;
+  ul_soft=$13;
 
-  cts_medium=$18;
-  err_medium=$19;
-  ul_medium=$20;
-  exp_medium = $21;
+  cts_medium=$16;
+  err_medium=$17;
+  ul_medium=$18;
 
-  cts_hard=$24;
-  err_hard=$25;
-  ul_hard=$26;
-  exp_medium = $27;
+  cts_hard=$21;
+  err_hard=$22;
+  ul_hard=$23;
 
   if(ul_soft == "None"){
     ul_soft = -999
