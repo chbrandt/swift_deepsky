@@ -114,12 +114,12 @@ create_ximage_sum_script() {
   _FILE=${IMAGES[$i]##*/}
   _FILE=${TMPDIRREL}/${_FILE}
   cp ${IMAGES[$i]} "${_FILE}"
-  echo "read/size=1024  ${_FILE}"                 >> $OUT_FILE
+  echo "read/size=800  ${_FILE}"                 >> $OUT_FILE
   for ((i=1; i<$NUMIMAGES; i++)); do
     _FILE=${IMAGES[$i]##*/}
     _FILE=${TMPDIRREL}/${_FILE}
     cp ${IMAGES[$i]} "${_FILE}"
-    echo "read/size=1024  ${_FILE}"               >> $OUT_FILE
+    echo "read/size=800  ${_FILE}"               >> $OUT_FILE
     echo 'sum_image'                              >> $OUT_FILE
     echo 'save_image'                             >> $OUT_FILE
   done
