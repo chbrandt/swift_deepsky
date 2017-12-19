@@ -38,6 +38,10 @@ done
 source bin/countrates/compile.sh &> bin/countrates/compile.log
 [[ $? -eq 0 ]] || exit 1;
 
+# Compile conv2sed
+source bin/conv2sedfile_compile.sh &> bin/conv2sedfile_compile.log
+[[ $? -eq 0 ]] || exit 1;
+
 # Set docker-heasoft cli
 install_heasoft_docker() {
   cd docker
