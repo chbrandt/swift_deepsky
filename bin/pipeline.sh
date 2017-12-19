@@ -60,7 +60,7 @@ function print() {
 ########################################################################
 help() {
   echo ""
-  echo " Usage: $(basename $0) -d <data> { --ra <degrees> --dec <degrees> | --object <name> }"
+  echo " Usage: $(basename $0) { --ra <degrees> --dec <degrees> | --object <name> }"
   echo ""
   echo " Arguments:"
   echo "  --ra     VALUE    : Right Ascension (in DEGREES)"
@@ -357,8 +357,8 @@ create_ximage_detbright_script(){
   OUTFILE="$5"
 
   cat > $OUTFILE << EOF
-read/size=1024/ecol=PI/emin=$EMIN/emax=$EMAX $EVENTS
-read/size=1024/expo $EXPMAP
+read/size=800/ecol=PI/emin=$EMIN/emax=$EMAX $EVENTS
+read/size=800/expo $EXPMAP
 det/bright
 quit
 EOF
@@ -405,7 +405,11 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
                                 "./${EXPOSSUM_RESULT#$PWD}" \
                                 "$XIMAGE_TMP_SCRIPT"
   ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
-  mv $XSELECT_DET_DEFAULT $XSELECT_DET_SOFT
+  if [ -f $XSELECT_DET_DEFAULT ]; then
+    mv $XSELECT_DET_DEFAULT $XSELECT_DET_SOFT
+  else
+    cp $XSELECT_DET_FULL $XSELECT_DET_SOFT
+  fi
 
   print "# -> Detecting bright sources in the MEDIUM band(1-2keV).."
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_medium.xco
@@ -414,7 +418,11 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
                                 "./${EXPOSSUM_RESULT#$PWD}" \
                                 "$XIMAGE_TMP_SCRIPT"
   ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
-  mv $XSELECT_DET_DEFAULT $XSELECT_DET_MEDIUM
+  if [ -f $XSELECT_DET_DEFAULT ]; then
+    mv $XSELECT_DET_DEFAULT $XSELECT_DET_MEDIUM
+  else
+    cp $XSELECT_DET_FULL $XSELECT_DET_MEDIUM
+  fi
 
   print "# -> Detecting bright sources in the HARD band (2-10keV).."
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_hard.xco
@@ -423,7 +431,11 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
                                 "./${EXPOSSUM_RESULT#$PWD}" \
                                 "$XIMAGE_TMP_SCRIPT"
   ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
-  mv $XSELECT_DET_DEFAULT $XSELECT_DET_HARD
+  if [ -f $XSELECT_DET_DEFAULT ]; then
+    mv $XSELECT_DET_DEFAULT $XSELECT_DET_HARD
+  else
+    cp $XSELECT_DET_FULL $XSELECT_DET_HARD
+  fi
 
   # rm $XIMAGE_TMP_SCRIPT
   print "#..............................................................."
@@ -548,7 +560,7 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
   print "# -> Converting objects' flux.."
 
   echo -n "#RA;DEC;NH;ENERGY_SLOPE;ENERGY_SLOPE_ERROR;EXPOSURE_TIME"                                   > $FLUX_TABLE
-  echo -n ";nufnu_5keV(erg.s-1.cm-2);nufnu_error_5keV(erg.s-1.cm-2)"                                          >> $FLUX_TABLE
+  echo -n ";nufnu_3keV(erg.s-1.cm-2);nufnu_error_3keV(erg.s-1.cm-2)"                                          >> $FLUX_TABLE
   echo -n ";nufnu_0.5keV(erg.s-1.cm-2);nufnu_error_0.5keV(erg.s-1.cm-2);upper_limit_0.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE
   echo -n ";nufnu_1.5keV(erg.s-1.cm-2);nufnu_error_1.5keV(erg.s-1.cm-2);upper_limit_1.5keV(erg.s-1.cm-2)" >> $FLUX_TABLE
   echo    ";nufnu_4.5keV(erg.s-1.cm-2);nufnu_error_4.5keV(erg.s-1.cm-2);upper_limit_4.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE

@@ -19,7 +19,7 @@ energy_bands() {
   [[ ${#@} -eq 0 ]] && return 1
 
   local -a ENERGY_BANDS
-  ENERGY_BANDS[0]='0.3 5.0 10.0'
+  ENERGY_BANDS[0]='0.3 3.0 10.0'
   ENERGY_BANDS[1]='0.3 0.5 1.0'
   ENERGY_BANDS[2]='1.0 1.5 2.0'
   ENERGY_BANDS[3]='2.0 4.5 10.0'
