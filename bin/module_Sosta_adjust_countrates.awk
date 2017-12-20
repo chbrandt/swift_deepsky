@@ -103,7 +103,7 @@ BEGIN{
     ratio_soft=cts_soft/cts_full;
     ratio_soft_err=err_soft/err_full;
   }else{
-    ul_soft = ul_soft/cts_full;
+    ul_soft = det_cts*ul_soft/cts_full;
     ratio_soft_err = -999;
   }
   corr_soft=det_cts*ratio_soft;
@@ -114,7 +114,7 @@ BEGIN{
     ratio_medium=cts_medium/cts_full;
     ratio_medium_err=err_medium/err_full;
   }else{
-    ul_medium = ul_medium/cts_full;
+    ul_medium = det_cts*ul_medium/cts_full;
     ratio_medium_err = -999;
   }
   corr_medium=det_cts*ratio_medium;
@@ -125,7 +125,7 @@ BEGIN{
     ratio_hard=cts_hard/cts_full;
     ratio_hard_err=err_hard/err_full;
   }else{
-    ul_hard = ul_hard/cts_full;
+    ul_hard = det_cts*ul_hard/cts_full;
     ratio_hard_err = -999;
   }
   corr_hard=det_cts*ratio_hard;

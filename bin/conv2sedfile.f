@@ -53,15 +53,15 @@ c
          call chra(ra,rah,ram,rasec,0)
          call chdec(dec,dd,dm,dsec,0)
          IF (sign(1:1) == '-') dec=-dec
-         DO i = 1,4
+         DO i = 1,5
             in = im
             im = index(string(in+1:lenact(string)),';')+in
          ENDDO
          READ(string(in+1:im-1),*) flux 
+c        5.0 KeV flux 
          in = im
          im = index(string(in+1:lenact(string)),';')+in
          READ(string(in+1:im-1),*) err 
-c         print *,' flux err ', flux, err
          freq = freq1kev*5.0 
          write(lu_out,'(f10.5,'' | '',f10.5,'' | '',e10.4,'' | '',e10.2,'' | '',
      &                  e10.4,'' | '',e10.3,'' | '',f10.2,'' | '',f10.2,'' | | '')')
@@ -96,7 +96,6 @@ c        1.5 KeV flux
          in = im
          im = index(string(in+1:lenact(string)),';')+in
          READ(string(in+1:im-1),*) err
-c         print *,' flux err ', flux, err
          freq = freq1kev*1.5
          in = im
          im = index(string(in+1:lenact(string)),';')+in
@@ -115,15 +114,14 @@ c         print *,' flux err ', flux, err
 c        4.5 KeV flux 
          in = im
          im = index(string(in+1:lenact(string)),';')+in
+c         print *,' in im', in, im
          READ(string(in+1:im-1),*) flux
          in = im
          im = index(string(in+1:lenact(string)),';')+in
          READ(string(in+1:im-1),*) err
-c         print *,' 4.5kev  flux err ', flux, err
          freq = freq1kev*4.5
          in = im
          im = index(string(in+1:lenact(string)),';')+in
-c         print *,' in im ', in, im
          READ(string(in+1:lenact(string)),*) test ! test if upper limit
          IF (test < 0. ) THEN 
             write(lu_out,'(f10.5,'' | '',f10.5,'' | '',e10.4,'' | '',e10.2,'' | '',

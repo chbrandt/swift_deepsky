@@ -619,7 +619,7 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
     ENERGY_SLOPE_minus=$(echo $ENERGY_SLOPE | cut -d' ' -f3)
     ENERGY_SLOPE_plus=$(echo $ENERGY_SLOPE | cut -d' ' -f2)
     ENERGY_SLOPE=$(echo $ENERGY_SLOPE | cut -d' ' -f1)
-    SLOPE_OK=$(echo "$ENERGY_SLOPE_plus $ENERGY_SLOPE_minus" | awk '{dif=$1-$2; if(dif<0.8){print "yes"}else{print "no"}}')
+    SLOPE_OK=$(echo "$ENERGY_SLOPE_plus $ENERGY_SLOPE_minus" | awk '{dif=$1-$2; if(dif<0.5){print "yes"}else{print "no"}}')
     if [[ $SLOPE_OK == 'no' ]];
     then
       ENERGY_SLOPE_minus=${NULL_VALUE}
