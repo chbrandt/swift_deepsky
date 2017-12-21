@@ -65,7 +65,7 @@ def swift_hardconvert(hardness, nh, hardness_matrix=None):
     if len(i_good):
         assert len(i_good) == 1
         alpha = energies[i_good]
-        if hardness > hs_good[i_good]:
+        if hardness > hs_good[i_good]:  # and i_good < len(energies)-1:
             alpha = energies[i_good+1] - energies[i_good]
             alpha *= (hardness - hs_good[i_good])
             alpha /= (hs_good[i_good+1] - hs_good[i_good])
@@ -83,21 +83,26 @@ def swift_hardconvert(hardness, nh, hardness_matrix=None):
 
 def swiftslope(nh,countrate_hard,countrate_soft,hard_error=None,soft_error=None,hardness_matrix=None):
     import math
-    hardness = countrate_hard/countrate_soft
-    if hard_error is None:
-        hard_error = 0
-    if soft_error is None:
-        soft_error = 0
-    hard_error = math.sqrt(hard_error**2 + hardness**2 * soft_error**2)
-    hard_error /= countrate_soft
+    if countrate_soft != 0:
+        hardness = countrate_hard/countrate_soft
+        if hard_error is None:
+            hard_error = 0
+        if soft_error is None:
+            soft_error = 0
+        hard_error = math.sqrt(hard_error**2 + hardness**2 * soft_error**2)
+        hard_error /= countrate_soft
 
-    hardness_plus = hardness+hard_error
-    hardness_minus = hardness-hard_error
-    alpha = swift_hardconvert(hardness,nh,hardness_matrix)
-    alpha_minus = swift_hardconvert(hardness_plus,nh,hardness_matrix)
-    alpha_plus = swift_hardconvert(hardness_minus,nh,hardness_matrix)
-    aerrplus = alpha_plus - alpha
-    aerrminus = alpha - alpha_minus
+        hardness_plus = hardness+hard_error
+        hardness_minus = hardness-hard_error
+        alpha = swift_hardconvert(hardness,nh,hardness_matrix)
+        alpha_minus = swift_hardconvert(hardness_plus,nh,hardness_matrix)
+        alpha_plus = swift_hardconvert(hardness_minus,nh,hardness_matrix)
+        aerrplus = alpha_plus - alpha
+        aerrminus = alpha - alpha_minus
+    else:
+        alpha = -99
+        aerrplus = -99
+        aerrminus = -99
     return alpha,aerrplus,aerrminus
 
 HARDNESS_MATRIX='''2.985E+19 4.454E+19 6.647E+19 9.919E+19 1.480E+20 2.209E+20 3.296E+20 4.919E+20 7.341E+20 1.095E+21 1.635E+21 2.440E+21 3.640E+21 5.433E+21 8.107E+21 1.210E+22 1.805E+22 2.694E+22 4.021E+22 6.000E+22

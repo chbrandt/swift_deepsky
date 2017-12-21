@@ -619,13 +619,24 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
     ENERGY_SLOPE_minus=$(echo $ENERGY_SLOPE | cut -d' ' -f3)
     ENERGY_SLOPE_plus=$(echo $ENERGY_SLOPE | cut -d' ' -f2)
     ENERGY_SLOPE=$(echo $ENERGY_SLOPE | cut -d' ' -f1)
-    SLOPE_OK=$(echo "$ENERGY_SLOPE_plus $ENERGY_SLOPE_minus" | awk '{dif=$1-$2; if(dif<0.5){print "yes"}else{print "no"}}')
+    SLOPE_OK=$(echo "$ENERGY_SLOPE" | awk '{if($1==-99){print "no"}else{print "yes"}}')
     if [[ $SLOPE_OK == 'no' ]];
     then
       ENERGY_SLOPE_minus=${NULL_VALUE}
       ENERGY_SLOPE_plus=${NULL_VALUE}
       ENERGY_SLOPE='0.8'
       # print " # ENERGY_SLOPE was changed because estimate error was too big (>0.8)"
+    fi
+    if [[ $SLOPE_OK == 'yes' ]];
+    then
+      SLOPE_OK=$(echo "$ENERGY_SLOPE_plus $ENERGY_SLOPE_minus" | awk '{dif=$1-$2; if(dif<0.5){print "yes"}else{print "no"}}')
+      if [[ $SLOPE_OK == 'no' ]];
+      then
+        ENERGY_SLOPE_minus=${NULL_VALUE}
+        ENERGY_SLOPE_plus=${NULL_VALUE}
+        ENERGY_SLOPE='0.8'
+        # print " # ENERGY_SLOPE was changed because estimate error was too big (>0.8)"
+      fi
     fi
     print " ENERGY_SLOPE=$ENERGY_SLOPE"
 
