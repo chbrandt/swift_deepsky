@@ -58,11 +58,11 @@ c
             im = index(string(in+1:lenact(string)),';')+in
          ENDDO
          READ(string(in+1:im-1),*) flux 
-c        5.0 KeV flux 
+c        3.0 KeV flux 
          in = im
          im = index(string(in+1:lenact(string)),';')+in
          READ(string(in+1:im-1),*) err 
-         freq = freq1kev*5.0 
+         freq = freq1kev*3.0 
          write(lu_out,'(f10.5,'' | '',f10.5,'' | '',e10.4,'' | '',e10.2,'' | '',
      &                  e10.4,'' | '',e10.3,'' | '',f10.2,'' | '',f10.2,'' | | '')')
      &                  ra,dec,freq,one,flux,err,mjd,mjd
