@@ -66,10 +66,18 @@ def swift_hardconvert(hardness, nh, hardness_matrix=None):
         assert len(i_good) == 1
         alpha = energies[i_good]
         if hardness > hs_good[i_good]:  # and i_good < len(energies)-1:
-            alpha = energies[i_good+1] - energies[i_good]
-            alpha *= (hardness - hs_good[i_good])
-            alpha /= (hs_good[i_good+1] - hs_good[i_good])
-            alpha += energies[i_good]
+            try:
+                alpha = energies[i_good+1] - energies[i_good]
+                alpha *= (hardness - hs_good[i_good])
+                alpha /= (hs_good[i_good+1] - hs_good[i_good])
+                alpha += energies[i_good]
+            except IndexError as e:
+                alpha = energies[i_good] - energies[i_good-1]
+                alpha /= (hs_good[i_good] - hs_good[i_good-1])
+                alpha *= (hardness - hs_good[i_good-1])
+                alpha += energies[i_good-1]
+            except:
+                alpha = [-99]
         else:
             alpha = energies[i_good] - energies[i_good-1]
             alpha /= (hs_good[i_good] - hs_good[i_good-1])
