@@ -276,7 +276,7 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
                                             --position "${POS_RA},${POS_DEC}" \
                                             --radius $RADIUS \
                                             --archive_addr_list $OBSLIST \
-                                            #2>> $LOGFILE #>> $LOGFILE
+                                            2>> $LOGERROR | tee -a $LOGFILE
 
   [[ $? -eq 0 ]] || { 1>&2 echo "Observations selection failed. Exiting."; exit 1; }
 
@@ -290,7 +290,7 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   #
   print "# -> Querying/Downloading observations.."
   ${SCRPT_DIR}/download_queue.sh -n $NPROCS -f $OBSLIST -d $DATA_ARCHIVE \
-    #2>> $LOGFILE #>> $LOGFILE
+    2>> $LOGERROR | tee -a $LOGFILE
 
   print "#............................................................."
 )
@@ -340,9 +340,11 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   # Run the scripts
   #
   print "# -> Running XSelect (events concatenation).."
-  xselect @"./${XSELECT_SUM_SCRIPT#$PWD}" #>> $LOGFILE
+  xselect @"./${XSELECT_SUM_SCRIPT#$PWD}" \
+    2>> $LOGERROR | tee -a $LOGFILE
   print "# -> Running XImage (exposure-maps stacking).."
-  ximage "@./${XIMAGE_SUM_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage "@./${XIMAGE_SUM_SCRIPT#$PWD}" \
+    2>> $LOGERROR | tee -a $LOGFILE
 
   [[ -f xselect.log ]] && mv xselect.log $TMPDIR
 
@@ -395,7 +397,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
                                 "./${EVENTSSUM_RESULT#$PWD}" \
                                 "./${EXPOSSUM_RESULT#$PWD}" \
                                 "$XIMAGE_TMP_SCRIPT"
-  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" \
+    2>> $LOGERROR | tee -a $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_FULL
 
   print "# -> Detecting bright sources in the SOFT band (0.3-1keV).."
@@ -404,7 +407,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
                                 "./${EVENTSSUM_RESULT#$PWD}" \
                                 "./${EXPOSSUM_RESULT#$PWD}" \
                                 "$XIMAGE_TMP_SCRIPT"
-  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" \
+    2>> $LOGERROR | tee -a $LOGFILE
   if [ -f $XSELECT_DET_DEFAULT ]; then
     mv $XSELECT_DET_DEFAULT $XSELECT_DET_SOFT
   else
@@ -417,7 +421,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
                                 "./${EVENTSSUM_RESULT#$PWD}" \
                                 "./${EXPOSSUM_RESULT#$PWD}" \
                                 "$XIMAGE_TMP_SCRIPT"
-  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" \
+    2>> $LOGERROR | tee -a $LOGFILE
   if [ -f $XSELECT_DET_DEFAULT ]; then
     mv $XSELECT_DET_DEFAULT $XSELECT_DET_MEDIUM
   else
@@ -430,7 +435,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
                                 "./${EVENTSSUM_RESULT#$PWD}" \
                                 "./${EXPOSSUM_RESULT#$PWD}" \
                                 "$XIMAGE_TMP_SCRIPT"
-  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" \
+    2>> $LOGERROR | tee -a $LOGFILE
   if [ -f $XSELECT_DET_DEFAULT ]; then
     mv $XSELECT_DET_DEFAULT $XSELECT_DET_HARD
   else
@@ -466,7 +472,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
             $RUN_LABEL \
             $XIMAGE_TMP_SCRIPT \
             'yes'
-  ximage "@./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage "@./${XIMAGE_TMP_SCRIPT#$PWD}" \
+    2>> $LOGERROR | tee -a $LOGFILE
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_soft.xco
   LOGFILE_SOFT="${TMPDIR}/sosta_soft.log"
@@ -477,7 +484,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
             $RUN_LABEL \
             $XIMAGE_TMP_SCRIPT \
             'no'
-  ximage "@./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage "@./${XIMAGE_TMP_SCRIPT#$PWD}" \
+    2>> $LOGERROR | tee -a $LOGFILE
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_medium.xco
   LOGFILE_MEDIUM="${TMPDIR}/sosta_medium.log"
@@ -488,7 +496,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
             $RUN_LABEL \
             $XIMAGE_TMP_SCRIPT \
             'no'
-  ximage "@./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage "@./${XIMAGE_TMP_SCRIPT#$PWD}" \
+    2>> $LOGERROR | tee -a $LOGFILE
 
   XIMAGE_TMP_SCRIPT=${XIMAGE_TMP_SCRIPT%_*.xco}_hard.xco
   LOGFILE_HARD="${TMPDIR}/sosta_hard.log"
@@ -499,7 +508,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
             $RUN_LABEL \
             $XIMAGE_TMP_SCRIPT \
             'no'
-  ximage "@./${XIMAGE_TMP_SCRIPT#$PWD}" #>> $LOGFILE
+  ximage "@./${XIMAGE_TMP_SCRIPT#$PWD}" \
+    2>> $LOGERROR | tee -a $LOGFILE
 
   # rm $XIMAGE_TMP_SCRIPT
 
@@ -507,16 +517,20 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
   # we now read from this "logfile" and write to a table..
   #
   CTS_SOST_FULL="${TMPDIR}/countrates_full.sosta.txt"
-  python ${SCRPT_DIR}/module_Sosta_log_to_table.py $LOGFILE_FULL '0.3-10keV' > $CTS_SOST_FULL
+  python ${SCRPT_DIR}/module_Sosta_log_to_table.py $LOGFILE_FULL '0.3-10keV' > $CTS_SOST_FULL \
+    2>> $LOGERROR
 
   CTS_SOST_SOFT="${TMPDIR}/countrates_soft.sosta.txt"
-  python ${SCRPT_DIR}/module_Sosta_log_to_table.py $LOGFILE_SOFT '0.3-1keV' > $CTS_SOST_SOFT
+  python ${SCRPT_DIR}/module_Sosta_log_to_table.py $LOGFILE_SOFT '0.3-1keV' > $CTS_SOST_SOFT \
+    2>> $LOGERROR
 
   CTS_SOST_MEDIUM="${TMPDIR}/countrates_medium.sosta.txt"
-  python ${SCRPT_DIR}/module_Sosta_log_to_table.py $LOGFILE_MEDIUM '1-2keV' > $CTS_SOST_MEDIUM
+  python ${SCRPT_DIR}/module_Sosta_log_to_table.py $LOGFILE_MEDIUM '1-2keV' > $CTS_SOST_MEDIUM \
+    2>> $LOGERROR
 
   CTS_SOST_HARD="${TMPDIR}/countrates_hard.sosta.txt"
-  python ${SCRPT_DIR}/module_Sosta_log_to_table.py $LOGFILE_HARD '2-10keV' > $CTS_SOST_HARD
+  python ${SCRPT_DIR}/module_Sosta_log_to_table.py $LOGFILE_HARD '2-10keV' > $CTS_SOST_HARD \
+    2>> $LOGERROR
 
   # ..make it a CSV..
   COUNTRATES_SOSTA_TABLE="${COUNTRATES_TABLE%.*}.sosta.csv"
@@ -535,7 +549,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
   # done by Sosta by the measurement done before by Detect/bright.
   #
   tail -n +2 $COUNTRATES_SOSTA_TABLE \
-    | awk -f ${SCRPT_DIR}/module_Sosta_adjust_countrates.awk > $COUNTRATES_TABLE #2> $LOGFILE
+    | awk -f ${SCRPT_DIR}/module_Sosta_adjust_countrates.awk > $COUNTRATES_TABLE \
+      2>> $LOGERROR
   print "#..............................................................."
 )
 
@@ -557,7 +572,7 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
   # define the middle band values (soft:0.5, medium:1.5, hard:5)
   # get the slope from swiftslope.py
   # input them all to 'countrates' to get nuFnu
-  print "# -> Converting objects' flux.."
+  print "# -> Converting objects' countrates to flux.."
 
   echo -n "#RA;DEC;NH;ENERGY_SLOPE;ENERGY_SLOPE_ERROR;EXPOSURE_TIME"                                   > $FLUX_TABLE
   echo -n ";nufnu_3keV(erg.s-1.cm-2);nufnu_error_3keV(erg.s-1.cm-2)"                                          >> $FLUX_TABLE
@@ -565,8 +580,13 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
   echo -n ";nufnu_1.5keV(erg.s-1.cm-2);nufnu_error_1.5keV(erg.s-1.cm-2);upper_limit_1.5keV(erg.s-1.cm-2)" >> $FLUX_TABLE
   echo    ";nufnu_4.5keV(erg.s-1.cm-2);nufnu_error_4.5keV(erg.s-1.cm-2);upper_limit_4.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE
 
+  IFS=';' read -a HEADER <<< `head -n1 $COUNTRATES_TABLE`
+  print "Countrates table/input:"
+  print "${HEADER[@]}"
+
   for DET in `tail -n +2 $COUNTRATES_TABLE`; do
     IFS=';' read -a FIELDS <<< "${DET}"
+    print "${FIELDS[@]}"
 
     # RA and Dec are the first two columns (in COUNTRATES_TABLE);
     # they are colon-separated, which we have to substitute by spaces
