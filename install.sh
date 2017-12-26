@@ -49,7 +49,7 @@ install_heasoft_docker() {
     || echo "'docker-heasoft' already here, will ./install.sh using it."
   bash ./docker-heasoft/install.sh > bashrc
   cat bashrc && source bashrc
-  cd -
+  cd - &> /dev/null
 }
 [[ $WITH_DOCKER == 'yes' ]] && install_heasoft_docker
 
