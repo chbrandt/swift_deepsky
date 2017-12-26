@@ -1,3 +1,4 @@
+
 # Swift DeepSky
 
 DeepSky combines all Swift/XRT observations for a given region of the sky.
@@ -14,6 +15,7 @@ in three energy sub-ranges and Swift's *full* energy band:
 * hard: 2-10 keV
 * full: 0.3-10 keV
 
+---
 ## Pre-/Post-processing
 ** This goes in another part of the thesis, where I explain the technical/method
 to run the pipeline for an entire (e.g, stripe82) region of the sky **
@@ -57,65 +59,101 @@ For Swift/XRT, for instance, such positional-error value is `6 arcsec`.
 Among each set of duplicated objects, which one to keep is dictated by their
 energy flux signal-to-noise ratio (SNR) in the full band: the source with better
 SNR is defined as our primary source and goes to the final catalog.
+---
+
 
 ## Pipeline stages
 
-DeepSky is composed by five blocks of code:
+DeepSky is composed by five blocks:
 1. Query/retrieve Swift observations is the search field
-2. Sum all events and exposure-maps from each observation
+2. Sum all observations -- event-files and exposure-maps
 3. Detect objects
-4. Measure sources' photon flux in different energy ranges
+4. Measure objects photon flux in different energy ranges
 5. Transform photon fluxes to energy fluxes (nuFnu)
 
-### Swift observations
 
-The pipeline starts by querying the Swift Master table which observations
-were done by the Swift telescope in a given region of the sky.
+### Swift observations
+[swiftmastr]: https://heasarc.gsfc.nasa.gov/W3Browse/swift/swiftmastr.html
+[swiftmodes]: http://www.swift.ac.uk/analysis/xrt/modes.php
+
+The pipeline starts by querying the [Swift Master table][swiftmastr] for observations
+done by the Swift telescope in a given region of the sky.
 The region of the sky is defined by the user and input to the pipeline
-as a central positional -- Right Ascension and Declination -- and a
+as a central position -- Right Ascension and Declination -- and a
 radius around it.
 
-The Swift Master table is a table relating every Swift observation to
+The Swift Master table relates every Swift observation to
 a position in the sky -- the central position of the telescope's field-of-view --
-start and end time of the observation, instruments and observation mode
-carried out.
+start and end time of the observation, instruments and observation mode.
 
 The pipeline process data from observations done by the XRT instrument
-running in Photon Count mode.
+running in [Photon Counting mode][swiftmodes].
 
 Once the list of observations (uniquely identified by their OBSID value)
-are retrieved, the according data is downloaded from the italian swift
-data archive host by the Italian Space Agency.
+is retrieved, the respective data is downloaded from the Italian Swift
+Archive host by the Italian Space Agency.
 Only the necessary data is downloaded to minimize the amount of data
-downloaded and speed-up the process.
-The data downloaded are the (XRT) event-files and exposure-maps.
+transfered and speed-up the process.
+Of our interest are the XRT event-files and exposure-maps.
+
 
 ### Observations stacking
+[xselect]: https://heasarc.gsfc.nasa.gov/ftools/xselect/
+[ximage]: https://heasarc.gsfc.nasa.gov/xanadu/ximage/ximage.html
 
-The event-files are combined using HEASoft `xselect` tool.
+For combining the events-files and exposure-maps we use Heasoft *xselect* and
+*ximage*, respectively.
+With [xselect] we will `extract` all events in *good time intervals*
+from each observation and write them all in one list of events.
+Analogously, [ximage] will be used to sum each observation's exposure-map
+in one final exposure.
+An *adhoc* image size of 800 pixels was chosen as a good compromise between
+resolution and processing time.
 
-Exposure-maps are coadded with HEASoft `ximage` tool.
+**TODO**: choose an field with ~4 observations and present each image and the
+resulting sum.
 
 ### Objects detection
 
 Objects are detected using all events in the entire Swift energy range
--- 0.3-10 keV -- from the combined events-file as well as the coadded
-exposure-map.
-XImage's `detect` algorithm is used for sources detection.
-Its output is a list of positions, effective exposure time, background
-level and count-rates estimate for each detected source.
+-- 0.3-10 keV -- using the previously combined events-file and exposure-map.
+XImage's `detect` routine is used for sources identification.
+
+The `detect` algorithm estimates the image background from a set of small boxes
+accros the image.
+After a sliding-cell traversed the field looking for excesses, the objects are
+detected in a boxes of size such that its signal-to-noise ratio is optimized.
+
+Although the objects we will handle from now on are the ones detected using all
+photon detected (from 0.3 to 10 keV), `detect` will be applied again for each
+band -- *soft, medium, hard* -- for the purpose of background estimation.
+The background level computed here will be used to properly measure the detected
+sources count-rates in the next step of the pipeline.
+
+**TODO**: for the chosen field, present the sum image with the detected sources
+and the detection applied to each sub-band.
 
 ### Photon flux measurement
 
-For each source detected previously the photon flux is measured using
-XImage's `sosta` algorithm.
-Sosta measures the count-rates is a given region of the image, weighing
-the exposure time and background level previously estimated by `detect`.
-The pipeline defines the size of the region around each source based on
-the amount of photons detected.
+For each source detected the photon flux is measured using XImage's `sosta` algorithm.
+Sosta measures objects count rates weighted by the exposure map previously created,
+and the background previously computed by detect.
+Sosta counts the number of photons that fall within a region of a size given as
+input.
 
-Photon flux measurements are carried out in the full band and three
-sub-bands: soft, medium and hard.
+Based on the source's intensity previously estimated by `detect`, the pipeline defines
+the amount of energy the region should encircle.
+Table [eef_source] shows the values we use for the encircled energy fraction (eef)
+the photons should be accounted.
+
+Notice that `sosta` measures the flux around the positions where `detect` detected
+objects, done using all events observed.
+Since Sosta count the events in each band, it may be that some objects are not
+bright enough to be measured in that band.
+In these cases Sosta provides a upper-limit estimate.
+
+Its output is a list of positions, effective exposure time, background
+level and count-rates estimate for each detected source.
 
 ### Energy flux measurements
 
