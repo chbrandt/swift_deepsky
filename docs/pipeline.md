@@ -4,7 +4,7 @@
 DeepSky combines all Swift/XRT observations for a given region of the sky.
 The region is defined by a central coordinate and a radius.
 
-The pipeline sum all events and exposure-maps centered in the corresponding
+The pipeline combines all events and exposure-maps centered in the corresponding
 field and detect the objects using all events, in the XRT energy range
 -- 0.3-10 keV.
 

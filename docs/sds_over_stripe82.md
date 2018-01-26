@@ -1,18 +1,12 @@
 
 # Surveying Swift' Stripe82
 
-The goal is to run Swift DeepSky over the Stripe82.
+Here we describe the processing of all Swift/XRT observations lying within the
+Stripe82 region.
 For such, we have to define the coordinates to visit and coverage radius.
 Define a parallel way for running it, since each run is independent from the other
 and a good amount of processing-time will be demanded.
 And finally, the results should be merged to compile a unique catalog.
-
-1) Define the positions to visit
-  * use of healpix to define positions
-2) Run the pipeline for each pointing
-  * docker packaging and parallel run
-3) Aggregate the results
-  * use of xmatch to filter sources
 
 
 ## Sky pointings with HEALpix

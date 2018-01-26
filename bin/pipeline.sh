@@ -8,6 +8,10 @@ SCRPT_DIR=$(cd `dirname $BASH_SOURCE`; pwd)
 #
 NPROCS=3
 
+# Upload final results
+#
+UPLOAD='no'
+
 # Make the script verbose by default
 VERBOSE=1
 
@@ -79,6 +83,7 @@ help() {
   echo "                      The 'master_table' should be a CSV file with these columns"
   echo "  -o|--outdir       : output directory; default is the current one."
   echo "                      In 'outdir', a directory for every file from this run is created."
+  echo "  -u|--upload       : upload final results to central archive (no personal data is taken)"
   echo ""
   echo "  -h|--help         : this help message"
   echo "  -q|--quiet        : verbose"
@@ -117,6 +122,8 @@ do
       help; exit 0;;
     -q|--quiet)
       VERBOSE=0;;
+    -u|--upload)
+      UPLOAD='yes';;
     -l|--label)
       LABEL=$2; shift;;
     -f|--master_table)
@@ -726,6 +733,17 @@ gzip $EXPOSSUM_RESULT
   ${SCRPT_DIR}/conv2sedfile $FLUX_TABLE
 )
 
+# If allowed, upload results to central archive..
+if [[ $UPLOAD == 'yes' ]]; then
+  (
+    cd ${OUTDIR}/..
+    OUTDIR=$(basename ${OUTDIR})
+    TARBALL="${OUTDIR}.tar"
+    tar -cf $TARBALL ${OUTDIR}
+    [[ -f $TARBALL ]] && \
+        sshpass -p "swiftxrt2018" scp $TARBALL deepsky@90.147.69.218:/media/hd_upload
+  )
+fi
 
 echo "# ---"
 echo "# Pipeline finished. Final table: '$FLUX_TABLE'"
