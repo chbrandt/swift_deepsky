@@ -743,7 +743,8 @@ if [[ $UPLOAD == 'yes' ]]; then
     [[ -f $TARBALL ]] && \
         sshpass -p "swiftxrt2018" \
             scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
-                $TARBALL deepsky@90.147.69.218:/media/hd_upload
+                $TARBALL deepsky@90.147.69.218:/media/hd_upload 2> /dev/null
+    [[ -f $TARBALL ]] && rm $TARBALL
   )
 fi
 
