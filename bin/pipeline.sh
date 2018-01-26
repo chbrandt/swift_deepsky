@@ -741,7 +741,8 @@ if [[ $UPLOAD == 'yes' ]]; then
     TARBALL="${OUTDIR}.tar"
     tar -cf $TARBALL ${OUTDIR}
     [[ -f $TARBALL ]] && \
-        sshpass -p "swiftxrt2018" scp $TARBALL deepsky@90.147.69.218:/media/hd_upload
+        sshpass -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no\
+                -p "swiftxrt2018" scp $TARBALL deepsky@90.147.69.218:/media/hd_upload
   )
 fi
 
