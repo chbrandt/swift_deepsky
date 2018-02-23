@@ -7,7 +7,8 @@ import datetime
 import logging
 import sys
 
-def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12):
+def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
+                        start_time=None, end_time=None):
 
     def swift_archive_obs_path(date,obsid):
         '''
@@ -87,6 +88,33 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12):
         match_mask = coords.separation(coords_search) < radius
         return match_mask
 
+    def timefilter(table_master, start_time, end_time):
+        """
+        Input:
+         - 'start_time' and 'end_time' are strings in format 'dd/mm/yyy'
+        """
+        from datetime import datetime
+        import pandas as pd
+        import numpy as np
+        inds = np.ones(len(table_master)).astype(bool)
+        if start_time is not None:
+            try:
+                dt_sel = datetime.strptime(start_time, '%d/%m/%Y')
+                dt_vec = pd.to_datetime(table_master['START_TIME'], format='%d/%m/%Y')
+                inds &= dt_vec >= dt_sel
+            except:
+                print('Given start-time format not understood:', start_time)
+                return table_master
+        if end_time is not None:
+            try:
+                dt_sel = datetime.strptime(end_time, '%d/%m/%Y')
+                dt_vec = pd.to_datetime(table_master['START_TIME'], format='%d/%m/%Y')
+                inds &= dt_vec <= dt_sel
+            except:
+                print('Given end-time format not understood:', end_time)
+                return table_master
+        return table_master[inds]
+
     print("Searching Swift Master table: {}".format(swift_mstr_table))
     print("Searching observations around position: {},{}".format(ra,dec))
     print("Search readius: {}".format(radius))
@@ -99,6 +127,12 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12):
                                 ra_list=table_radec['RA'].values,
                                 dec_list=table_radec['DEC'].values)
     table_object = table_master.loc[match_obs_mask]
+
+    # If any time limit was given, filter the observations
+    #
+    if start_time or end_time:
+        table_object = timefilter(table_object, start_time, end_time)
+
     print("Number of observations found: {:d}".format(len(table_object)))
 
     if len(table_object) > 0:
@@ -153,6 +187,11 @@ if __name__ == '__main__':
     parser.add_argument('--radius', type=float, default=12,
                         help='Search radius in ARCMIN (default: 12)')
 
+    parser.add_argument('--start', type=str, default=None,
+                        help='Start time to select observations (default: None)')
+    parser.add_argument('--end', type=str, default=None,
+                        help='End time to select observations (default: None)')
+
     parser.add_argument('table_in', type=str,
                         help='Table (Swift) to conesearch')
     parser.add_argument('table_out', type=str,
@@ -179,6 +218,9 @@ if __name__ == '__main__':
     tablefilein = args.table_in
     tablefileout = args.table_out
     obsaddrfile = args.archive_addr_list
+    start_time = args.start
+    end_time = args.end
     select_observations(tablefilein, fileout=tablefileout,
                         obsaddrfile=obsaddrfile,
-                        ra=ra, dec=dec, radius=radius)
+                        ra=ra, dec=dec, radius=radius,
+                        start_time=start_time, end_time=end_time)
