@@ -187,10 +187,10 @@ if __name__ == '__main__':
     parser.add_argument('--radius', type=float, default=12,
                         help='Search radius in ARCMIN (default: 12)')
 
-    parser.add_argument('--start', type=str, default=None,
-                        help='Start time to select observations (default: None)')
-    parser.add_argument('--end', type=str, default=None,
-                        help='End time to select observations (default: None)')
+    parser.add_argument('--start', type=str, default='',
+                        help='Start time to select observations (default: "")')
+    parser.add_argument('--end', type=str, default='',
+                        help='End time to select observations (default: "")')
 
     parser.add_argument('table_in', type=str,
                         help='Table (Swift) to conesearch')
@@ -218,8 +218,8 @@ if __name__ == '__main__':
     tablefilein = args.table_in
     tablefileout = args.table_out
     obsaddrfile = args.archive_addr_list
-    start_time = args.start
-    end_time = args.end
+    start_time = args.start if args.start else None
+    end_time = args.end if args.end else None
     select_observations(tablefilein, fileout=tablefileout,
                         obsaddrfile=obsaddrfile,
                         ra=ra, dec=dec, radius=radius,

@@ -10,7 +10,7 @@ NPROCS=3
 
 # Upload final results
 #
-UPLOAD='no'
+UPLOAD='yes'
 
 # Make the script verbose by default
 VERBOSE=1
@@ -83,7 +83,10 @@ help() {
   echo "                      The 'master_table' should be a CSV file with these columns"
   echo "  -o|--outdir       : output directory; default is the current one."
   echo "                      In 'outdir', a directory for every file from this run is created."
-  echo "  -u|--upload       : upload final results to central archive (no personal data is taken)"
+  echo "  -u|--upload       : upload final results to central archive (no personal data is taken). Default."
+  echo "  --noupload        : not to upload final results to central archive (no personal data is taken)"
+  echo "  --start           : initial date to consider for observations selection. Format is 'dd/mm/yyyy'"
+  echo "  --end             : final date to consider for observations selection. Format is 'dd/mm/yyyy'"
   echo ""
   echo "  -h|--help         : this help message"
   echo "  -q|--quiet        : verbose"
@@ -115,6 +118,10 @@ POS_DEC=''
 OBJECT=''
 LABEL=''
 
+# Start and End time to select observations
+START=''
+END=''
+
 while [[ $# -gt 0 ]]
 do
   case $1 in
@@ -124,6 +131,12 @@ do
       VERBOSE=0;;
     -u|--upload)
       UPLOAD='yes';;
+    --noupload)
+      UPLOAD='no';;
+    --start)
+      START=$2; shift;;
+    --end)
+      END=$2; shift;;
     -l|--label)
       LABEL=$2; shift;;
     -f|--master_table)
@@ -176,6 +189,19 @@ else
   RUN_LABEL=$(echo "${POS_RA}_${POS_DEC}_${RADIUS}" | tr '.' '_' | tr "+" "p" | tr "-" "m")
 fi
 
+if [[ -n $START || -n $END ]]; then
+  START=$(echo $START | tr -s '[:space:]' | tr -d '[:space:]')
+  END=$(echo $END | tr -s '[:space:]' | tr -d '[:space:]')
+  if [[ -n $START ]]; then
+    START_LABEL=$(echo $START | tr -d "/")
+    RUN_LABEL=$(echo "${RUN_LABEL}_from${START_LABEL}")
+  fi
+  if [[ -n $END ]]; then
+    END_LABEL=$(echo $END | tr -d "/")
+    RUN_LABEL=$(echo "${RUN_LABEL}_to${END_LABEL}")
+  fi
+fi
+
 [[ -n $LABEL ]] && RUN_LABEL="$LABEL"
 
 # Sanity-check:
@@ -223,6 +249,8 @@ print "#  * Field:              ${OBJECT}"
 print "#    * RA:               ${POS_RA}"
 print "#    * Dec:              ${POS_DEC}"
 print "#    * Radius:           ${RADIUS}"
+print "#  * Start date:         ${START}"
+print "#  * End date:           ${END}"
 print "#  * Run-label:          ${RUN_LABEL}"
 print "#  * Output directory:   ${OUTDIR}"
 print "#    * Temporary files:  ${TMPDIR}"
@@ -281,8 +309,10 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   python ${SCRPT_DIR}/select_observations.py $TABLE_MASTER \
                                             $TABLE_SELECT \
                                             --position "${POS_RA},${POS_DEC}" \
-                                            --radius $RADIUS \
+                                            --radius "$RADIUS" \
                                             --archive_addr_list $OBSLIST \
+                                            --start "$START" \
+                                            --end "$END" \
                                             2>> $LOGERROR | tee -a $LOGFILE
 
   [[ $? -eq 0 ]] || { 1>&2 echo "Observations selection failed. Exiting."; exit 1; }
