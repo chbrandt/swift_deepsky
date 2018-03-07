@@ -80,7 +80,7 @@ det2sosta() {
 
     # Correction to countrates, assuming they have been estimated using
     # GTI (header) exposure time.
-    ctrate=$(echo "$expo $expo_corr $ctrate" | awk '{print ($1/$2)*$3 }')
+    #ctrate=$(echo "$expo $expo_corr $ctrate" | awk '{print ($1/$2)*$3 }')
 
     counts=$(echo "$ctrate $expo_corr" | awk '{print $1 * $2}')
     counts=${counts%%.*}
