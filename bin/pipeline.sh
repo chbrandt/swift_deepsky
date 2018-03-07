@@ -765,7 +765,7 @@ gzip $EXPOSSUM_RESULT
 
 # If allowed, upload results to central archive..
 if [[ $UPLOAD == 'yes' ]]; then
-  source upload_results.sh
+  source ${SCRPT_DIR}/upload_results.sh
   upload_results "$OUTDIR" || echo "Warning: Upload results failed. Some firewall?.."
 fi
 
