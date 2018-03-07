@@ -75,12 +75,12 @@ det2sosta() {
     ra="${FIELDS[5]}:${FIELDS[6]}:${FIELDS[7]}"
     dec="${FIELDS[8]}:${FIELDS[9]}:${FIELDS[10]}"
 
+    # Full-band countrates sub-product (CTSFILE)
+    echo "$ra $dec $ctrate $errate $expo_corr" >> $CTSFILE
+
     # Correction to countrates, assuming they have been estimated using
     # GTI (header) exposure time.
     ctrate=$(echo "$expo $expo_corr $ctrate" | awk '{print ($1/$2)*$3 }')
-
-    # Full-band countrates sub-product (CTSFILE)
-    echo "$ra $dec $ctrate $errate $expo_corr" >> $CTSFILE
 
     counts=$(echo "$ctrate $expo_corr" | awk '{print $1 * $2}')
     counts=${counts%%.*}
