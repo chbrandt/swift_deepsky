@@ -765,17 +765,8 @@ gzip $EXPOSSUM_RESULT
 
 # If allowed, upload results to central archive..
 if [[ $UPLOAD == 'yes' ]]; then
-  (
-    cd ${OUTDIR}/..
-    OUTDIR=$(basename ${OUTDIR})
-    TARBALL="${OUTDIR}.tar"
-    tar -cf $TARBALL ${OUTDIR}
-    [[ -f $TARBALL ]] && \
-        sshpass -p "swiftxrt2018" \
-            scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
-                $TARBALL deepsky@90.147.69.218:/media/hd_upload 2> /dev/null
-    [[ -f $TARBALL ]] && rm $TARBALL
-  )
+  source upload_results.sh
+  upload_results "$OUTDIR" || echo "Warning: Upload results failed. Some firewall?.."
 fi
 
 echo "# ---"
