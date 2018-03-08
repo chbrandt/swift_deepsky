@@ -88,14 +88,14 @@ det2sosta() {
     xpx=${FIELDS[2]}
     ypx=${FIELDS[3]}
 
-    eef_size=0.9
-    #if [ $counts -lt 100 ]; then
-    #  eef_size=0.6
-    #elif [ $counts -lt 500 ]; then
-    #  eef_size=0.7
-    #elif [ $counts -lt 2000 ]; then
-    #  eef_size=0.8
-    #fi
+    eef_size=0.8
+    if [ $counts -lt 100 ]; then
+     eef_size=0.6
+    elif [ $counts -lt 500 ]; then
+     eef_size=0.7
+    elif [ $counts -lt 2000 ]; then
+     eef_size=0.8
+    fi
 
     echo "sosta/xpix=${xpx}/ypix=${ypx}/back=${back}/eef_s=${eef_size}" >> $OUTFILE
   done
