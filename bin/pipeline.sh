@@ -751,14 +751,18 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
   print "#..............................................................."
 )
 
+# Create a SED tool version of the flux table
+(
+  cd `dirname $FLUX_TABLE`
+  ${SCRPT_DIR}/conv2sedfile `basename $FLUX_TABLE` \
+    || 1>&2 echo "Conv2SED could not convert the flux table to ASDC sed builder."
+)
+
 # Finally, let's zip some files..
 gzip $EVENTSSUM_RESULT
 gzip $EXPOSSUM_RESULT
 (
   cd ${TMPDIR}/..
-
-  # Convert flux-table to sedbuilder
-  ${SCRPT_DIR}/conv2sedfile $FLUX_TABLE 2> ${TMPDIR}/conv2sedfile.error || echo ""
 
   TMPDIR=$(basename ${TMPDIR})
   tar -czf ${TMPDIR}.tgz ${TMPDIR} && rm -rf $TMPDIR
