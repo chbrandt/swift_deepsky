@@ -756,11 +756,12 @@ gzip $EVENTSSUM_RESULT
 gzip $EXPOSSUM_RESULT
 (
   cd ${TMPDIR}/..
-  TMPDIR=$(basename ${TMPDIR})
-  tar -czf ${TMPDIR}.tgz ${TMPDIR} && rm -rf $TMPDIR
 
   # Convert flux-table to sedbuilder
-  ${SCRPT_DIR}/conv2sedfile $FLUX_TABLE 2> ${TMPDIR}/conv2sedfile.error
+  ${SCRPT_DIR}/conv2sedfile $FLUX_TABLE 2> ${TMPDIR}/conv2sedfile.error || echo ""
+
+  TMPDIR=$(basename ${TMPDIR})
+  tar -czf ${TMPDIR}.tgz ${TMPDIR} && rm -rf $TMPDIR
 )
 
 # If allowed, upload results to central archive..
