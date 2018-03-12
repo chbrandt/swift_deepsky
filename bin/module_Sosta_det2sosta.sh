@@ -45,15 +45,15 @@ det2sosta() {
   # echo "log test_$EMIN-$EMAX.txt"
   # echo "cpd ${NAME}_sum_band${EMIN}-${EMAX}daeV.gif/gif"        >> $OUTFILE
   echo "log ./${LOGFILE#$PWD}"                                  >> $OUTFILE
-  echo "read/size=800/ecol=PI/emin=${EMIN}/emax=${EMAX} $file" >> $OUTFILE
+  echo "read/size=800/ecol=PI/emin=${EMIN}/emax=${EMAX} $file"  >> $OUTFILE
   if [[ $SMOOTH == yes ]]
   then
     echo "smooth/wave/sigma=5/back=1.0"                           >> $OUTFILE
-    echo "cpd ${NAME}_sum_band${EMIN}-${EMAX}daeV.gif/gif"        >> $OUTFILE
+    echo "cpd ${NAME}_sum.smooth.band${EMIN}-${EMAX}daeV.gif/gif" >> $OUTFILE
     echo "disp"                                                   >> $OUTFILE
-    echo "read/size=800/ecol=PI/emin=${EMIN}/emax=${EMAX} $file" >> $OUTFILE
+    echo "read/size=800/ecol=PI/emin=${EMIN}/emax=${EMAX} $file"  >> $OUTFILE
   fi
-  echo "read/size=800/expo ./${EXPOFILE#$PWD}"                 >> $OUTFILE
+  echo "read/size=800/expo ./${EXPOFILE#$PWD}"                    >> $OUTFILE
 
   # Full-band countrates sub-product (CTSFILE)
   echo "#RA DEC photon_flux[cts/s] photon_flux_error[cts/s] exptime[s]" > $CTSFILE
@@ -81,6 +81,7 @@ det2sosta() {
     # Correction to countrates, assuming they have been estimated using
     # GTI (header) exposure time.
     #ctrate=$(echo "$expo $expo_corr $ctrate" | awk '{print ($1/$2)*$3 }')
+    #back=$(echo "$expo_corr $expo $back" | awk '{print ($1/$2)*$3 }')
 
     counts=$(echo "$ctrate $expo_corr" | awk '{print $1 * $2}')
     counts=${counts%%.*}

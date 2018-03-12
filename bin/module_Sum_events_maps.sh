@@ -108,7 +108,7 @@ create_ximage_sum_script() {
   NUMIMAGES=${#IMAGES[@]}
 
   # echo "log ${TMPDIR}/ximage_expossum.log"
-  echo "cpd ${NAME}_sum.gif/gif"                  >> $OUT_FILE
+  echo "cpd ${NAME}_sum.exposure.gif/gif"        >> $OUT_FILE
 
   i=0
   _FILE=${IMAGES[$i]##*/}

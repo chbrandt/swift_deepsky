@@ -394,11 +394,14 @@ create_ximage_detbright_script(){
   EVENTS="$3"
   EXPMAP="$4"
   OUTFILE="$5"
+  NAME="$6"
 
   cat > $OUTFILE << EOF
 read/size=800/ecol=PI/emin=$EMIN/emax=$EMAX $EVENTS
 read/size=800/expo $EXPMAP
 det/bright
+cpd ${NAME}_sum.detect.band${EMIN}-${EMAX}daeV.gif/gif
+disp
 quit
 EOF
 }
@@ -433,7 +436,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
   create_ximage_detbright_script 30 1000 \
                                 "./${EVENTSSUM_RESULT#$PWD}" \
                                 "./${EXPOSSUM_RESULT#$PWD}" \
-                                "$XIMAGE_TMP_SCRIPT"
+                                "$XIMAGE_TMP_SCRIPT" \
+                                $RUN_LABEL
   ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" \
     2>> $LOGERROR | tee -a $LOGFILE
   mv $XSELECT_DET_DEFAULT $XSELECT_DET_FULL
@@ -443,7 +447,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
   create_ximage_detbright_script 30 100 \
                                 "./${EVENTSSUM_RESULT#$PWD}" \
                                 "./${EXPOSSUM_RESULT#$PWD}" \
-                                "$XIMAGE_TMP_SCRIPT"
+                                "$XIMAGE_TMP_SCRIPT" \
+                                $RUN_LABEL
   ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" \
     2>> $LOGERROR | tee -a $LOGFILE
   if [ -f $XSELECT_DET_DEFAULT ]; then
@@ -457,7 +462,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
   create_ximage_detbright_script 101 200 \
                                 "./${EVENTSSUM_RESULT#$PWD}" \
                                 "./${EXPOSSUM_RESULT#$PWD}" \
-                                "$XIMAGE_TMP_SCRIPT"
+                                "$XIMAGE_TMP_SCRIPT" \
+                                $RUN_LABEL
   ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" \
     2>> $LOGERROR | tee -a $LOGFILE
   if [ -f $XSELECT_DET_DEFAULT ]; then
@@ -471,7 +477,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
   create_ximage_detbright_script 201 1000 \
                                 "./${EVENTSSUM_RESULT#$PWD}" \
                                 "./${EXPOSSUM_RESULT#$PWD}" \
-                                "$XIMAGE_TMP_SCRIPT"
+                                "$XIMAGE_TMP_SCRIPT" \
+                                $RUN_LABEL
   ximage @"./${XIMAGE_TMP_SCRIPT#$PWD}" \
     2>> $LOGERROR | tee -a $LOGFILE
   if [ -f $XSELECT_DET_DEFAULT ]; then
