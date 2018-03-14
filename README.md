@@ -61,6 +61,12 @@ The default Swift master table --relating (RA,DEC) coordinates to epoch of
 observation (START_TIME) to observation-id (OBSID)-- is shipped together
 and it contains all Swift observations as of September/2017.
 
+If that is running fine, we may make a test:
+```bash
+$ swift_deepsky --ra 34.2608 --dec 1.2455
+```
+And that process the 12 arcmin (default radius) field around RA=34.2608 and Dec=1.2455.
+
 
 ## Docker
 
