@@ -1,16 +1,23 @@
 [dockerhub]: https://hub.docker.com/r/chbrandt/swift_deepsky/
+[Swift]: https://en.wikipedia.org/wiki/Neil_Gehrels_Swift_Observatory
+[XRT]: https://swift.gsfc.nasa.gov/about_swift/xrt_desc.html
 
 # Swift DeepSky
 
-This pipeline combines multiple Swift-XRT observations of a given position of the sky.
-The pipeline components were written using Python, Bash, Perl and Fortran.
-HEASoft also, providing tools for x-ray image processing.
+The DeepSky pipeline provides a *deep* view of the Sky in *x-ray* as seen by [Neil Gehrels Swift Observatory][Swift].
+The pipeline starts with a position of the Sky, given by the user -- Right Ascension, Declination -- and from there 
+automatically combines *all* observations made by [Swift/XRT][XRT] up to date, automatically identifies
+the objects in the field and measures their fluxes, countrates, spectral energy slope, hydrogen column density and other
+parameters involved in the process, like the *effective* exposure time (*per object*).
+
+Data for the processing is downloaded on the fly, not being necessary for the user to have them before hand --
+by all means, if the user has already the necessary data in his/her local storage the pipeline may use it.
 
 To ease the use and portability of this package, a [Docker container is also available][dockerhub].
 The use of containers allows us to bypass the setup process and go straight to the data analysis.
 
-See section [Docker](#Docker) for instructions on using the *ready-to-use* container version; section [Install](#Install) if you want to install the source code.
-
+See section [Docker](#Docker) for instructions on using the *ready-to-use* container version; 
+look for the section [Install](#Install) if you want to install the source code.
 
 ## Running it
 
