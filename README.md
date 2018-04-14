@@ -5,6 +5,7 @@
 # Swift DeepSky
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1217671.svg)](https://doi.org/10.5281/zenodo.1217671)
+-----
 
 The DeepSky pipeline provides *deep* observations of the *X-ray* sky seen by the Swift satellite -- currently named [Neil Gehrels Swift Observatory][Swift] in memory to Neil Gehrels, the former head of the mission.
 
