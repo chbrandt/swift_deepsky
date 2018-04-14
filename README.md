@@ -4,6 +4,8 @@
 
 # Swift DeepSky
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1217671.svg)](https://doi.org/10.5281/zenodo.1217671)
+
 The DeepSky pipeline provides *deep* observations of the *X-ray* sky seen by the Swift satellite -- currently named [Neil Gehrels Swift Observatory][Swift] in memory to Neil Gehrels, the former head of the mission.
 
 The pipeline starts with a position of the Sky, given by the user -- Right Ascension, Declination -- and from there  automatically combines *all* observations made by [Swift/XRT][XRT] up to date, automatically identifies the objects in the field and measures their fluxes, countrates, spectral energy slope, hydrogen column density and other parameters involved in the process, like the *effective* exposure time (*per object*).
