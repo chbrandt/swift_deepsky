@@ -9,7 +9,7 @@ upload_results (){
     [[ -f $TARBALL ]] && \
         sshpass -p "swiftxrt2018" \
             scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
-                $TARBALL deepsky@90.147.69.218:/media/hd_upload 2> /dev/null
+                $TARBALL deepsky@90.147.69.218:~/upload/. 2> /dev/null
   )
   [[ -f $TARBALL ]] && rm $TARBALL
 }
