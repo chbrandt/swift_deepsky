@@ -8,8 +8,10 @@ upload_results (){
     tar -cf $TARBALL ${OUTDIR}
     [[ -f $TARBALL ]] && \
         sshpass -p "swiftxrt2018" \
-            scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
-                $TARBALL deepsky@90.147.69.218:/media/hd_upload 2> /dev/null
+            scp -o UserKnownHostsFile=/dev/null \
+                -o StrictHostKeyChecking=no \
+                -o ConnectTimeout=10 \
+                $TARBALL deepsky@deepsky.servebeer.com:~/upload/
   )
   [[ -f $TARBALL ]] && rm $TARBALL
 }
