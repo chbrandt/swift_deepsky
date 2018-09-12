@@ -1,5 +1,23 @@
 #!/usr/bin/env perl
 
+# This script downloads Swift/XRT data from ASDC,
+# the ASI Science Data Center, by simulatig user
+# interaction and subsequently downloading the
+# selected data.
+# The data selection is done at a given observation
+# page at 'https://swift.ssdc.asi.it/cgi-bin/listobs?seq=<SEQ>&date=<DATE>',
+# where <SEQ> and <DATE> refer to the observation.
+#
+# The script is run as:
+# ```
+# ./download_swift_asdc.pl ${OBSID} ${DATE} ${TARBALL} ${DESTDIR}
+# ```
+# Where `DESTDIR` is where to put the downloaded data,
+# `TARBALL` is the name of the output data package,
+# `DATE` is in the format `YYYY_MM`,
+# `OBSID` is -- `seq` -- the observation ID.
+#
+
 use strict;
 use warnings;
 use Carp::Assert;
