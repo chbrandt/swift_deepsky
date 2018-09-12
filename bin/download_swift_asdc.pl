@@ -107,7 +107,7 @@ sub system_unpack_observation {
 
 
 my $nargs = $#ARGV + 1;
-if ($nargs < 2) {
+if ($nargs < 3) {
   say "\nUsage: $0 <OBSID> <START_TIME> <output.tar> [dest-dir]";
   say "";
   say "Positional arguments:";
