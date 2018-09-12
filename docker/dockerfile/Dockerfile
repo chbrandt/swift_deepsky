@@ -26,7 +26,8 @@ RUN yum -y install perl-CPAN && yum clean all && \
     cpan App::cpanminus    && \
     cpanm WWW::Mechanize   && \
     cpanm Carp::Assert     && \
-    cpanm Archive::Tar
+    cpanm Archive::Tar     && \
+    cpanm Mozilla::CA
 
 
 RUN git clone https://github.com/CBDC/swift_deepsky.git && \
