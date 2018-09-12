@@ -6,5 +6,7 @@ RUN cd / && rm -rf /swift_deepsky && \
 
 RUN yum install -y epel-release && \
     yum install -y sshpass
-    
+
+RUN cpanm Mozilla::CA
+
 ENV EXECAPP /swift_deepsky/bin/pipeline.sh
