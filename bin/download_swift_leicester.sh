@@ -15,14 +15,14 @@ set -e
 # Base url of (NASA's) data archive, from where we gonna download the data
 #
 ARCHIVE_SERVER='http://www.swift.ac.uk'
-ARCHIVE_DIRECTORY='archive/obs'
-ARCHIVE_URL="${ARCHIVE_SERVER}/${ARCHIVE_DIRECTORY}"
+ARCHIVE_PATH='archive/obs'
+ARCHIVE_URL="${ARCHIVE_SERVER}/${ARCHIVE_PATH}"
 
 # UK's Swift archive does not organize its archive after observations' date,
 # which is the schema NASA and ASDC implement ("swift/data/obs/DATE/OBSID").
 # Instead, Leicester store a plain list of Observations at the top level:
 # "archive/obs/OBSID".
-DATE='All'
+DATE='ALL'
 
 # Local archive/storage.
 # We organize our local archive similar to NASA and ASDC:
@@ -30,8 +30,7 @@ DATE='All'
 # By default, we'll use the current working directory as local archive's
 # root/top level.
 LOCAL_ARCHIVE="$PWD"
-LOCAL_DIRECTORY='swift/data/obs'
-LOCAL_PATH="${LOCAL_ARCHIVE}/${LOCAL_DIRECTORY}"
+LOCAL_PATH='swift/data/obs'
 
 usage() {
   echo
@@ -48,7 +47,7 @@ usage() {
   echo "       Default is *not* download OBSID again (even if it has been partially downloaded)"
   echo
   echo "Observation will be stored under LOCAL_DIRECTORY/DATE/OBSID:"
-  echo "> $LOCAL_DIRECTORY/$DATE/$OBSID"
+  echo "> LOCAL_ARCHIVE/$LOCAL_PATH/DATE/OBSID"
   echo
   exit 1
 }
@@ -62,10 +61,9 @@ function download(){
   [ -d $LOCAL_DIR ] || mkdir -p $LOCAL_DIR
 
   local FILE_LOG="${LOCAL_DIR}/${YYYYMM}_${OBSID}.log"
-  local TARGET_DIR="${ARCHIVE_URL}/${YYYYMM}/${OBSID}"  # NOTICE the trailing '/'! This shit is important!
+  local TARGET_DIR="${ARCHIVE_URL}/${OBSID}"  # NOTICE the trailing '/'! This shit is important!
   local TARGET_DIR="${TARGET_DIR}/xrt"
-
-  curl -s -l "$TARGET_DIR" > /dev/null || { 1>&2 echo "Could not reach '$TARGET_DIR'."; exit 1; }
+  curl -s "$TARGET_DIR" > /dev/null || { 1>&2 echo "Could not reach '$TARGET_DIR'."; exit 1; }
 
   echo "    - logs will be written in ${LOCAL_DIR}"
   echo "    - data being downloaded: ${TARGET_DIR}"
@@ -84,14 +82,24 @@ function download(){
     #wget -r --no-verbose --no-parent -nH --cut-dirs=3 \
     #                      --wait=2 --random-wait \
     #                      "${TARGET_DIR}/products" 2>&1
-    declare -a EVTS=($(curl -l ${TARGET_DIR}/event/ | grep "_cl.evt.gz" ))
-    declare -a PRDS=($(curl -l ${TARGET_DIR}/products/ ))
-    echo ${EVTS[@]} | xargs -n1 -P3 -I{} wget -r --no-verbose \
+    declare -a EVTS=($(curl -s -l ${TARGET_DIR}/event/ \
+                      | grep "_cl.evt.gz" \
+                      | grep "^<li>" \
+                      | sed 's/.*\(sw.*_cl\.evt\.gz\)<.*/\1/p'))
+                      # Yes, it's true...shell scripting is a nasty dialect ;P
+    declare -a PRDS=($(curl -s -l ${TARGET_DIR}/products/ \
+                      | grep "img.gz" \
+                      | grep "^<li>" \
+                      | sed 's/.*\(sw.*img\.gz\)<.*/\1/p'))
+                      # This 'sed' cleaning is necessay because contrary to FTP
+                      # queries, HTTP answers with a HTML document, so we have
+                      # to read the filenames from the page links/list.
+    echo ${EVTS[@]} | xargs -n1 -P3 -I{} wget -r -q --show-progress \
                                                 --no-parent -nH --cut-dirs=5 \
                                                 --wait=2 --random-wait \
                                                 -P $ARCHIVE/ \
                                                 ${TARGET_DIR}/event/{}
-    echo ${PRDS[@]} | xargs -n1 -P3 -I{} wget -r --no-verbose \
+    echo ${PRDS[@]} | xargs -n1 -P3 -I{} wget -r  -q --show-progress \
                                                 --no-parent -nH --cut-dirs=5 \
                                                 --wait=2 --random-wait \
                                                 -P $ARCHIVE/ \
@@ -112,7 +120,7 @@ while getopts ":d:o:a:f" OPT; do
             OBSID=${OPTARG}
             ;;
         a)
-            ARCHIVE=${OPTARG}
+            LOCAL_ARCHIVE=${OPTARG}
             ;;
         f)
             FORCE_DOWNLOAD='yes'
@@ -123,11 +131,12 @@ while getopts ":d:o:a:f" OPT; do
     esac
 done
 
-[ -n "${DATE}" -a -n "${OBSID}" -a -n "${ARCHIVE}" ] || usage
+[ -n "${DATE}" -a -n "${OBSID}" -a -n "${LOCAL_ARCHIVE}" ] || usage
 
-LOCAL_ARCHIVE_DIR="${ARCHIVE}/${ARCHIVE_DIRECTORY}/${DATE}/${OBSID}/"
+
+LOCAL_ARCHIVE_OBS="${LOCAL_ARCHIVE}/${LOCAL_PATH}/${DATE}/${OBSID}/"
 if [ -z "$FORCE_DOWNLOAD" ]; then
-  if [ -d "$LOCAL_ARCHIVE_DIR" ]; then
+  if [ -d "$LOCAL_ARCHIVE_OBS" ]; then
     echo "========================================================="
     echo "Data '${DATE}/${OBSID}' already downloaded"
     echo "========================================================="
@@ -136,10 +145,10 @@ if [ -z "$FORCE_DOWNLOAD" ]; then
 fi
 
 # Guarantee destination directory exist
-[ -d "$LOCAL_ARCHIVE_DIR" ] || mkdir -p $LOCAL_ARCHIVE_DIR 2> /dev/null
+[ -d "$LOCAL_ARCHIVE_OBS" ] || mkdir -p $LOCAL_ARCHIVE_OBS 2> /dev/null
 
-if [ ! -w ${LOCAL_ARCHIVE_DIR} ]; then
-  1>&2 echo "You don't have enough permissions to write to '${LOCAL_ARCHIVE_DIR}'. Finishing."
+if [ ! -w ${LOCAL_ARCHIVE_OBS} ]; then
+  1>&2 echo "You don't have enough permissions to write to '${LOCAL_ARCHIVE_OBS}'. Finishing."
   exit 1
 fi
 
@@ -147,7 +156,10 @@ echo "========================================================="
 TIME_INIT=$(date +%s)
 echo "Downloading ${DATE}, observation $OBSID.."
 
-download "${DATE}" "${OBSID}" "$LOCAL_ARCHIVE_DIR"
+# ========
+# Download
+download "${DATE}" "${OBSID}" "$LOCAL_ARCHIVE_OBS"
+# ========
 
 echo "..done."
 TIME_DONE=$(date +%s)
