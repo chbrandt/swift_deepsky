@@ -18,15 +18,28 @@ ARCHIVE_SERVER='ftp://legacy.gsfc.nasa.gov'
 ARCHIVE_DIRECTORY='swift/data/obs'
 ARCHIVE_URL="${ARCHIVE_SERVER}/${ARCHIVE_DIRECTORY}"
 
+# Local archive/storage.
+# We organize our local archive similar to NASA and ASDC:
+# > "swift/data/obs/DATE/OBSID"
+# By default, we'll use the current working directory as local archive's
+# root/top level.
+LOCAL_ARCHIVE="$PWD"
+LOCAL_PATH='swift/data/obs'
 
 usage() {
   echo
   _file=$(basename $BASH_SOURCE)
-  echo "Usage: $_file -d <date> -o <obsid> [-a <local-data-archive>]"
+  echo "Usage: $_file -o <OBSID> -d <DATE> [-a <LOCAL_ARCHIVE>]"
   echo
-  echo "  -d : observation date; format is YYYY_MM"
-  echo "  -o : swift observation id"
-  echo "  -a : local swift data archive (the directory containing 'swift/data/obs')"
+  echo "  -o : swift observation id (eg, 00035393001)."
+  echo "  -d : observation date; format is YYYY_MM (eg, 2006_03)."
+  echo "  -a : local data archive (directory hosting './swift/data/obs')"
+  echo "       Default is $PWD."
+  echo "  -f : (force) download data even if OBSID is already in LOCAL_ARCHIVE."
+  echo "       Default is *not* download OBSID again (even if it has been partially downloaded)"
+  echo
+  echo "Observation will be stored under LOCAL_DIRECTORY/DATE/OBSID:"
+  echo "> LOCAL_ARCHIVE/$LOCAL_PATH/DATE/OBSID"
   echo
   exit 1
 }
@@ -35,24 +48,23 @@ usage() {
 function download(){
   local YYYYMM="$1"
   local OBSID="$2"
-  local ARCHIVE="$3"
+  local LOCAL_ARCHIVE="$3"
 
   local LOCAL_DIR="${PWD}/log"
   [ -d $LOCAL_DIR ] || mkdir -p $LOCAL_DIR
 
   local FILE_LOG="${LOCAL_DIR}/${YYYYMM}_${OBSID}.log"
-  local TARGET_DIR="${ARCHIVE_URL}/${YYYYMM}/${OBSID}"    # NOTICE the trailing '/'! This shit is important!
-  local TARGET_DIR="${TARGET_DIR}/xrt"
+  local TARGET_DIR="${ARCHIVE_URL}/${YYYYMM}/${OBSID}/"  # NOTICE the trailing '/'! This shit is important!
 
-  curl -s -l "$TARGET_DIR" > /dev/null || { 1>&2 echo "Could not reach '$TARGET_DIR'."; exit 1; }
+  curl -s "$TARGET_DIR" > /dev/null || { 1>&2 echo "Could not reach '$TARGET_DIR'."; exit 1; }
 
-  echo "    - things will be written to ${LOCAL_DIR}"
-  echo "    - archive being recursively downloaded: ${TARGET_DIR}"
+  echo "    - logs will be written in ${LOCAL_DIR}"
+  echo "    - data being downloaded: ${TARGET_DIR}"
 
   echo "Transfer START time: `date`" >> "${FILE_LOG}"
 
   (
-    cd $ARCHIVE
+    # cd $LOCAL_ARCHIVE
     WAIT=$(echo "scale=2 ; 2*$RANDOM/32768" | bc -l)
     sleep "$WAIT"s
     #>> "${FILE_LOG}" \
@@ -63,23 +75,24 @@ function download(){
     #wget -r --no-verbose --no-parent -nH --cut-dirs=3 \
     #                      --wait=2 --random-wait \
     #                      "${TARGET_DIR}/products" 2>&1
-    declare -a EVTS=($(curl -l ${TARGET_DIR}/event/ | grep "_cl.evt.gz" ))
-    declare -a PRDS=($(curl -l ${TARGET_DIR}/products/ ))
-    echo ${EVTS[@]} | xargs -n1 -P3 -I{} wget -r --no-verbose \
-                                                --no-parent -nH --cut-dirs=5 \
-                                                --wait=2 --random-wait \
-                                                ${TARGET_DIR}/event/{}
-    echo ${PRDS[@]} | xargs -n1 -P3 -I{} wget -r --no-verbose \
-                                                --no-parent -nH --cut-dirs=5 \
-                                                --wait=2 --random-wait \
-                                                ${TARGET_DIR}/products/{}
+    declare -a EVTS=($(curl -s -l ${TARGET_DIR}/xrt/event/ | grep "_cl.evt.gz" ))
+    declare -a PRDS=($(curl -s -l ${TARGET_DIR}/xrt/products/ | grep "img.gz" ))
+
+    echo ${EVTS[@]} | xargs -n1 -P3 -I{} wget -q --show-progress -c \
+                                              --wait=2 --random-wait \
+                                              -P "${LOCAL_ARCHIVE}/xrt/event/" \
+                                              ${TARGET_DIR}/xrt/event/{}
+
+    echo ${PRDS[@]} | xargs -n1 -P3 -I{} wget -q --show-progress -c \
+                                              --wait=2 --random-wait \
+                                              -P "${LOCAL_ARCHIVE}/xrt/products/" \
+                                              ${TARGET_DIR}/xrt/products/{}
   )
 
   echo "Transfer STOP time: `date`" >> "${FILE_LOG}"
 }
 
 FORCE_DOWNLOAD=''
-ARCHIVE="$PWD"
 
 while getopts ":d:o:a:f" OPT; do
     case "${OPT}" in
@@ -90,10 +103,10 @@ while getopts ":d:o:a:f" OPT; do
             OBSID=${OPTARG}
             ;;
         a)
-            ARCHIVE=${OPTARG}
+            LOCAL_ARCHIVE=${OPTARG}
             ;;
         f)
-            FORCE_DOWNLOAD='1'
+            FORCE_DOWNLOAD='yes'
             ;;
         *)
             usage
@@ -101,11 +114,12 @@ while getopts ":d:o:a:f" OPT; do
     esac
 done
 
-[ -n "${DATE}" -a -n "${OBSID}" -a -n "${ARCHIVE}" ] || usage
+[ -n "${DATE}" -a -n "${OBSID}" -a -n "${LOCAL_ARCHIVE}" ] || usage
 
-LOCAL_ARCHIVE_DIR="${ARCHIVE}/${ARCHIVE_DIRECTORY}/${DATE}/${OBSID}/"
+
+LOCAL_ARCHIVE_OBS="${LOCAL_ARCHIVE}/${LOCAL_PATH}/${DATE}/${OBSID}/"
 if [ -z "$FORCE_DOWNLOAD" ]; then
-  if [ -d "$LOCAL_ARCHIVE_DIR" ]; then
+  if [ -d "$LOCAL_ARCHIVE_OBS" ]; then
     echo "========================================================="
     echo "Data '${DATE}/${OBSID}' already downloaded"
     echo "========================================================="
@@ -114,10 +128,10 @@ if [ -z "$FORCE_DOWNLOAD" ]; then
 fi
 
 # Guarantee destination directory exist
-[ -d "$LOCAL_ARCHIVE_DIR" ] || mkdir -p $LOCAL_ARCHIVE_DIR 2> /dev/null
+[ -d "$LOCAL_ARCHIVE_OBS" ] || mkdir -p $LOCAL_ARCHIVE_OBS 2> /dev/null
 
-if [ ! -w ${LOCAL_ARCHIVE_DIR} ]; then
-  1>&2 echo "You don't have enough permissions to write to '${LOCAL_ARCHIVE_DIR}'. Finishing."
+if [ ! -w ${LOCAL_ARCHIVE_OBS} ]; then
+  1>&2 echo "You don't have enough permissions to write to '${LOCAL_ARCHIVE_OBS}'. Finishing."
   exit 1
 fi
 
@@ -125,7 +139,10 @@ echo "========================================================="
 TIME_INIT=$(date +%s)
 echo "Downloading ${DATE}, observation $OBSID.."
 
-download "${DATE}" "${OBSID}" "$LOCAL_ARCHIVE_DIR"
+# ========
+# Download
+download "${DATE}" "${OBSID}" "$LOCAL_ARCHIVE_OBS"
+# ========
 
 echo "..done."
 TIME_DONE=$(date +%s)

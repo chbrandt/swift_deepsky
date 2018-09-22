@@ -55,14 +55,15 @@ usage() {
 function download(){
   local YYYYMM="$1"
   local OBSID="$2"
-  local ARCHIVE="$3"
+  local LOCAL_ARCHIVE="$3"
 
   local LOCAL_DIR="${PWD}/log"
   [ -d $LOCAL_DIR ] || mkdir -p $LOCAL_DIR
 
   local FILE_LOG="${LOCAL_DIR}/${YYYYMM}_${OBSID}.log"
-  local TARGET_DIR="${ARCHIVE_URL}/${OBSID}"  # NOTICE the trailing '/'! This shit is important!
-  local TARGET_DIR="${TARGET_DIR}/xrt"
+  local TARGET_DIR="${ARCHIVE_URL}/${OBSID}/"  # NOTICE the trailing '/'! This shit is important!
+  # local TARGET_DIR="${TARGET_DIR}/xrt/"
+
   curl -s "$TARGET_DIR" > /dev/null || { 1>&2 echo "Could not reach '$TARGET_DIR'."; exit 1; }
 
   echo "    - logs will be written in ${LOCAL_DIR}"
@@ -71,7 +72,7 @@ function download(){
   echo "Transfer START time: `date`" >> "${FILE_LOG}"
 
   (
-    cd $ARCHIVE
+    # cd $LOCAL_ARCHIVE
     WAIT=$(echo "scale=2 ; 2*$RANDOM/32768" | bc -l)
     sleep "$WAIT"s
     #>> "${FILE_LOG}" \
@@ -82,28 +83,30 @@ function download(){
     #wget -r --no-verbose --no-parent -nH --cut-dirs=3 \
     #                      --wait=2 --random-wait \
     #                      "${TARGET_DIR}/products" 2>&1
-    declare -a EVTS=($(curl -s -l ${TARGET_DIR}/event/ \
+    declare -a EVTS=($(curl -s -l ${TARGET_DIR}/xrt/event/ \
                       | grep "_cl.evt.gz" \
                       | grep "^<li>" \
-                      | sed 's/.*\(sw.*_cl\.evt\.gz\)<.*/\1/p'))
+                      | sed 's/.*\(sw.*_cl\.evt\.gz\)<.*/\1/p' \
+                      | sort | uniq ))
                       # Yes, it's true...shell scripting is a nasty dialect ;P
-    declare -a PRDS=($(curl -s -l ${TARGET_DIR}/products/ \
+    declare -a PRDS=($(curl -s -l ${TARGET_DIR}/xrt/products/ \
                       | grep "img.gz" \
                       | grep "^<li>" \
-                      | sed 's/.*\(sw.*img\.gz\)<.*/\1/p'))
+                      | sed 's/.*\(sw.*img\.gz\)<.*/\1/p' \
+                      | sort | uniq ))
                       # This 'sed' cleaning is necessay because contrary to FTP
                       # queries, HTTP answers with a HTML document, so we have
                       # to read the filenames from the page links/list.
-    echo ${EVTS[@]} | xargs -n1 -P3 -I{} wget -r -q --show-progress \
-                                                --no-parent -nH --cut-dirs=5 \
-                                                --wait=2 --random-wait \
-                                                -P $ARCHIVE/ \
-                                                ${TARGET_DIR}/event/{}
-    echo ${PRDS[@]} | xargs -n1 -P3 -I{} wget -r  -q --show-progress \
-                                                --no-parent -nH --cut-dirs=5 \
-                                                --wait=2 --random-wait \
-                                                -P $ARCHIVE/ \
-                                                ${TARGET_DIR}/products/{}
+
+    echo ${EVTS[@]} | xargs -n1 -P3 -I{} wget -q --show-progress -c \
+                                              --wait=2 --random-wait \
+                                              -P "${LOCAL_ARCHIVE}/xrt/event/" \
+                                              ${TARGET_DIR}/xrt/event/{}
+
+    echo ${PRDS[@]} | xargs -n1 -P3 -I{} wget -q --show-progress -c \
+                                              --wait=2 --random-wait \
+                                              -P "${LOCAL_ARCHIVE}/xrt/products/" \
+                                              ${TARGET_DIR}/xrt/products/{}
   )
 
   echo "Transfer STOP time: `date`" >> "${FILE_LOG}"
