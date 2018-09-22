@@ -8,6 +8,8 @@ CURDIR=$(cd `dirname $BASH_SOURCE`; pwd)
 #
 DATA_ARCHIVE="${PWD}"
 
+DATA_SERVER='UK'
+
 # By default, be verbose
 #
 VERBOSE="1"
@@ -16,6 +18,9 @@ VERBOSE="1"
 #
 NPROCS=1
 
+# List of Observations (init null)
+#
+OBSLIST=''
 
 TMPDIR="${PWD}"
 
@@ -31,11 +36,11 @@ do
      echo " -h : this help message"
      echo " -d : data archive directory, where 'swift' directory is seated"
      echo " -f : file with observations list in the format 'OBSID/DATE';"
-     echo "      E.g,"
-     echo "      $ cat > OBS_LIST << EOF"
-     echo "      00035393001/2006_03"
-     echo "      00035063020/2006_03"
-     echo "      EOF"
+     echo "     E.g,"
+     echo "$ cat > OBS_LIST << EOF"
+     echo "2006_03/00035393001"
+     echo "2006_03/00035063020"
+     echo "EOF"
      echo " -n : number or processors to use (default=1)"
      echo " -q : quiet run"
      echo " -s : archive server, where options are 'UK', 'US'"
@@ -117,36 +122,37 @@ do
     DATE=${FLDS[0]}
     OBSID=${FLDS[1]}
 
-    # ${SCRIPT} --file=${file[$ncnt]} &
-    # ${CURDIR}/download.sh -d ${DATE} -o ${OBSID} -a ${DATA_ARCHIVE} &
-    DESTDIR="${SWIFT_ARCHIVE}/${DATE}"
+    # # ${SCRIPT} --file=${file[$ncnt]} &
+    # # ${CURDIR}/download.sh -d ${DATE} -o ${OBSID} -a ${DATA_ARCHIVE} &
+    # DESTDIR="${SWIFT_ARCHIVE}"
+    #
+    # [[ -d ${DESTDIR}/${OBSID} ]] && continue
+    #
+    # [[ -d $DESTDIR ]] || mkdir -p $DESTDIR
 
-    [[ -d ${DESTDIR}/${OBSID} ]] && continue
-
-    [[ -d $DESTDIR ]] || mkdir -p $DESTDIR
-
-    TARBALL="${TMPDIR}/${OBSID}.tar"
+    # TARBALL="${TMPDIR}/${OBSID}.tar"
 
     #${CURDIR}/download_swift_asdc.pl ${OBSID} \
     #                                 ${DATE} \
     #                                 ${TARBALL} \
     #                                 ${DESTDIR} &
+
     if [[ "$DATA_SERVER" == 'UK' ]]; then
       ${CURDIR}/download_swift_leicester.sh -o ${OBSID} \
                                             -d ${DATE} \
-                                            -a ${DESTDIR} &
+                                            -a ${SWIFT_ARCHIVE} &
     else
       # assert [ $DATA_SERVER == 'US' ]
       ${CURDIR}/download_swift_nasa.sh -o ${OBSID} \
                                        -d ${DATE} \
-                                       -a ${DESTDIR} &
+                                       -a ${SWIFT_ARCHIVE} &
     fi
 
     PID=$!
     PIDs[$PID]=$PID
     CNTs[$PID]=$ncnt
     # Since we gave $DESTDIR above, we may now delete the tarball
-    [ -f $TARBALL ] && rm $TARBALL
+    # [ -f $TARBALL ] && rm $TARBALL
 
     echo ""
 
