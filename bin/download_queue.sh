@@ -121,10 +121,15 @@ do
 
     TARBALL="${TMPDIR}/${OBSID}.tar"
 
-    ${CURDIR}/download_swift_asdc.pl ${OBSID} \
+    #${CURDIR}/download_swift_asdc.pl ${OBSID} \
+    #                                 ${DATE} \
+    #                                 ${TARBALL} \
+    #                                 ${DESTDIR} &
+    ${CURDIR}/download_swift_data.sh ${OBSID} \
                                      ${DATE} \
                                      ${TARBALL} \
-                                     ${DESTDIR} &
+                                     ${DESTDIR} \
+                                     'US' &
     PID=$!
     PIDs[$PID]=$PID
     CNTs[$PID]=$ncnt

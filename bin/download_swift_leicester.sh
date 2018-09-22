@@ -14,23 +14,44 @@ set -e
 
 # Base url of (NASA's) data archive, from where we gonna download the data
 #
-ARCHIVE_SERVER='ftp://legacy.gsfc.nasa.gov'
-ARCHIVE_DIRECTORY='swift/data/obs'
+ARCHIVE_SERVER='http://www.swift.ac.uk'
+ARCHIVE_DIRECTORY='archive/obs'
 ARCHIVE_URL="${ARCHIVE_SERVER}/${ARCHIVE_DIRECTORY}"
 
+# UK's Swift archive does not organize its archive after observations' date,
+# which is the schema NASA and ASDC implement ("swift/data/obs/DATE/OBSID").
+# Instead, Leicester store a plain list of Observations at the top level:
+# "archive/obs/OBSID".
+DATE='All'
+
+# Local archive/storage.
+# We organize our local archive similar to NASA and ASDC:
+# > "swift/data/obs/DATE/OBSID"
+# By default, we'll use the current working directory as local archive's
+# root/top level.
+LOCAL_ARCHIVE="$PWD"
+LOCAL_DIRECTORY='swift/data/obs'
+LOCAL_PATH="${LOCAL_ARCHIVE}/${LOCAL_DIRECTORY}"
 
 usage() {
   echo
   _file=$(basename $BASH_SOURCE)
-  echo "Usage: $_file -d <date> -o <obsid> [-a <local-data-archive>]"
+  echo "Usage: $_file -o <OBSID> [-d <DATE>] [-a <LOCAL_ARCHIVE>]"
   echo
-  echo "  -d : observation date; format is YYYY_MM"
-  echo "  -o : swift observation id"
-  echo "  -a : local swift data archive (the directory containing 'swift/data/obs')"
+  echo "  -o : swift observation id (eg, 00035393001)."
+  echo "  -d : observation date; format is YYYY_MM (eg, 2006_03)."
+  echo "       'Date, is not used when querying the UK Swift archive, then,"
+  echo "        if given, it will be used to organize swift data archive under it"
+  echo "  -a : local data archive (directory hosting './swift/data/obs')"
+  echo "       Default is $PWD."
+  echo "  -f : (force) download data even if OBSID is already in LOCAL_ARCHIVE."
+  echo "       Default is *not* download OBSID again (even if it has been partially downloaded)"
+  echo
+  echo "Observation will be stored under LOCAL_DIRECTORY/DATE/OBSID:"
+  echo "> $LOCAL_DIRECTORY/$DATE/$OBSID"
   echo
   exit 1
 }
-
 
 function download(){
   local YYYYMM="$1"
@@ -41,13 +62,13 @@ function download(){
   [ -d $LOCAL_DIR ] || mkdir -p $LOCAL_DIR
 
   local FILE_LOG="${LOCAL_DIR}/${YYYYMM}_${OBSID}.log"
-  local TARGET_DIR="${ARCHIVE_URL}/${YYYYMM}/${OBSID}"    # NOTICE the trailing '/'! This shit is important!
+  local TARGET_DIR="${ARCHIVE_URL}/${YYYYMM}/${OBSID}"  # NOTICE the trailing '/'! This shit is important!
   local TARGET_DIR="${TARGET_DIR}/xrt"
 
   curl -s -l "$TARGET_DIR" > /dev/null || { 1>&2 echo "Could not reach '$TARGET_DIR'."; exit 1; }
 
-  echo "    - things will be written to ${LOCAL_DIR}"
-  echo "    - archive being recursively downloaded: ${TARGET_DIR}"
+  echo "    - logs will be written in ${LOCAL_DIR}"
+  echo "    - data being downloaded: ${TARGET_DIR}"
 
   echo "Transfer START time: `date`" >> "${FILE_LOG}"
 
@@ -68,10 +89,12 @@ function download(){
     echo ${EVTS[@]} | xargs -n1 -P3 -I{} wget -r --no-verbose \
                                                 --no-parent -nH --cut-dirs=5 \
                                                 --wait=2 --random-wait \
+                                                -P $ARCHIVE/ \
                                                 ${TARGET_DIR}/event/{}
     echo ${PRDS[@]} | xargs -n1 -P3 -I{} wget -r --no-verbose \
                                                 --no-parent -nH --cut-dirs=5 \
                                                 --wait=2 --random-wait \
+                                                -P $ARCHIVE/ \
                                                 ${TARGET_DIR}/products/{}
   )
 
@@ -79,7 +102,6 @@ function download(){
 }
 
 FORCE_DOWNLOAD=''
-ARCHIVE="$PWD"
 
 while getopts ":d:o:a:f" OPT; do
     case "${OPT}" in
@@ -93,7 +115,7 @@ while getopts ":d:o:a:f" OPT; do
             ARCHIVE=${OPTARG}
             ;;
         f)
-            FORCE_DOWNLOAD='1'
+            FORCE_DOWNLOAD='yes'
             ;;
         *)
             usage
