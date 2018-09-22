@@ -21,20 +21,27 @@ TMPDIR="${PWD}"
 
 # GetOptions..
 #
-while getopts ":hqn:f:d:" opt
+while getopts ":hqn:f:d:s:" opt
 do
   case $opt in
     h) echo ""
-     echo " Usage: $(basename $0) [-n ] -f "
+     echo " Usage: $(basename $0) [-n ] -f <OBS_LIST>"
      echo ""
      echo " Options:"
      echo " -h : this help message"
-     echo " -n : number or processors to use [default: 1]"
-     echo " -f : observations list file"
-     echo " -d : data archive directory, where 'swift' directory is"
+     echo " -d : data archive directory, where 'swift' directory is seated"
+     echo " -f : file with observations list in the format 'OBSID/DATE';"
+     echo "      E.g,"
+     echo "      $ cat > OBS_LIST << EOF"
+     echo "      00035393001/2006_03"
+     echo "      00035063020/2006_03"
+     echo "      EOF"
+     echo " -n : number or processors to use (default=1)"
      echo " -q : quiet run"
+     echo " -s : archive server, where options are 'UK', 'US'"
      echo ""
      exit 0;;
+    s) DATA_SERVER=$OPTARG;;
     q) VERBOSE="0";;
     n) NPROCS="$OPTARG";;
     f) OBSLIST="$OPTARG";;
@@ -56,7 +63,6 @@ echo ""
 echo "ERROR: file $OBSLIST does not exist. Finishing."
 exit 2
 fi
-
 
 
 SWIFT_ARCHIVE="${DATA_ARCHIVE}"
@@ -125,11 +131,17 @@ do
     #                                 ${DATE} \
     #                                 ${TARBALL} \
     #                                 ${DESTDIR} &
-    ${CURDIR}/download_swift_data.sh ${OBSID} \
-                                     ${DATE} \
-                                     ${TARBALL} \
-                                     ${DESTDIR} \
-                                     'US' &
+    if [[ "$DATA_SERVER" == 'UK' ]]; then
+      ${CURDIR}/download_swift_leicester.sh -o ${OBSID} \
+                                            -d ${DATE} \
+                                            -a ${DESTDIR} &
+    else
+      # assert [ $DATA_SERVER == 'US' ]
+      ${CURDIR}/download_swift_nasa.sh -o ${OBSID} \
+                                       -d ${DATE} \
+                                       -a ${DESTDIR} &
+    fi
+
     PID=$!
     PIDs[$PID]=$PID
     CNTs[$PID]=$ncnt

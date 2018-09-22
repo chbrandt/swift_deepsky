@@ -81,13 +81,18 @@ help() {
   echo " Options:"
   echo "  -f|--master_table : Swift master-table. This table relates RA,DEC,START_TIME,OBSID."
   echo "                      The 'master_table' should be a CSV file with these columns"
+  echo
   echo "  -o|--outdir       : output directory; default is the current one."
   echo "                      In 'outdir', a directory for every file from this run is created."
+  echo
   echo "  -u|--upload       : upload final results to central archive (no personal data is taken). Default."
   echo "  --noupload        : not to upload final results to central archive (no personal data is taken)"
+  echo
   echo "  --start           : initial date to consider for observations selection. Format is 'dd/mm/yyyy'"
   echo "  --end             : final date to consider for observations selection. Format is 'dd/mm/yyyy'"
-  echo ""
+  echo
+  echo "  -s|--server       : Options are 'US','UK' (default)"
+  echo
   echo "  -h|--help         : this help message"
   echo "  -q|--quiet        : verbose"
   echo ""
@@ -105,6 +110,9 @@ TABLE_MASTER="${SCRPT_DIR}/SwiftXrt_master.csv"
 # Default data archive to use if none given
 #
 DATA_ARCHIVE="./data/"
+
+# Default data archive provider is Leicester ('UK');
+DATA_SERVER='UK'
 
 # Default output dir is the current working dir.
 # By all means, a sub-directory will be created to hold every
@@ -129,6 +137,8 @@ do
       help; exit 0;;
     -q|--quiet)
       VERBOSE=0;;
+    -s|--server)
+      DATA_SERVER=$2; shift;;
     -u|--upload)
       UPLOAD='yes';;
     --noupload)
@@ -323,11 +333,15 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   print "  OBSLIST="`cat $OBSLIST`
   unset NOBS
 
-  # Download Swift observations; Already present datasets are skipped
-  #
+  # Download Swift observations;
+  # We will eventually skip Observations already in the archive
+  # (the "download_swift_" scripts take care individually)
   print "# -> Querying/Downloading observations.."
-  ${SCRPT_DIR}/download_queue.sh -n $NPROCS -f $OBSLIST -d $DATA_ARCHIVE \
-    2>> $LOGERROR | tee -a $LOGFILE
+  ${SCRPT_DIR}/download_queue.sh -n "$NPROCS" \
+                                 -f "$OBSLIST" \
+                                 -d "$DATA_ARCHIVE" \
+                                 -s "$DATA_SERVER" \
+                                 2>> $LOGERROR | tee -a $LOGFILE
 
   print "#............................................................."
 )
