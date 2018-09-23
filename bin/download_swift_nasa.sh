@@ -24,7 +24,8 @@ ARCHIVE_URL="${ARCHIVE_SERVER}/${ARCHIVE_DIRECTORY}"
 # By default, we'll use the current working directory as local archive's
 # root/top level.
 LOCAL_ARCHIVE="$PWD"
-LOCAL_PATH='swift/data/obs'
+# LOCAL_PATH='swift/data/obs'
+LOCAL_PATH='./'
 
 usage() {
   echo

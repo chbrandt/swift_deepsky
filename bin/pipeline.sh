@@ -91,7 +91,7 @@ help() {
   echo "  --start           : initial date to consider for observations selection. Format is 'dd/mm/yyyy'"
   echo "  --end             : final date to consider for observations selection. Format is 'dd/mm/yyyy'"
   echo
-  echo "  -s|--server       : Options are 'US','UK' (default)"
+  echo "  -s|--server       : Options are 'UK' (default) and 'US'"
   echo
   echo "  -h|--help         : this help message"
   echo "  -q|--quiet        : verbose"

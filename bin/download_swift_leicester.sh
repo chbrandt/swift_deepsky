@@ -30,7 +30,8 @@ DATE='ALL'
 # By default, we'll use the current working directory as local archive's
 # root/top level.
 LOCAL_ARCHIVE="$PWD"
-LOCAL_PATH='swift/data/obs'
+# LOCAL_PATH='swift/data/obs'
+LOCAL_PATH='./'
 
 usage() {
   echo
@@ -97,16 +98,15 @@ function download(){
                       # This 'sed' cleaning is necessay because contrary to FTP
                       # queries, HTTP answers with a HTML document, so we have
                       # to read the filenames from the page links/list.
+    printf "%s\n" "${EVTS[@]}" | xargs -n1 -P3 -I{} wget --no-verbose -c \
+                                                    --wait=2 --random-wait \
+                                                    -P "${LOCAL_ARCHIVE}/xrt/event/" \
+                                                    ${TARGET_DIR}/xrt/event/{}
 
-    echo ${EVTS[@]} | xargs -n1 -P3 -I{} wget -q --show-progress -c \
-                                              --wait=2 --random-wait \
-                                              -P "${LOCAL_ARCHIVE}/xrt/event/" \
-                                              ${TARGET_DIR}/xrt/event/{}
-
-    echo ${PRDS[@]} | xargs -n1 -P3 -I{} wget -q --show-progress -c \
-                                              --wait=2 --random-wait \
-                                              -P "${LOCAL_ARCHIVE}/xrt/products/" \
-                                              ${TARGET_DIR}/xrt/products/{}
+    printf "%s\n" "${PRDS[@]}" | xargs -n1 -P3 -I{} wget --no-verbose -c \
+                                                    --wait=2 --random-wait \
+                                                    -P "${LOCAL_ARCHIVE}/xrt/products/" \
+                                                    ${TARGET_DIR}/xrt/products/{}
   )
 
   echo "Transfer STOP time: `date`" >> "${FILE_LOG}"
