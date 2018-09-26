@@ -9,9 +9,4 @@ RUN yum install -y epel-release   && \
     yum install -y openssl-devel  && \
     yum clean all
 
-RUN cpanm Mozilla::CA@20130114
-cpanm Net::SSLeay
-cpanm IO::Socket::SSL
-
-
 ENV EXECAPP /swift_deepsky/bin/pipeline.sh
