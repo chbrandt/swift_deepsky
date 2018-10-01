@@ -638,7 +638,15 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
   echo -n ";nufnu_3keV(erg.s-1.cm-2);nufnu_error_3keV(erg.s-1.cm-2)"                                          >> $FLUX_TABLE
   echo -n ";nufnu_0.5keV(erg.s-1.cm-2);nufnu_error_0.5keV(erg.s-1.cm-2);upper_limit_0.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE
   echo -n ";nufnu_1.5keV(erg.s-1.cm-2);nufnu_error_1.5keV(erg.s-1.cm-2);upper_limit_1.5keV(erg.s-1.cm-2)" >> $FLUX_TABLE
-  echo    ";nufnu_4.5keV(erg.s-1.cm-2);nufnu_error_4.5keV(erg.s-1.cm-2);upper_limit_4.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE
+  echo -n ";nufnu_4.5keV(erg.s-1.cm-2);nufnu_error_4.5keV(erg.s-1.cm-2);upper_limit_4.5keV(erg.s-1.cm-2)"       >> $FLUX_TABLE
+  echo    ";MJD_OBS;TELAPSE" >> $FLUX_TABLE
+
+  # Let's add information about the epoch of the observations;
+  # Because the product of the pipeline is the integrated photometry
+  # of all observations, the initial MJD and Elapsed time will be given
+  # accordingly, from the stacked image.
+  MJD_OBS=$(fkeyprint ${EVENTSSUM_RESULT}+1 'mjd-obs' | grep "MJD-OBS =")
+  TELAPSE=$(fkeyprint ${EVENTSSUM_RESULT}+1 'telapse' | grep "TELAPSE =")
 
   IFS=';' read -a HEADER <<< `head -n1 $COUNTRATES_TABLE`
   print "Countrates table/input:"
@@ -768,7 +776,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
     echo -n ";${FLUX_FULL};${FLUX_FULL_ERROR}"                        >> $FLUX_TABLE
     echo -n ";${FLUX_SOFT};${FLUX_SOFT_ERROR};${FLUX_SOFT_UL}"        >> $FLUX_TABLE
     echo -n ";${FLUX_MEDIUM};${FLUX_MEDIUM_ERROR};${FLUX_MEDIUM_UL}"  >> $FLUX_TABLE
-    echo    ";${FLUX_HARD};${FLUX_HARD_ERROR};${FLUX_HARD_UL}"        >> $FLUX_TABLE
+    echo -n ";${FLUX_HARD};${FLUX_HARD_ERROR};${FLUX_HARD_UL}"        >> $FLUX_TABLE
+    echo    ";${MJD_OBS};${TELAPSE}" >> $FLUX_TABLE
   done
   sed -i.bak 's/[[:space:]]/;/g' $FLUX_TABLE
   print "#..............................................................."
