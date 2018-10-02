@@ -645,8 +645,8 @@ XSELECT_DET_HARD="${DET_TMPDIR%.*}.hard.det"
   # Because the product of the pipeline is the integrated photometry
   # of all observations, the initial MJD and Elapsed time will be given
   # accordingly, from the stacked image.
-  MJD_OBS=$(fkeyprint ${EVENTSSUM_RESULT}+1 'mjd-obs' | grep "MJD-OBS =")
-  TELAPSE=$(fkeyprint ${EVENTSSUM_RESULT}+1 'telapse' | grep "TELAPSE =")
+  MJD_OBS=$(fkeyprint ${EVENTSSUM_RESULT}+1 'mjd-obs' | grep "MJD-OBS =" | awk '{print $3}')
+  TELAPSE=$(fkeyprint ${EVENTSSUM_RESULT}+1 'telapse' | grep "TELAPSE =" | awk '{print $3}')
 
   IFS=';' read -a HEADER <<< `head -n1 $COUNTRATES_TABLE`
   print "Countrates table/input:"
