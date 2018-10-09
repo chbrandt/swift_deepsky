@@ -8,8 +8,8 @@ c
       INTEGER*4 i,rah,ram,dd,dm,im,imjd,imjde
       INTEGER*4 ier, lu_in, lu_outSED, lu_outLC, lenact, in,length
       REAL*4 freq1kev, freq, err, one, rasec, dsec, flux, test
-      REAL*4 f05,f15,f05err,f15err,f1kev,mjdstart,mjdend
-      REAL*8 ra, dec
+      REAL*4 f05,f15,f05err,f15err,f1kev
+      REAL*8 ra, dec,mjdstart,mjdend
       CHARACTER*1 sign
       CHARACTER*80 input_file,output_fileSED,output_fileLC
       CHARACTER*300 string
@@ -46,7 +46,6 @@ c
       READ(lu_in,'(a)',end=99) string 
       one = 1.0
       freq1kev = 2.418e17 
-c      mjd = 55000.0
       sign=''
       DO WHILE(ok)
          READ(lu_in,'(a)',end=99) string 
@@ -60,10 +59,11 @@ c      mjd = 55000.0
 c         print *,' imjd imjde ',imjd,imjde
          read(string(imjd+1:imjde-1),*) mjdstart
 c         print *,' mjdstart ',mjdstart
-         imjde = index(string(imjd+1:lenact(string)),';')+imjd  
-         read(string(imjd+1:imjde-1),*) mjdend
+c         imjde = index(string(imjde+1:lenact(string)),';')+imjd  
+         read(string(imjde+1:lenact(string)),*) mjdend
+c         print *,' mjdend ',mjdend
          mjdend=mjdstart+mjdend/86400.
-c         print *,' mjdend ',mjdstart+mjdend/86400.
+c         print *,' mjdend ', mjdend
          READ(string(1:in-1),'(i2,x,i2,x,f6.3)') rah,ram,rasec 
          im = index(string(in+1:lenact(string)),';')+in
          READ(string(in+2:im-1),'(i2,x,i2,x,f6.3)') dd,dm,dsec 
