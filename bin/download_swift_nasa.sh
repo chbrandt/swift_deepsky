@@ -77,17 +77,23 @@ function download(){
     #                      --wait=2 --random-wait \
     #                      "${TARGET_DIR}/products" 2>&1
     declare -a EVTS=($(curl -s -l ${TARGET_DIR}/xrt/event/ | grep "_cl.evt.gz" ))
-    declare -a PRDS=($(curl -s -l ${TARGET_DIR}/xrt/products/ | grep "img.gz" ))
+    declare -a HKS=($(curl -s -l ${TARGET_DIR}/xrt/hk/ | grep "xhd.hk.gz" ))
+    declare -a AUXS=($(curl -s -l ${TARGET_DIR}/auxil/ | grep "at.fits.gz" ))
 
     echo ${EVTS[@]} | xargs -n1 -P3 -I{} wget -q --show-progress -c \
                                               --wait=2 --random-wait \
                                               -P "${LOCAL_ARCHIVE}/xrt/event/" \
                                               ${TARGET_DIR}/xrt/event/{}
 
-    echo ${PRDS[@]} | xargs -n1 -P3 -I{} wget -q --show-progress -c \
-                                              --wait=2 --random-wait \
-                                              -P "${LOCAL_ARCHIVE}/xrt/products/" \
-                                              ${TARGET_DIR}/xrt/products/{}
+    printf "%s\n" "${HKS[@]}" | xargs -n1 -P3 -I{} wget --no-verbose -c \
+                                                    --wait=2 --random-wait \
+                                                    -P "${LOCAL_ARCHIVE}/xrt/hk/" \
+                                                    ${TARGET_DIR}/xrt/hk/{}
+
+    printf "%s\n" "${AUXS[@]}" | xargs -n1 -P3 -I{} wget --no-verbose -c \
+                                                    --wait=2 --random-wait \
+                                                    -P "${LOCAL_ARCHIVE}/auxil/" \
+                                                    ${TARGET_DIR}/auxil/{}
   )
 
   echo "Transfer STOP time: `date`" >> "${FILE_LOG}"

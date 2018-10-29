@@ -90,10 +90,15 @@ function download(){
                       | sed 's/.*\(sw.*_cl\.evt\.gz\)<.*/\1/p' \
                       | sort | uniq ))
                       # Yes, it's true...shell scripting is a nasty dialect ;P
-    declare -a PRDS=($(curl -s -l ${TARGET_DIR}/xrt/products/ \
-                      | grep "img.gz" \
+    declare -a HKS=($(curl -s -l ${TARGET_DIR}/xrt/hk/ \
+                      | grep "xhd.hk.gz" \
                       | grep "^<li>" \
-                      | sed 's/.*\(sw.*img\.gz\)<.*/\1/p' \
+                      | sed 's/.*\(sw.*xhd\.hk\.gz\)<.*/\1/p' \
+                      | sort | uniq ))
+    declare -a AUXS=($(curl -s -l ${TARGET_DIR}/auxil/ \
+                      | grep "at.fits.gz" \
+                      | grep "^<li>" \
+                      | sed 's/.*\(sw.*at\.fits\.gz\)<.*/\1/p' \
                       | sort | uniq ))
                       # This 'sed' cleaning is necessay because contrary to FTP
                       # queries, HTTP answers with a HTML document, so we have
@@ -103,10 +108,15 @@ function download(){
                                                     -P "${LOCAL_ARCHIVE}/xrt/event/" \
                                                     ${TARGET_DIR}/xrt/event/{}
 
-    printf "%s\n" "${PRDS[@]}" | xargs -n1 -P3 -I{} wget --no-verbose -c \
+    printf "%s\n" "${HKS[@]}" | xargs -n1 -P3 -I{} wget --no-verbose -c \
                                                     --wait=2 --random-wait \
-                                                    -P "${LOCAL_ARCHIVE}/xrt/products/" \
-                                                    ${TARGET_DIR}/xrt/products/{}
+                                                    -P "${LOCAL_ARCHIVE}/xrt/hk/" \
+                                                    ${TARGET_DIR}/xrt/hk/{}
+
+    printf "%s\n" "${AUXS[@]}" | xargs -n1 -P3 -I{} wget --no-verbose -c \
+                                                    --wait=2 --random-wait \
+                                                    -P "${LOCAL_ARCHIVE}/auxil/" \
+                                                    ${TARGET_DIR}/auxil/{}
   )
 
   echo "Transfer STOP time: `date`" >> "${FILE_LOG}"
