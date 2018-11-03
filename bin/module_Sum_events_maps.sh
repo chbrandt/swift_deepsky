@@ -46,7 +46,7 @@ select_exposure_maps() {
     XRTDIR=${DATADIR}/xrt
     EXPDIR=${XRTDIR}/products
 
-    for f in ${EXPDIR}/*pc*ex.img.gz; do
+    for f in ${EXPDIR}/*pc*ex.img*; do
       if [ -e "$f" ]; then
         echo "$f" >> $OUT_FILE
       else
