@@ -360,6 +360,7 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   cd $OUTDIR
 
   source ${SCRPT_DIR}/module_Sum_events_maps.sh
+  source ${SCRPT_DIR}/module_Expomap_create.sh
 
   # Create two files with filenames list of event-images and exposure-maps
   #
@@ -367,6 +368,8 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   EVENTSFILE="${TMPDIR}/${RUN_LABEL}_events.txt"
   select_event_files $DATA_ARCHIVE $OBSLIST $EVENTSFILE 2> FILES_not_FOUND.events.txt #2> $LOGFILE
   print "  EVENTSFILE="`cat $EVENTSFILE`
+
+  create_xrtexpomaps $EVENTSFILE
 
   print "# -> ..and exposure-maps:"
   EXMAPSFILE="${TMPDIR}/${RUN_LABEL}_expos.txt"
@@ -382,6 +385,8 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
                             "./${EVENTSSUM_RESULT#$PWD}" \
                             $XSELECT_SUM_SCRIPT
 
+  # Create exposure map from event-sum file
+  #
   XIMAGE_SUM_SCRIPT="${TMPDIR}/expos_sum.xco"
   create_ximage_sum_script $RUN_LABEL \
                            $EXMAPSFILE \
