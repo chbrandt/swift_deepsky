@@ -85,7 +85,7 @@ function download(){
     #                      --wait=2 --random-wait \
     #                      "${TARGET_DIR}/products" 2>&1
     declare -a EVTS=($(curl -s -l ${TARGET_DIR}/xrt/event/ \
-                      | grep "_cl.evt.gz" \
+                      | grep "xpc.*_cl.evt.gz" \
                       | grep "^<li>" \
                       | sed 's/.*\(sw.*_cl\.evt\.gz\)<.*/\1/p' \
                       | sort | uniq ))
@@ -96,7 +96,7 @@ function download(){
                       | sed 's/.*\(sw.*xhd\.hk\.gz\)<.*/\1/p' \
                       | sort | uniq ))
     declare -a AUXS=($(curl -s -l ${TARGET_DIR}/auxil/ \
-                      | grep "at.fits.gz" \
+                      | grep "[ps]at.fits.gz" \
                       | grep "^<li>" \
                       | sed 's/.*\(sw.*at\.fits\.gz\)<.*/\1/p' \
                       | sort | uniq ))

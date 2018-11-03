@@ -76,9 +76,9 @@ function download(){
     #wget -r --no-verbose --no-parent -nH --cut-dirs=3 \
     #                      --wait=2 --random-wait \
     #                      "${TARGET_DIR}/products" 2>&1
-    declare -a EVTS=($(curl -s -l ${TARGET_DIR}/xrt/event/ | grep "_cl.evt.gz" ))
+    declare -a EVTS=($(curl -s -l ${TARGET_DIR}/xrt/event/ | grep "xpc.*_cl.evt.gz" ))
     declare -a HKS=($(curl -s -l ${TARGET_DIR}/xrt/hk/ | grep "xhd.hk.gz" ))
-    declare -a AUXS=($(curl -s -l ${TARGET_DIR}/auxil/ | grep "at.fits.gz" ))
+    declare -a AUXS=($(curl -s -l ${TARGET_DIR}/auxil/ | grep "[ps]at.fits.gz" ))
 
     echo ${EVTS[@]} | xargs -n1 -P3 -I{} wget -q --show-progress -c \
                                               --wait=2 --random-wait \
