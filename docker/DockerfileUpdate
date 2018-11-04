@@ -9,4 +9,12 @@ RUN yum install -y epel-release   && \
     yum install -y openssl-devel  && \
     yum clean all
 
+# Do some workaround with CALDB.
+# This should allow a CALDB-volume to be attached (and not break if not attached).
+#
+# ENV CALDB='/caldb'
+COPY etc/caldbinit.sh /usr/local/heasoft/caldb/software/tools/caldbinit.sh
+RUN ln -s /usr/local/heasoft/caldb /caldb && \
+    sed -i.old '/CALDB/d' /etc/bashrc
+
 ENV EXECAPP /swift_deepsky/bin/pipeline.sh
