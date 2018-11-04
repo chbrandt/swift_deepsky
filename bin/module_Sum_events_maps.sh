@@ -18,7 +18,7 @@ select_event_files(){
     XRTDIR=${DATADIR}/xrt
     EVTDIR=${XRTDIR}/event
 
-    for f in ${EVTDIR}/*pc*po_cl.evt.gz; do
+    for f in ${EVTDIR}/*xpc*po_cl.evt.gz; do
       if [ -e "$f" ]; then
         echo "$f" >> $OUT_FILE
       else
@@ -30,23 +30,24 @@ select_event_files(){
 }
 
 select_exposure_maps() {
-  DATA_ARCHIVE="$1"
-  OBS_ADDR_LIST="$2"
-  OUT_FILE="$3"
+  # DATA_ARCHIVE="$1"
+  local EXPDIR="$1"
+  local OBS_ADDR_LIST="$2"
+  local OUT_FILE="$3"
 
-  SWIFT_OBS_ARCHIVE="${DATA_ARCHIVE}"
+  # SWIFT_OBS_ARCHIVE="${DATA_ARCHIVE}"
 
   for ln in `cat $OBS_ADDR_LIST`
   do
     OIFS=$IFS
     IFS='/' read -ra FLDS <<< "$ln"
     IFS=$OIFS
-    DATADIR="${SWIFT_OBS_ARCHIVE}/${FLDS[0]}/${FLDS[1]}"
-    [ -d $DATADIR ] || continue
-    XRTDIR=${DATADIR}/xrt
-    EXPDIR=${XRTDIR}/products
+    # DATADIR="${SWIFT_OBS_ARCHIVE}/${FLDS[0]}/${FLDS[1]}"
+    # [ -d $DATADIR ] || continue
+    # XRTDIR=${DATADIR}/xrt
+    # EXPDIR=${XRTDIR}/products
 
-    for f in ${EXPDIR}/*pc*ex.img*; do
+    for f in ${EXPDIR}/*xpc*po_ex.img*; do
       if [ -e "$f" ]; then
         echo "$f" >> $OUT_FILE
       else

@@ -369,11 +369,12 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   select_event_files $DATA_ARCHIVE $OBSLIST $EVENTSFILE 2> FILES_not_FOUND.events.txt #2> $LOGFILE
   print "  EVENTSFILE="`cat $EVENTSFILE`
 
-  create_xrtexpomaps $EVENTSFILE
+  TMPEXPOS="${TMPDIR}/expomaps"
+  create_xrtexpomaps $EVENTSFILE $TMPEXPOS
 
   print "# -> ..and exposure-maps:"
   EXMAPSFILE="${TMPDIR}/${RUN_LABEL}_expos.txt"
-  select_exposure_maps $DATA_ARCHIVE $OBSLIST $EXMAPSFILE 2> FILES_not_FOUND.expomaps.txt #2> $LOGFILE
+  select_exposure_maps $TMPEXPOS $OBSLIST $EXMAPSFILE 2> FILES_not_FOUND.expomaps.txt #2> $LOGFILE
   print "  EXMAPSFILE="`cat $EXMAPSFILE`
 
   # Create XSelect and XImage scripts to sum event-files and exposure-maps
