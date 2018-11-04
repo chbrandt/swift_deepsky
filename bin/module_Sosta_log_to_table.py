@@ -5,90 +5,104 @@
 #
 # Example input file
 #------------------------------------------------------------------------------
-# read/size=1024/ecol=PI/emin=201/emax=1000 947_5_1_sum.evt
+#  read/size=800/ecol=PI/emin=30/emax=1000 22_33_15_sum.evt
 #  Telescope SWIFT XRT
-#  Image size = 1024 x 1024 pixels
+#  Image size = 800 x 800 pixels
 #  Image rebin = 1.000
 #  Image center = 500.5, 500.5
-#  Energy column = PI Min = 201 Max = 1000
-#  Using gti for exposure 13484.2594005 s
+#  Energy column = PI Min = 30 Max = 1000
+#  Using gti for exposure 3720.83320004 s
 #  Reading an events file
-#  File contains       2895 events
-#  Accepted: 1130 Rejected: 1765
-#   Image level, min = 0.0000000 max = 2.0000000
+#  File contains       1194 events
+#  Accepted: 955 Rejected: 239
+#   Image level, min = 0.0000000 max = 8.0000000
 #  Copied MAP1 to MAP9
-#  read/size=1024/expo .//947_5_1_sum.exp
+#  smooth/wave/sigma=5/back=1.0
+#  Sigma (arcmin) :    0.19644
+#  Calculating background: Poisson statistics assumed
+#  Background box size =  64
+#  Background =2.1887E-03 cts/original-pixel
+#             =2.1887E-03 cts/image-pixel
+#             =3.8109E-04 cts/sqarcmin/s
+#             =5.8824E-07 cts/original-pixel/s
+#   Scaling factor :    456.88196
+#   Min and max :    0.0000000       638.00000
+#  Max-preserving scaling factor :     5.7289274
+# cpd 22_33_15_sum.smooth.band30-1000daeV.gif/gif
+#  disp
+#  Plotting image
+#   Min =   0.0000000      Max =    638.00000
+#  read/size=800/ecol=PI/emin=30/emax=1000 22_33_15_sum.evt
 #  Telescope SWIFT XRT
-#  Image size = 1024 x 1024 pixels
+#  Image size = 800 x 800 pixels
+#  Image rebin = 1.000
+#  Image center = 500.5, 500.5
+#  Energy column = PI Min = 30 Max = 1000
+#  Using gti for exposure 3720.83320004 s
+#  Reading an events file
+#  File contains       1194 events
+#  Accepted: 955 Rejected: 239
+#   Image level, min = 0.0000000 max = 8.0000000
+#  read/size=800/expo .//22_33_15_sum.exp
+#  Telescope SWIFT XRT
+#  Image size = 800 x 800 pixels
 #  Image rebin = 1.000
 #  Image center = 500.5, 500.5
 #  Reading an image
-#   Image level, min = 0.0000000 max = 13484.614
-#  sosta/xpix=457.45834/ypix=513.29169/back=3.0157142E-07/eef_s=0.6
+#   Image level, min = 0.0000000 max = 3698.0923
+#  sosta/xpix=495.04999/ypix=584.84375/back=5.2715291E-07/eef_s=0.7
 #  Using MAP1
 #  Using constant background...
-#                     X = 457.45834    Y = 513.29169
+#                     X = 495.04999    Y = 584.84375
 #   Using average energy for PSF:    1.0000000
-#  Source half-box for 0.57 EEF is    4.4 pixels
-#         Half-box for 0.90 EEF is   18.5 pixels
-#  Total # of counts 0.0000000 (in 72 elemental sq pixels)
-#  Background/elemental sq pixel :                3.016E-07 +/- 6.5E-05
-#  Background/elemental sq pixel/sec :            2.242E-11 +/- 4.8E-09
+#  Source half-box for 0.66 EEF is    5.8 pixels
+#         Half-box for 0.90 EEF is   17.2 pixels
+#  Total # of counts 122.00000 (in 121 elemental sq pixels)
+#  Vignetting is part of exposure map
+#  Background/elemental sq pixel :                5.272E-07 +/- 6.6E-05
+#  Background/elemental sq pixel/sec :            1.464E-10 +/- 1.8E-08
 #
-#  Source counts :                               -2.171E-05 +/- 4.7E-03
-#  s.c. corrected for PSF :                      -4.562E-05 +/- 9.8E-03
+#  Source counts :                                1.220E+02 +/- 1.1E+01
 #  s.c. corrected for PSF + sampling dead time
-#                                 + vignetting   -4.590E-05 +/- 9.8E-03
-#  Source intensity :                            -1.614E-09 +/- 3.5E-07 c/sec
-#  s.i. corrected for PSF                        -3.392E-09 +/- 7.3E-07 c/sec
+#                                 + vignetting    2.080E+02 +/- 1.9E+01
+#  Source intensity :                             3.388E-02 +/- 3.1E-03 c/sec
 #  s.i. corrected for PSF + sampling dead time
-#                                 + vignetting ->-3.412E-09 +/- 7.3E-07 c/sec <-
-#  Signal to Noise Ratio             :           -4.660E-03
-#                                                  Poisson    Gauss
-#  Pr. that source is a fluctuation of back. :    1.00E+00   5.02E-01
+#                                 + vignetting -> 5.776E-02 +/- 5.2E-03 c/sec <-
+#  Signal to Noise Ratio             :            1.105E+01
 #
-#     Exposure time                 :      13451.856 s
-#     Vignetting correction         :      1.006
+#
+#     Vignetting corrected exposure :       3601.206 s
 #     Sampling dead time correction :      1.000
-#     PSF correction                :      2.101
-#
-#       Three sigma upper limit : 1.04E-03 cts/s
-#     Optimum half box size is      : 2.5000000 orig pixels
-#  sosta/xpix=477.25000/ypix=445.00000/back=3.0157142E-07/eef_s=0.6
+#     PSF correction                :      1.705
+#     Optimum half box size is      : 74.500000 orig pixels
+#  sosta/xpix=317.23529/ypix=464.47058/back=5.2715291E-07/eef_s=0.6
 #  Using MAP1
 #  Using constant background...
-#                     X = 477.25000    Y = 445.00000
+#                     X = 317.23529    Y = 464.47058
 #   Using average energy for PSF:    1.0000000
-#  Source half-box for 0.58 EEF is    4.3 pixels
-#         Half-box for 0.90 EEF is   18.0 pixels
-#  Total # of counts 4.0000000 (in 81 elemental sq pixels)
-#  Background/elemental sq pixel :                3.016E-07 +/- 6.1E-05
-#  Background/elemental sq pixel/sec :            2.236E-11 +/- 4.5E-09
+#  Source half-box for 0.52 EEF is    3.8 pixels
+#         Half-box for 0.90 EEF is   14.4 pixels
+#  Total # of counts 10.000000 (in 64 elemental sq pixels)
+#  Vignetting is part of exposure map
+#  Background/elemental sq pixel :                5.272E-07 +/- 9.1E-05
+#  Background/elemental sq pixel/sec :            1.579E-10 +/- 2.7E-08
 #
-#  Source counts :                                4.000E+00 +/- 2.0E+00
-#  s.c. corrected for PSF :                       8.318E+00 +/- 4.2E+00
+#  Source counts :                                1.000E+01 +/- 3.2E+00
 #  s.c. corrected for PSF + sampling dead time
-#                                 + vignetting    8.408E+00 +/- 4.2E+00
-#  Source intensity :                             2.966E-04 +/- 1.5E-04 c/sec
-#  s.i. corrected for PSF                         6.169E-04 +/- 3.1E-04 c/sec
+#                                 + vignetting    2.619E+01 +/- 8.3E+00
+#  Source intensity :                             2.996E-03 +/- 9.5E-04 c/sec
 #  s.i. corrected for PSF + sampling dead time
-#                                 + vignetting -> 6.235E-04 +/- 3.1E-04 c/sec <-
-#  Signal to Noise Ratio             :            2.000E+00
+#                                 + vignetting -> 7.846E-03 +/- 2.5E-03 c/sec <-
+#  Signal to Noise Ratio             :            3.162E+00
 #                                                  Poisson    Gauss
 #  Pr. that source is a fluctuation of back. :    0.00E+00   0.00E+00
 #
 #
-#     Exposure time                 :      13484.259 s
-#     Vignetting correction         :      1.011
+#     Vignetting corrected exposure :       3337.614 s
 #     Sampling dead time correction :      1.000
-#     PSF correction                :      2.080
-#     Optimum half box size is      : 80.500000 orig pixels
-#  sosta/xpix=612.00000/ypix=487.11765/back=3.0157142E-07/eef_s=0.6
-#  Using MAP1
-#  Using constant background...
-#                     X = 612.00000    Y = 487.11765
-#   Using average energy for PSF:    1.0000000
-#   (...)
+#     PSF correction                :      2.619
+#     Optimum half box size is      : 56.500000 orig pixels
+# exit
 #------------------------------------------------------------------------------
 
 import sys
@@ -141,9 +155,12 @@ for i, line in enumerate(fp.readlines()):
         flux_pos = fields[3]
         error = fields[5]
 
-    if 'Exposure time' in line:
+    # if 'Exposure time' in line:
+    #     fields = line.split()
+    #     expo = fields[3]
+    if 'Vignetting corrected exposure :' in line:
         fields = line.split()
-        expo = fields[3]
+        expo = fields[4]
 
     if 'upper' in line:
         fields = line.split()
