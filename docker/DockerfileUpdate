@@ -17,4 +17,10 @@ COPY etc/caldbinit.sh /usr/local/heasoft/caldb/software/tools/caldbinit.sh
 RUN ln -s /usr/local/heasoft/caldb /caldb && \
     sed -i.old '/CALDB/d' /etc/bashrc
 
+COPY home /heasoft_init
+RUN cat /heasoft_init/non_interactive.rc \
+        /heasoft_init/ximage_exit_on_fail.rc \
+        /heasoft_init/ximage_no_history.rc \
+        >> /etc/bashrc
+
 ENV EXECAPP /swift_deepsky/bin/pipeline.sh

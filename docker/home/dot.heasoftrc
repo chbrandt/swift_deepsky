@@ -1,0 +1,16 @@
+echo -n "define heasoft parfiles dir.."
+TEMPDIR=$(mktemp -u)
+PFDIR="${TEMPDIR}/pfiles"
+[ ! -d "$PFDIR" ] && mkdir -p $PFDIR
+export PFILES="${PFDIR};${HEADAS}/syspfiles"
+echo "PFILES='$PFILES'"
+
+echo "define non-interactive mode for heasoft"
+export HEADASNOQUERY=""
+export HEADASPROMPT="/dev/null"
+
+echo -n "define alternative history files location, xselect and ximage.."
+export XSEL_HTY=$TEMPDIR
+[ ! -f "$HOME/.ximagerc" ] && echo 'set ximage_history_file ""' > "$HOME/.ximagerc"
+echo "XSEL_HTY='$TEMPDIR'"
+

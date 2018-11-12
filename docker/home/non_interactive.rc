@@ -1,0 +1,4 @@
+echo "--> set non-interactive mode for heasoft"
+export HEADASNOQUERY=""
+export HEADASPROMPT="/dev/null"
+
