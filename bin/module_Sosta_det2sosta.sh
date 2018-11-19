@@ -42,6 +42,8 @@ det2sosta() {
   expo=$(grep "^! Exposure" $FILE | awk '{print $NF}')
   back=$(grep "^! Back" $BACKFILE | awk '{print $NF}')
 
+  back_expo=$(echo "$expo $back" | awk '{print $1 * $2}')
+
   # echo "log test_$EMIN-$EMAX.txt"
   # echo "cpd ${NAME}_sum_band${EMIN}-${EMAX}daeV.gif/gif"        >> $OUTFILE
   echo "log ./${LOGFILE#$PWD}"                                  >> $OUTFILE
@@ -98,7 +100,7 @@ det2sosta() {
      eef_size=0.8
     fi
 
-    echo "sosta/xpix=${xpx}/ypix=${ypx}/back=${back}/eef_s=${eef_size}" >> $OUTFILE
+    echo "sosta/xpix=${xpx}/ypix=${ypx}/back=${back_expo}/eef_s=${eef_size}" >> $OUTFILE
   done
   echo 'exit'                                                           >> $OUTFILE
 }
