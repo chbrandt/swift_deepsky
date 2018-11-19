@@ -32,20 +32,20 @@ select_event_files(){
 select_exposure_maps() {
   # DATA_ARCHIVE="$1"
   local EXPDIR="$1"
-  local OBS_ADDR_LIST="$2"
-  local OUT_FILE="$3"
+  local OUT_FILE="$2"
+  local OBS_ADDR_LIST="$3"
 
   # SWIFT_OBS_ARCHIVE="${DATA_ARCHIVE}"
 
-  for ln in `cat $OBS_ADDR_LIST`
-  do
-    OIFS=$IFS
-    IFS='/' read -ra FLDS <<< "$ln"
-    IFS=$OIFS
-    # DATADIR="${SWIFT_OBS_ARCHIVE}/${FLDS[0]}/${FLDS[1]}"
-    # [ -d $DATADIR ] || continue
-    # XRTDIR=${DATADIR}/xrt
-    # EXPDIR=${XRTDIR}/products
+  # for ln in `cat $OBS_ADDR_LIST`
+  # do
+  #   OIFS=$IFS
+  #   IFS='/' read -ra FLDS <<< "$ln"
+  #   IFS=$OIFS
+  #   # DATADIR="${SWIFT_OBS_ARCHIVE}/${FLDS[0]}/${FLDS[1]}"
+  #   # [ -d $DATADIR ] || continue
+  #   # XRTDIR=${DATADIR}/xrt
+  #   # EXPDIR=${XRTDIR}/products
 
     for f in ${EXPDIR}/*xpc*po_ex.img*; do
       if [ -e "$f" ]; then
@@ -55,7 +55,7 @@ select_exposure_maps() {
         break
       fi
     done
-  done
+  # done
 }
 
 create_xselect_sum_script() {
