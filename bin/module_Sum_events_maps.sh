@@ -84,7 +84,7 @@ create_xselect_sum_script() {
     _FILE=${EVTFILES[$i]##*/}
     cp ${EVTFILES[$i]} "${TMPDIR}/${_FILE}"
     echo "read ev $_FILE"                     >> $OUT_FILE
-    if [ $i -ge 20 ]; then
+    if [ $i -ge 19 ]; then
       echo 'yes'                              >> $OUT_FILE
     fi
   done
