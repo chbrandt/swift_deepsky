@@ -134,7 +134,7 @@ print(SEP.join(['photon_flux_{0}(ph.s-1)',
 
 
 def print_fluxes(flux, error, ul, expect, counts):
-    fmt = "{1}{0}{2}{0}{3}{0}{4}{0}{5}"
+    fmt = "{1:.4E}{0}{2}{0}{3}{0}{4:E}{0}{5:.1f}"
     print(fmt.format(SEP, flux, error, ul, expect, counts))
 
 
@@ -146,14 +146,31 @@ for i, line in enumerate(fp.readlines()):
 
     if 'Total # of counts' in line:
         fields = line.split()
-        counts = fields[4]
+        counts = float(fields[4])
         size = fields[6]
 
     if '+ vignetting ->' in line:
         fields = line.split()
-        flux_neg = fields[2]
-        flux_pos = fields[3]
-        error = fields[5]
+        # Here we have to fix for a weak formating of the sosta.log,
+        # if the reported flux is negative, because of the "-" the value
+        # is reported attached to "->":
+        # """
+        # + vignetting ->-3.412E-09 +/- 7.3E-07 c/sec <-
+        # """
+        # Otherwise, if positive, it is reported "correctly":
+        # """
+        # + vignetting -> 6.235E-04 +/- 3.1E-04 c/sec <-
+        # """
+        if len(fields) == 8:
+            flux_pos = fields[3]
+            flux = float(flux_pos)
+            error = fields[5]
+        else:
+            assert len(fields) == 7
+            flux_neg = fields[2]
+            flux_neg = flux_neg[2:]
+            flux = float(flux_neg)
+            error = fields[4]
 
     # if 'Exposure time' in line:
     #     fields = line.split()
@@ -170,10 +187,7 @@ for i, line in enumerate(fp.readlines()):
         if back is None:
             continue
 
-        if ul is None:
-            flux = float(flux_pos)
-        else:
-            flux = float(flux_neg[2:])
+        if ul is not None:
             error = None
 
         expect = float(back) * int(size) * float(expo)
@@ -190,10 +204,7 @@ for i, line in enumerate(fp.readlines()):
         error = None
         counts = None
 
-if ul is None:
-    flux = float(flux_pos)
-else:
-    flux = float(flux_neg[2:])
+if ul is not None:
     error = None
 
 expect = float(back) * int(size) * float(expo)
