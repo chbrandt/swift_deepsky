@@ -419,7 +419,7 @@ create_ximage_detbright_script(){
   cat > $OUTFILE << EOF
 cpd ${NAME}_sum.detect.band${EMIN}-${EMAX}daeV.gif/gif
 read/size=800/ecol=PI/emin=$EMIN/emax=$EMAX $EVENTS
-smooth/wave/sigma=5/back=1
+smooth/wave/sigma=5
 disp
 read/size=800/ecol=PI/emin=$EMIN/emax=$EMAX $EVENTS
 read/size=800/expo $EXPMAP
