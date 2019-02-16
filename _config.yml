@@ -1,1 +1,4 @@
 theme: jekyll-theme-cayman
+title: Swift-DeepSky
+description: Deep images of the X-ray sky, automatically.
+show_downloads: "true"
