@@ -1,4 +1,6 @@
 theme: jekyll-theme-cayman
 title: Swift-DeepSky
 description: Deep X-ray observations of the Sky. For non-experts.
-show_downloads: "true"
+show_downloads: "false"
+docker:
+  repository_url: https://hub.docker.com/r/chbrandt/swift_deepsky/
