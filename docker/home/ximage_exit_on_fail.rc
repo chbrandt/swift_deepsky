@@ -1,7 +1,0 @@
-# If a XIMAGE startup script encounters an error on execution,
-# XIMAGE will normally return to the (Tcl) prompt with an error message.
-# In some cases this behavior is undesireable, the line below will cause
-# XIMAGE to exit, returning 1 as the error status.
-#
-set exit_on_startfail 1
-

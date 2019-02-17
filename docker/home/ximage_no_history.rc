@@ -1,3 +1,0 @@
-echo "--> disable ximage history"
-set ximage_history_file ""
-
