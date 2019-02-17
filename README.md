@@ -1,8 +1,8 @@
 
 The _Swift DeepSky_ (SDS) project has three goals:
-* Generate deep views of the Sky
-* Keep an up-to-date version of Swift photometric catalog
-* Provide sn easy tool for non-specialists to process X-ray data
+- [x] Generate deep views of the Sky
+- [x] Provide sn easy tool for non-specialists to process X-ray data
+- [] Keep an up-to-date version of Swift photometric catalog
 
 To accomplish those goals a mixture of technologies and client/server agents
 were assembled to deliver a completely automated mechanism to handle all the
