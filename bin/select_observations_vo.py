@@ -19,8 +19,7 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
         Format 'date' and 'obsid' information for swift archive
 
         Input:
-         - date : datetime string
-            For example: "13/06/26 23:59:12"
+         - date : MJD
          - obsid : str or int
             Swift OBSID code, e.g, "49650001"
 
@@ -33,12 +32,14 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
             Extract year/month from swift date format
 
             Example:
-            "13/06/26 23:59:12" --> "2013_06"
+            "56469.9994" --> "2013-06-26 23:59:08" --> "2013_06"
             '''
+            from astropy.time import Time
             from datetime import datetime
             try:
                 # dt = datetime.strptime(archive_date,'%y/%m/%d %H:%M:%S')
-                dt = datetime.strptime(archive_date,'%d/%m/%Y')
+                td = Time(archive_date,format='mjd')
+                dt = td.datetime
             except ValueError as e:
                 print("ERROR: while processing {}".format(archive_date),file=sys.stderr)
                 print("ERROR: {}".format(e),file=sys.stderr)
@@ -53,66 +54,67 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
         obs = '{:011d}'.format(obsid)
         return '{}/{}'.format(dtf,obs)
 
-    def conesearch(ra_centroid, dec_centroid, radius,
-                    ra_list, dec_list):
-        '''
-        Return a bool array signaling the entries around centroid
-
-        Input:
-         - ra_centroid : float
-            Reference position' right ascension, in 'degree'
-         - dec_centroid: float
-            Reference position' declination, in 'degree'
-         - radius : float
-            Radius, in 'arcmin', to consider around central position
-         - ra_list : list of floats
-            List of RA positions (in 'degree') to consider
-         - dec_list : list of floats
-            List of Dec positions (in 'degree') to consider
-
-        Output:
-         - Mask arrays : boolean one-dimensional array
-            True for (ra/dec_list) positions within 'radius' arcmin
-            from (ra/dec_centroid) reference, Flase otherwise
-        '''
-        from astropy.coordinates import Angle,SkyCoord
-        radius = Angle(radius,unit='arcmin')
-        coords = SkyCoord(ra_centroid, dec_centroid, unit='degree')
-        # ramin = coords.ra - radius
-        # ramax = coords.ra + radius
-        # raind = (ra_list > ramin.value) * (ra_list < ramax.value)
-        # decmin = coords.dec - radius
-        # decmax = coords.dec + radius
-        # decind = (dec_list > decmin.value) * (dec_list < decmax.value)
-        # ind = raind * decind
-        # ra_list = ra_list[ind]
-        # dec_list = dec_list[ind]
-        coords_search = SkyCoord(ra_list, dec_list, unit='degree')
-
-        match_mask = coords.separation(coords_search) < radius
-        return match_mask
+    # def conesearch(ra_centroid, dec_centroid, radius,
+    #                 ra_list, dec_list):
+    #     '''
+    #     Return a bool array signaling the entries around centroid
+    #
+    #     Input:
+    #      - ra_centroid : float
+    #         Reference position' right ascension, in 'degree'
+    #      - dec_centroid: float
+    #         Reference position' declination, in 'degree'
+    #      - radius : float
+    #         Radius, in 'arcmin', to consider around central position
+    #      - ra_list : list of floats
+    #         List of RA positions (in 'degree') to consider
+    #      - dec_list : list of floats
+    #         List of Dec positions (in 'degree') to consider
+    #
+    #     Output:
+    #      - Mask arrays : boolean one-dimensional array
+    #         True for (ra/dec_list) positions within 'radius' arcmin
+    #         from (ra/dec_centroid) reference, Flase otherwise
+    #     '''
+    #     from astropy.coordinates import Angle,SkyCoord
+    #     radius = Angle(radius,unit='arcmin')
+    #     coords = SkyCoord(ra_centroid, dec_centroid, unit='degree')
+    #     # ramin = coords.ra - radius
+    #     # ramax = coords.ra + radius
+    #     # raind = (ra_list > ramin.value) * (ra_list < ramax.value)
+    #     # decmin = coords.dec - radius
+    #     # decmax = coords.dec + radius
+    #     # decind = (dec_list > decmin.value) * (dec_list < decmax.value)
+    #     # ind = raind * decind
+    #     # ra_list = ra_list[ind]
+    #     # dec_list = dec_list[ind]
+    #     coords_search = SkyCoord(ra_list, dec_list, unit='degree')
+    #
+    #     match_mask = coords.separation(coords_search) < radius
+    #     return match_mask
 
     def timefilter(table_master, start_time, end_time):
         """
         Input:
-         - 'start_time' and 'end_time' are strings in format 'dd/mm/yyy'
+         - 'start_time' and 'end_time' are strings in format 'dd/mm/yyyy'
         """
         from datetime import datetime
+        from astropy.time import Time
         import pandas as pd
         import numpy as np
         inds = np.ones(len(table_master)).astype(bool)
         if start_time is not None:
             try:
-                dt_sel = datetime.strptime(start_time, '%d/%m/%Y')
-                dt_vec = pd.to_datetime(table_master['start_time'], format='%d/%m/%Y')
+                dt_sel = Time(datetime.strptime(start_time, '%d/%m/%Y')).mjd
+                dt_vec = table_master['start_time']
                 inds &= dt_vec >= dt_sel
             except:
                 print('Given start-time format not understood:', start_time)
                 return table_master
         if end_time is not None:
             try:
-                dt_sel = datetime.strptime(end_time, '%d/%m/%Y')
-                dt_vec = pd.to_datetime(table_master['start_time'], format='%d/%m/%Y')
+                dt_sel = Time(datetime.strptime(end_time, '%d/%m/%Y')).mjd
+                dt_vec = table_master['start_time']
                 inds &= dt_vec <= dt_sel
             except:
                 print('Given end-time format not understood:', end_time)
@@ -128,19 +130,17 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
 
     cols = 'name,obsid,ra,dec,start_time,processing_date,xrt_exposure,uvot_exposure,bat_exposure,archive_date,af_insaa,af_inslew,af_onsource,af_total,att_flag,bat_expo_ev,bat_expo_mt,bat_expo_pl,bat_expo_rt,bat_expo_sv,bat_'.split()
     from eada.vo import conesearch as cs
-    table = cs.main(ra,dec,radius,swift_mstr_table,cols)
-    table_object = table.to_pandas()
+    table_master = cs.main(ra,dec,radius,swift_mstr_table,cols)
+    table_object = table_master.to_pandas()
 
-
-
-    import pandas
-    table_master = pandas.read_csv(swift_mstr_table, sep=';', header=0, low_memory=False)
-
-    table_radec = table_master[['RA','DEC']]
-    match_obs_mask = conesearch(ra, dec, radius=radius,
-                                ra_list=table_radec['RA'].values,
-                                dec_list=table_radec['DEC'].values)
-    table_object = table_master.loc[match_obs_mask]
+    # import pandas
+    # table_master = pandas.read_csv(swift_mstr_table, sep=';', header=0, low_memory=False)
+    #
+    # table_radec = table_master[['RA','DEC']]
+    # match_obs_mask = conesearch(ra, dec, radius=radius,
+    #                             ra_list=table_radec['RA'].values,
+    #                             dec_list=table_radec['DEC'].values)
+    # table_object = table_master.loc[match_obs_mask]
 
     # If any time limit was given, filter the observations
     #
@@ -150,7 +150,7 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
     print("Number of observations found: {:d}".format(len(table_object)))
 
     if len(table_object) > 0:
-        archive_addr = table_object.apply(lambda x:swift_archive_obs_path(x['START_TIME'],x['OBSID']), axis=1)
+        archive_addr = table_object.apply(lambda x:swift_archive_obs_path(x['start_time'],x['obsid']), axis=1)
         print("Observation addresses: {}".format(archive_addr.values))
     else:
         archive_addr = pandas.DataFrame()
