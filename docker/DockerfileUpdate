@@ -23,4 +23,6 @@ RUN cat /heasoft_init/non_interactive.rc \
         /heasoft_init/ximage_no_history.rc \
         >> /etc/bashrc
 
+RUN pip install https://github.com/chbrandt/eada/archive/0.9.7.3.tar.gz
+
 ENV EXECAPP /swift_deepsky/bin/pipeline.sh
