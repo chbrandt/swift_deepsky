@@ -9,7 +9,7 @@ import sys
 
 # VO Swift Master table
 #
-URL = 'https://heasarc.gsfc.nasa.gov/cgi-bin/vo/cone/coneGet.pl?table=swiftmastr'
+URL = 'https://heasarc.gsfc.nasa.gov/cgi-bin/vo/cone/coneGet.pl?table=swiftmastr&VERB=3'
 
 def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
                         start_time=None, end_time=None):
@@ -51,7 +51,7 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
 
         if dtf is None:
             return None
-        obs = '{:011d}'.format(obsid)
+        obs = '{:011d}'.format(int(obsid))
         return '{}/{}'.format(dtf,obs)
 
     # def conesearch(ra_centroid, dec_centroid, radius,
@@ -121,6 +121,10 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
                 return table_master
         return table_master[inds]
 
+    def select_pc_mode_200(table_master, threshold_seconds=200):
+        inds = table_master['xrt_expo_pc'] > threshold_seconds
+        return table_master[inds]
+
     print("Searching Swift Master table: {}".format(swift_mstr_table))
     print("Searching observations around position: {},{}".format(ra,dec))
     print("Search readius: {}".format(radius))
@@ -128,19 +132,11 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
     # radius from arcmin to degree:
     radius = radius / 60.0
 
-    cols = 'name,obsid,ra,dec,start_time,processing_date,xrt_exposure,uvot_exposure,bat_exposure,archive_date,af_insaa,af_inslew,af_onsource,af_total,att_flag,bat_expo_ev,bat_expo_mt,bat_expo_pl,bat_expo_rt,bat_expo_sv,bat_'.split()
     from eada.vo import conesearch as cs
-    table_master = cs.main(ra,dec,radius,swift_mstr_table,cols)
+    table_master = cs.main(ra,dec,radius,swift_mstr_table)
     table_object = table_master.to_pandas()
 
-    # import pandas
-    # table_master = pandas.read_csv(swift_mstr_table, sep=';', header=0, low_memory=False)
-    #
-    # table_radec = table_master[['RA','DEC']]
-    # match_obs_mask = conesearch(ra, dec, radius=radius,
-    #                             ra_list=table_radec['RA'].values,
-    #                             dec_list=table_radec['DEC'].values)
-    # table_object = table_master.loc[match_obs_mask]
+    table_object = select_pc_mode_200(table_object)
 
     # If any time limit was given, filter the observations
     #
@@ -149,6 +145,8 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
 
     print("Number of observations found: {:d}".format(len(table_object)))
 
+    # print(table_object.info)
+    
     if len(table_object) > 0:
         archive_addr = table_object.apply(lambda x:swift_archive_obs_path(x['start_time'],x['obsid']), axis=1)
         print("Observation addresses: {}".format(archive_addr.values))

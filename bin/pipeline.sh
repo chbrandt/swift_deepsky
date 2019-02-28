@@ -316,14 +316,22 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   # Select rows/obserations from master table in the field
   #
   print "# -> Selecting observations.."
-  python ${SCRPT_DIR}/select_observations.py $TABLE_MASTER \
-                                            $TABLE_SELECT \
+  # python ${SCRPT_DIR}/select_observations.py $TABLE_MASTER \
+  #                                           $TABLE_SELECT \
+  #                                           --position "${POS_RA},${POS_DEC}" \
+  #                                           --radius "$RADIUS" \
+  #                                           --archive_addr_list $OBSLIST \
+  #                                           --start "$START" \
+  #                                           --end "$END" \
+  #                                           2>> $LOGERROR | tee -a $LOGFILE
+
+  python ${SCRPT_DIR}/select_observations_vo.py $TABLE_SELECT \
                                             --position "${POS_RA},${POS_DEC}" \
                                             --radius "$RADIUS" \
                                             --archive_addr_list $OBSLIST \
                                             --start "$START" \
                                             --end "$END" \
-                                            2>> $LOGERROR | tee -a $LOGFILE
+                                            #2>> $LOGERROR | tee -a $LOGFILE
 
   [[ $? -eq 0 ]] || { 1>&2 echo "Observations selection failed. Exiting."; exit 1; }
 
