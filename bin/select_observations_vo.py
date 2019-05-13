@@ -105,10 +105,8 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
         inds = np.ones(len(table_master)).astype(bool)
         if start_time is not None:
             try:
-                start_time = start_time.strip()
-                start_time_mod = start_time.replace(' ','T')
-                if start_time != start_time_mod:
-                    start_time = start_time_mod
+                start_time = start_time.strip().replace(' ','T')
+                if 'T' in start_time:
                     dt_sel = Time(datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')).mjd
                 else:
                     dt_sel = Time(datetime.strptime(start_time, '%Y-%m-%d')).mjd
@@ -119,10 +117,8 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
                 return table_master
         if end_time is not None:
             try:
-                end_time = end_time.strip()
-                end_time_mod = end_time.replace(' ','T')
-                if end_time != end_time_mod:
-                    end_time = end_time_mod
+                end_time = end_time.strip().replace(' ','T')
+                if 'T' in end_time:
                     dt_sel = Time(datetime.strptime(end_time, '%Y-%m-%dT%H:%M:%S')).mjd
                 else:
                     dt_sel = Time(datetime.strptime(end_time, '%Y-%m-%d')).mjd
