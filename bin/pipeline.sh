@@ -88,8 +88,8 @@ help() {
   echo "  -u|--upload       : upload final results to central archive (no personal data is taken). Default."
   echo "  --noupload        : not to upload final results to central archive (no personal data is taken)"
   echo
-  echo "  --start           : initial date to consider for observations selection. Format is 'dd/mm/yyyy'"
-  echo "  --end             : final date to consider for observations selection. Format is 'dd/mm/yyyy'"
+  echo "  --start           : initial date to consider for observations selection. Format is 'yyyy-mm-dd hh:mm:ss'"
+  echo "  --end             : final date to consider for observations selection. Format is 'yyyy-mm-dd hh:mm:ss'"
   echo
   echo "  -s|--server       : Options are 'UK' (default) and 'US'"
   echo
