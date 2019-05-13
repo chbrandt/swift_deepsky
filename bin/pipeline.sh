@@ -200,14 +200,16 @@ else
 fi
 
 if [[ -n $START || -n $END ]]; then
-  START=$(echo $START | tr -s '[:space:]' | tr -d '[:space:]')
-  END=$(echo $END | tr -s '[:space:]' | tr -d '[:space:]')
-  if [[ -n $START ]]; then
-    START_LABEL=$(echo $START | tr -d "/")
+  START=$(echo $START | tr -s '[:space:]')
+  START_CLEAN=$(echo $START | tr -d '[:space:]')
+  END=$(echo $END | tr -s '[:space:]')
+  END_CLEAN=$(echo $END | tr -d '[:space:]')
+  if [[ -n $START_CLEAN ]]; then
+    START_LABEL=$(echo $START_CLEAN | tr -d "/")
     RUN_LABEL=$(echo "${RUN_LABEL}_from${START_LABEL}")
   fi
-  if [[ -n $END ]]; then
-    END_LABEL=$(echo $END | tr -d "/")
+  if [[ -n $END_CLEAN ]]; then
+    END_LABEL=$(echo $END_CLEAN | tr -d "/")
     RUN_LABEL=$(echo "${RUN_LABEL}_to${END_LABEL}")
   fi
 fi

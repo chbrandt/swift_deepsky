@@ -96,7 +96,7 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
     def timefilter(table_master, start_time, end_time):
         """
         Input:
-         - 'start_time' and 'end_time' are strings in format 'dd/mm/yyyy'
+         - 'start_time' and 'end_time' are strings in format ISO
         """
         from datetime import datetime
         from astropy.time import Time
@@ -105,15 +105,27 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
         inds = np.ones(len(table_master)).astype(bool)
         if start_time is not None:
             try:
-                dt_sel = Time(datetime.strptime(start_time, '%d/%m/%Y')).mjd
+                start_time = start_time.strip()
+                start_time_mod = start_time.replace(' ','T')
+                if start_time != start_time_mod:
+                    start_time = start_time_mod
+                    dt_sel = Time(datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')).mjd
+                else:
+                    dt_sel = Time(datetime.strptime(start_time, '%Y-%m-%d')).mjd
                 dt_vec = table_master['start_time']
                 inds &= dt_vec >= dt_sel
-            except:
+            except Exception as e:
                 print('Given start-time format not understood:', start_time)
                 return table_master
         if end_time is not None:
             try:
-                dt_sel = Time(datetime.strptime(end_time, '%d/%m/%Y')).mjd
+                end_time = end_time.strip()
+                end_time_mod = end_time.replace(' ','T')
+                if end_time != end_time_mod:
+                    end_time = end_time_mod
+                    dt_sel = Time(datetime.strptime(end_time, '%Y-%m-%dT%H:%M:%S')).mjd
+                else:
+                    dt_sel = Time(datetime.strptime(end_time, '%Y-%m-%d')).mjd
                 dt_vec = table_master['start_time']
                 inds &= dt_vec <= dt_sel
             except:
@@ -141,12 +153,13 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
     # If any time limit was given, filter the observations
     #
     if start_time or end_time:
+        print('START/END-TIME', start_time, end_time)
         table_object = timefilter(table_object, start_time, end_time)
 
     print("Number of observations found: {:d}".format(len(table_object)))
 
     # print(table_object.info)
-    
+
     if len(table_object) > 0:
         archive_addr = table_object.apply(lambda x:swift_archive_obs_path(x['start_time'],x['obsid']), axis=1)
         print("Observation addresses: {}".format(archive_addr.values))
@@ -200,9 +213,9 @@ if __name__ == '__main__':
                         help='Search radius in ARCMIN (default: 12)')
 
     parser.add_argument('--start', type=str, default='',
-                        help='Start time to select observations (default: "")')
+                        help='Start time to select observations (datetime ISO format)')
     parser.add_argument('--end', type=str, default='',
-                        help='End time to select observations (default: "")')
+                        help='End time to select observations (datetime ISO format)')
 
     # parser.add_argument('table_in', type=str,
     #                     help='Table (Swift) to conesearch')
