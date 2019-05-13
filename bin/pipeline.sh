@@ -201,9 +201,9 @@ fi
 
 if [[ -n $START || -n $END ]]; then
   START=$(echo $START | tr -s '[:space:]')
-  START_CLEAN=$(echo $START | tr -d '[:space:]')
+  START_CLEAN=$(echo $START | tr -d '[:space:]' | tr -d ':-')
   END=$(echo $END | tr -s '[:space:]')
-  END_CLEAN=$(echo $END | tr -d '[:space:]')
+  END_CLEAN=$(echo $END | tr -d '[:space:]' | tr -d ':-')
   if [[ -n $START_CLEAN ]]; then
     START_LABEL=$(echo $START_CLEAN | tr -d "/")
     RUN_LABEL=$(echo "${RUN_LABEL}_from${START_LABEL}")

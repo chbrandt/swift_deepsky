@@ -109,7 +109,7 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
                 if 'T' in start_time:
                     dt_sel = Time(datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')).mjd
                 else:
-                    dt_sel = Time(datetime.strptime(start_time, '%Y-%m-%d')).mjd
+                    dt_sel = Time(datetime.strptime(start_time+'T00:00:01', '%Y-%m-%dT%H:%M:%S')).mjd
                 dt_vec = table_master['start_time']
                 inds &= dt_vec >= dt_sel
             except Exception as e:
@@ -121,7 +121,7 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
                 if 'T' in end_time:
                     dt_sel = Time(datetime.strptime(end_time, '%Y-%m-%dT%H:%M:%S')).mjd
                 else:
-                    dt_sel = Time(datetime.strptime(end_time, '%Y-%m-%d')).mjd
+                    dt_sel = Time(datetime.strptime(end_time+'T23:59:59', '%Y-%m-%dT%H:%M:%S')).mjd
                 dt_vec = table_master['start_time']
                 inds &= dt_vec <= dt_sel
             except:
