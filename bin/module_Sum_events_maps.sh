@@ -27,6 +27,8 @@ select_event_files(){
       fi
     done
   done
+  cat "${OUT_FILE}" | sort -n > "${OUT_FILE}.tmp"
+  mv "${OUT_FILE}.tmp" "${OUT_FILE}"
 }
 
 select_exposure_maps() {
@@ -56,6 +58,8 @@ select_exposure_maps() {
       fi
     done
   # done
+  cat "${OUT_FILE}" | sort -n > "${OUT_FILE}.tmp"
+  mv "${OUT_FILE}.tmp" "${OUT_FILE}"
 }
 
 create_xselect_sum_script() {
