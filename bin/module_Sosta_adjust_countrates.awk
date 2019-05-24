@@ -86,6 +86,8 @@ BEGIN{
   cts_full=$6;
   err_full=$7;
 
+  if(cts_full == "None" || err_full == "None"){ next }
+
   cts_soft=$11;
   err_soft=$12;
   ul_soft=$13;
