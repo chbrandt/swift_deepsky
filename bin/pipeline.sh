@@ -88,8 +88,8 @@ help() {
   echo "  -u|--upload       : upload final results to central archive (no personal data is taken). Default."
   echo "  --noupload        : not to upload final results to central archive (no personal data is taken)"
   echo
-  echo "  --start           : initial date to consider for observations selection. Format is 'dd/mm/yyyy'"
-  echo "  --end             : final date to consider for observations selection. Format is 'dd/mm/yyyy'"
+  echo "  --start           : initial date to consider for observations selection. Format is 'yyyy-mm-dd hh:mm:ss'"
+  echo "  --end             : final date to consider for observations selection. Format is 'yyyy-mm-dd hh:mm:ss'"
   echo
   echo "  -s|--server       : Options are 'UK' (default) and 'US'"
   echo
@@ -200,14 +200,16 @@ else
 fi
 
 if [[ -n $START || -n $END ]]; then
-  START=$(echo $START | tr -s '[:space:]' | tr -d '[:space:]')
-  END=$(echo $END | tr -s '[:space:]' | tr -d '[:space:]')
-  if [[ -n $START ]]; then
-    START_LABEL=$(echo $START | tr -d "/")
+  START=$(echo $START | tr -s '[:space:]')
+  START_CLEAN=$(echo $START | tr -d '[:space:]' | tr -d ':-')
+  END=$(echo $END | tr -s '[:space:]')
+  END_CLEAN=$(echo $END | tr -d '[:space:]' | tr -d ':-')
+  if [[ -n $START_CLEAN ]]; then
+    START_LABEL=$(echo $START_CLEAN | tr -d "/")
     RUN_LABEL=$(echo "${RUN_LABEL}_from${START_LABEL}")
   fi
-  if [[ -n $END ]]; then
-    END_LABEL=$(echo $END | tr -d "/")
+  if [[ -n $END_CLEAN ]]; then
+    END_LABEL=$(echo $END_CLEAN | tr -d "/")
     RUN_LABEL=$(echo "${RUN_LABEL}_to${END_LABEL}")
   fi
 fi
