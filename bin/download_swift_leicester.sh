@@ -14,7 +14,7 @@ set -e
 
 # Base url of (NASA's) data archive, from where we gonna download the data
 #
-ARCHIVE_SERVER='http://www.swift.ac.uk'
+ARCHIVE_SERVER='https://www.swift.ac.uk'
 ARCHIVE_PATH='archive/obs'
 ARCHIVE_URL="${ARCHIVE_SERVER}/${ARCHIVE_PATH}"
 
