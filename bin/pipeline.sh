@@ -387,6 +387,16 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   select_exposure_maps $TMPEXPOS $EXMAPSFILE $OBSLIST 2> FILES_not_FOUND.expomaps.txt #2> $LOGFILE
   print "  EXMAPSFILE="`cat $EXMAPSFILE`
 
+  # Compute RA,Dec center for events/expomaps stacking
+  #
+  declare -a EXPOSURES=$(cat $EVENTSFILE | xargs -n1 -P1 -I{} fkeyprint {}+1 EXPOSURE exact=yes | grep "^EXPOSURE" | awk '{printf "%d\n",$2}')
+
+  declare -a RAS=$(cat $EVENTSFILE | xargs -n1 -P1 -I{} fkeyprint {}+1 RA_PNT exact=yes | grep "^RA" | awk '{printf "%f\n",$3}')
+
+  declare -a DECS=$(cat $EVENTSFILE | xargs -n1 -P1 -I{} fkeyprint {}+1 DEC_PNT exact=yes | grep "^DEC" | awk '{printf "%f\n",$3}')
+
+  CENTER=$(python ${SCRPT_DIR}/compute_weight_coordinates.py --expos ${EXPOSURES[@]} --ras ${RAS[@]} --decs ${DECS[@]})
+
   # Create XSelect and XImage scripts to sum event-files and exposure-maps
   #
   print "# -> Generating scripts for stacking data"
@@ -394,7 +404,8 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   create_xselect_sum_script $RUN_LABEL \
                             $EVENTSFILE \
                             "./${EVENTSSUM_RESULT#$PWD}" \
-                            $XSELECT_SUM_SCRIPT
+                            $XSELECT_SUM_SCRIPT \
+                            $CENTER
 
   # Create exposure map from event-sum file
   #
@@ -402,7 +413,8 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   create_ximage_sum_script $RUN_LABEL \
                            $EXMAPSFILE \
                            "./${EXPOSSUM_RESULT#$PWD}" \
-                           $XIMAGE_SUM_SCRIPT
+                           $XIMAGE_SUM_SCRIPT \
+                           $CENTER
 
   # Run the scripts
   #

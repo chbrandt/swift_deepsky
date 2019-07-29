@@ -67,6 +67,7 @@ create_xselect_sum_script() {
   EVTLIST="$2"
   RESULT="$3"
   OUT_FILE="$4"
+  CENTER="$5"
 
   TMPDIRREL="./${TMPDIR#$PWD}"
 
@@ -104,6 +105,7 @@ create_ximage_sum_script() {
   IMGLIST="$2"
   RESULT="$3"
   OUT_FILE="$4"
+  CENTER="$5"
 
   TMPDIRREL="./${TMPDIR#$PWD}"
 

@@ -21,9 +21,5 @@ if __name__ == '__main__':
     parser.add_argument('--ras', nargs='*', type=float)
     parser.add_argument('--decs', nargs='*', type=float)
     args = parser.parse_args()
-    # if len(sys.argv) != 4:
-    #     print("Usage: {script} <exposures> <RAs> <DECs>".format(script=sys.argv[0]))
-    #     print("       Where <exposures/RAs/DECs> are space-separated strings (each)")
-    #     sys.exit()
     ra,dec = weight_position(args.expos, args.ras, args.decs)
-    print("{:f} {:f}".format(ra,dec))
+    print("{:f},{:f}".format(ra,dec))
