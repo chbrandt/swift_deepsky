@@ -67,7 +67,6 @@ create_xselect_sum_script() {
   EVTLIST="$2"
   RESULT="$3"
   OUT_FILE="$4"
-  CENTER="$5"
 
   TMPDIRREL="./${TMPDIR#$PWD}"
 
@@ -107,6 +106,9 @@ create_ximage_sum_script() {
   OUT_FILE="$4"
   CENTER="$5"
 
+  RA=$(echo $CENTER | cut -d',' -f1)
+  DEC=$(echo $CENTER | cut -d',' -f2)
+
   TMPDIRREL="./${TMPDIR#$PWD}"
 
   NAME=$(echo $NAME | tr -c "[:alnum:]\n" "_")
@@ -121,12 +123,12 @@ create_ximage_sum_script() {
   _FILE=${IMAGES[$i]##*/}
   _FILE=${TMPDIRREL}/${_FILE}
   cp ${IMAGES[$i]} "${_FILE}"
-  echo "read/size=800  ${_FILE}"                 >> $OUT_FILE
+  echo "read/size=800/ra=${RA}/dec=${DEC} ${_FILE}" >> $OUT_FILE
   for ((i=1; i<$NUMIMAGES; i++)); do
     _FILE=${IMAGES[$i]##*/}
     _FILE=${TMPDIRREL}/${_FILE}
     cp ${IMAGES[$i]} "${_FILE}"
-    echo "read/size=800  ${_FILE}"               >> $OUT_FILE
+    echo "read/size=800/ra=${RA}/dec=${DEC} ${_FILE}" >> $OUT_FILE
     echo 'sum_image'                              >> $OUT_FILE
     echo 'save_image'                             >> $OUT_FILE
   done

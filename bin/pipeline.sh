@@ -395,7 +395,8 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
 
   declare -a DECS=$(cat $EVENTSFILE | xargs -n1 -P1 -I{} fkeyprint {}+1 DEC_PNT exact=yes | grep "^DEC" | awk '{printf "%f\n",$3}')
 
-  CENTER=$(python ${SCRPT_DIR}/compute_weight_coordinates.py --expos ${EXPOSURES[@]} --ras ${RAS[@]} --decs ${DECS[@]})
+  CENTER=$(python ${SCRPT_DIR}/compute_weight_coordinates.py \
+          --expos ${EXPOSURES[@]} --ras ${RAS[@]} --decs ${DECS[@]})
 
   # Create XSelect and XImage scripts to sum event-files and exposure-maps
   #
@@ -404,8 +405,7 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   create_xselect_sum_script $RUN_LABEL \
                             $EVENTSFILE \
                             "./${EVENTSSUM_RESULT#$PWD}" \
-                            $XSELECT_SUM_SCRIPT \
-                            $CENTER
+                            $XSELECT_SUM_SCRIPT
 
   # Create exposure map from event-sum file
   #
