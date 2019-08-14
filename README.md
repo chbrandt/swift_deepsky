@@ -6,24 +6,25 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1217670.svg)](https://doi.org/10.5281/zenodo.1217670)
 -----
 
-The DeepSky pipeline provides *deep* observations of the *X-ray* sky seen by the Swift satellite -- currently named [Neil Gehrels Swift Observatory][Swift] in memory to Neil Gehrels, the former head of the mission.
+The _Swift DeepSky_ pipeline provides *deep* observations of the *X-ray* sky as seen by the Swift<sup>1</sup> satellite.
 
-The pipeline starts with a position of the Sky, given by the user -- Right Ascension, Declination -- and from there  automatically combines *all* observations made by [Swift/XRT][XRT] up to date, automatically identifies the objects in the field and measures their fluxes, countrates, spectral energy slope, hydrogen column density and other parameters involved in the process, like the *effective* exposure time (*per object*).
+The pipeline starts from a position on the Sky given by the user (Right Ascension, Declination) -- and from there combines *all* observations made by [Swift/XRT][XRT] up to the date, identifies the objects in the field and measures their fluxes, countrates, spectral energy slope, hydrogen column density, like the *effective* exposure time (*per object*).
+And this is all done _automatically_.
 
-Data for the processing is downloaded on the fly, not being necessary for the user to have them before hand -- by all means, if the user has already the necessary data in his/her local storage the pipeline may use it.
+* Data for the processing is downloaded on the fly, not being necessary for the user to have them before hand -- by all means, if the user has already the necessary data in his/her local storage the pipeline may use it if requested.
 
-To ease the use and portability of this package, a [Docker container is also available][dockerhub]. The use of containers allows us to bypass the setup process and go straight to the data analysis.
+* To ease the use and portability of this package, a [Docker container is also available][dockerhub]. The use of containers allows us to bypass the setup process and go straight to the data analysis.
 
 See section [Docker](#Docker) for instructions on using the *ready-to-use* container version; look for the section [Install](#Install) if you want to install the source code.
 
-## Running it
 
-The pipeline, when ran without arguments, will output a `help` message like the one below:
+## No secrets: `help` is here
+When no arguments are given, or the `--help | -h` option is given, a _help_ message like the one below is displayed.
+Besides all the options, it should be highlighted that only the `--object` _or_ the (`--ra`,`--dec`) position is mandatory; that is effectively all `swift_deepsky` needs to run.
 ```
-
 $ swift_deepsky
 
- Usage: pipeline.sh { --ra <degrees> --dec <degrees> | --object <name> }
+ Usage: swift_deepsky { --ra <degrees> --dec <degrees> | --object <name> }
 
  Arguments:
   --ra     VALUE    : Right Ascension (in DEGREES)
@@ -52,10 +53,9 @@ $ swift_deepsky
 
 ```
 
-Apart from the coordinate/object to use as the pointing centroid, and optionally the size of the circle to search for observation around, the path to an existent swift archive may be given to avoid downloading new data (notice that only a small amount, the necessary data only, is downloaded anyway).
-For the records, Swift data is downloaded from the Italian Space Agency (swift.asdc.asi.it) archive.
+## Running it
 
-The default Swift master table --relating (RA,DEC) coordinates to epoch of observation (START_TIME) to observation-id (OBSID)-- is shipped together and it contains all Swift observations as of February 28, 2018.
+The pipeline may either be manually installed in your own workstation -- to that, check section [#Manual-Install] below -- or (recommended) run through a Docker engine.
 
 If that is running fine, we may make a test:
 ```bash
@@ -70,53 +70,44 @@ $ swift_deepsky --object 3c279 --start 1/1/2018 --end 28/2/2018
 
 
 ## Docker
+To run the `swift_deepsky` container we need to have Docker installed and tested.
+Please, check [#Install-Docker] for instructions on installing Docker on your platform.
 
-To use this package from a container Docker must be installed, see [#Install-Docker] for instructions about your platform.
+Since version 9, the _Swift-DeepSky_ container (`chbrandt/swift_deepsky`) runs with a _CalDB_ container attached to it (`chbrandt/heasoft_caldb`). 
+The _CalDB_ container though is just a data volume: it's role is only to serve _DeepSky_ with Swift calibration data, which means that you can run the _CalDB_ container once and (mostly) forget about it for a while.
 
-**Note**
-> The syntax on calling containers may be a bit ugly, don't worry; we will hide the ugliness under an alias.
-> But I would like to explain the container' parameters so that we understand what is going on.
-
-The name of the Swift-DeepSky container is `chbrandt/swift_deepsky`, it is publicly available through the [Docker-Hub][dockerhub]
-
-The `latest` version of the pipeline can be downloaded by typing
-```
-# docker pull chbrandt/swift_deepsky
+There is _one_ information that is important about the `heasoft_caldb` container that we will use everytime we call
+`swift_deepsky`: the _name_ we give to the container. We will use simply `caldb`:
+```bash
+$ docker run --name caldb chbrandt/heasoft_caldb:swift
 ```
 
-Considering we want to run the pipeline and have our results all organized under a directory called `work` we'd use the following call:
+Now we can run the `swift_deepsky` container, supported by `caldb`:
+```bash
+$ docker run --rm -it --volumes-from caldb -v $HOME/sds_output:/work chbrandt/swift_deepsky:latest
 ```
-# docker run -v $PWD/work:/work chbrandt/swift_deepsky
-```
+Let me explain what we just saw:
+* `--rm`: this guarantees that the container is garbage-collected when it is done processing;
+* `-it`: these are important flags that guarantee the necessary kind of environment for HeaSOFT tools;
+* `--volumes-from caldb`: here is where we bind `swift_deepsky` to `heasoft_caldb` container;
+* `-v $HOME/sds_output:/work` is where the results are written: locally, inside `$HOME/sds_output`;
+  * `$HOME/sds_output` **can** be changed to whatever you want, `/work` **cannot** be changed;
+* `chbrandt/swift_deepsky:latest` is the same as `chbrandt/swift_deepsky`.
 
-`$PWD/work` means we are asking the outputs to be written to directory `work` inside current working directory (`$PWD`).
-You may use any directory you want here; if such directory does not exist it will be created for you.
+> In other words, you want to keep the parameters as given above, you _may_ (and probably _should_) change the value for
+> the output files: the example uses `$HOME/sds_output`, pick one that suites your organization better.
 
-We can generalize the work directory and subsequent call to:
-```
-# WDIR="$PWD/work"
-# docker run -v $WDIR:/work chbrandt/swift_deepsky
-```
-
-### Make it beautiful again
-
-We can `alias` such command-line to a simple, clean call.
-Let's say we decide to put our results in a directory called `sds_results` under our `Home` directory.
-
-We can then define the alias as:
-```
-# alias swift_deepsky="docker run --rm -v \$HOME/sds_results/work:/work chbrandt/swift_deepsky"
+Once you digested the command-line(s) above, you may very well create an alias to simplify your life. For example,
+```bash
+$ alias swift_deepsky='docker run --rm -it --volumes-from caldb -v $HOME/sds_output:/work chbrandt/swift_deepsky:latest'
 ```
 
-*Notice we are defining the alias as `swift_deepsky`, but that is not mandatory; the alias can be called whatever you like better.*
-
-We may now call the pipeline as presented in [#Running-it], as if we were running it from the source code binary:
-```
-# swift_deepsky
+And now you could simply type:
+```bash
+$ swift_deepsky [options]
 ```
 
-### Test
-
+### Test: dummy values
 Run the following to get some processing done and see outputs comming out:
 ```
 # swift_deepsky --ra 22 --dec 33 --radius 15
@@ -125,8 +116,7 @@ Run the following to get some processing done and see outputs comming out:
 We are here asking the pipeline to sum all Swift-XRT images in the `15'` wide field around Right Ascension `22` and Declination `33`. The output should be in a directory called `22_33_15` in your current directory.
 
 
-## Setup, the source code way
-
+## Manual Install
 The following software(version) is necessary to run the pipeline:
 
 * HEASoft (v6.21)
@@ -200,3 +190,6 @@ Follow the links below to setup your docker environment; we see each other soon 
   * [CentOS](https://www.docker.com/docker-centos-distribution)
 
 all options available: https://store.docker.com/.
+
+- - -
+<sup>1</sup>: currently named [Neil Gehrels Swift Observatory][Swift] in memory to Neil Gehrels, former head of the mission.
