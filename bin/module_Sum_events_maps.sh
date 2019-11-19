@@ -8,6 +8,9 @@ select_event_files(){
 
   SWIFT_OBS_ARCHIVE="${DATA_ARCHIVE}"
 
+  TMPXRT="${TMPDIR}/xrt"
+  mkdir -p $TMPXRT
+
   for ln in `cat $OBS_ADDR_LIST`
   do
     OIFS=$IFS
@@ -19,10 +22,14 @@ select_event_files(){
     EVTDIR=${XRTDIR}/event
 
     for f in ${EVTDIR}/*xpc*po_cl.evt.gz; do
+      _fn="${TMPXRT}/${f##*/}"
       if [ -e "$f" ]; then
-        echo "$f" >> $OUT_FILE
+        cp ${f} ${_fn}
+        cp -R "${DATADIR}/auxil" "${TMPDIR}/."
+        cp -R "${XRTDIR}/hk" "${TMPXRT}/."
+        echo "$_fn" >> $OUT_FILE
       else
-        1>&2 echo "Files not found for observation: $ln"
+        1>&2 echo "Files not found for observation: $f"
         break
       fi
     done
@@ -34,8 +41,8 @@ select_event_files(){
 select_exposure_maps() {
   # DATA_ARCHIVE="$1"
   local EXPDIR="$1"
-  local OUT_FILE="$2"
-  local OBS_ADDR_LIST="$3"
+  local OBS_ADDR_LIST="$2"
+  local OUT_FILE="$3"
 
   # SWIFT_OBS_ARCHIVE="${DATA_ARCHIVE}"
 
@@ -50,12 +57,20 @@ select_exposure_maps() {
   #   # EXPDIR=${XRTDIR}/products
 
     for f in ${EXPDIR}/*xpc*po_ex.img*; do
+      _fn="${TMPDIR}/${f##*/}"
       if [ -e "$f" ]; then
-        echo "$f" >> $OUT_FILE
+        cp ${f} ${_fn}
+        echo "$_fn" >> $OUT_FILE
       else
-        1>&2 echo "Files not found for observation: $ln"
+        1>&2 echo "Files not found for observation: $f"
         break
       fi
+      # if [ -e "$f" ]; then
+      #   echo "$f" >> $OUT_FILE
+      # else
+      #   1>&2 echo "Files not found for observation: $ln"
+      #   break
+      # fi
     done
   # done
   cat "${OUT_FILE}" | sort -n > "${OUT_FILE}.tmp"
@@ -68,7 +83,7 @@ create_xselect_sum_script() {
   RESULT="$3"
   OUT_FILE="$4"
 
-  TMPDIRREL="./${TMPDIR#$PWD}"
+  TMPDIRREL="./${TMPDIR#$PWD}/xrt"
 
   NAME=$(echo $NAME | tr -c "[:alnum:]\n" "_")
 
@@ -80,13 +95,13 @@ create_xselect_sum_script() {
 
   i=0
   _FILE=${EVTFILES[$i]##*/}
-  cp ${EVTFILES[$i]} "${TMPDIR}/${_FILE}"
+  # cp ${EVTFILES[$i]} "${TMPDIR}/${_FILE}"
   echo "read ev $_FILE"                       >> $OUT_FILE
   echo "${TMPDIRREL}/"                        >> $OUT_FILE
   echo "yes"                                  >> $OUT_FILE
   for ((i=1; i<$NUMEVTFILES; i++)); do
     _FILE=${EVTFILES[$i]##*/}
-    cp ${EVTFILES[$i]} "${TMPDIR}/${_FILE}"
+    # cp ${EVTFILES[$i]} "${TMPDIR}/${_FILE}"
     echo "read ev $_FILE"                     >> $OUT_FILE
     if [ $i -ge 19 ]; then
       echo 'yes'                              >> $OUT_FILE
@@ -109,7 +124,7 @@ create_ximage_sum_script() {
   RA=$(echo $CENTER | cut -d',' -f1)
   DEC=$(echo $CENTER | cut -d',' -f2)
 
-  TMPDIRREL="./${TMPDIR#$PWD}"
+  TMPDIRREL="./${TMPDIR#$PWD}/expomaps"
 
   NAME=$(echo $NAME | tr -c "[:alnum:]\n" "_")
 
@@ -122,12 +137,12 @@ create_ximage_sum_script() {
   i=0
   _FILE=${IMAGES[$i]##*/}
   _FILE=${TMPDIRREL}/${_FILE}
-  cp ${IMAGES[$i]} "${_FILE}"
+  # cp ${IMAGES[$i]} "${_FILE}"
   echo "read/size=800/ra=${RA}/dec=${DEC} ${_FILE}" >> $OUT_FILE
   for ((i=1; i<$NUMIMAGES; i++)); do
     _FILE=${IMAGES[$i]##*/}
     _FILE=${TMPDIRREL}/${_FILE}
-    cp ${IMAGES[$i]} "${_FILE}"
+    # cp ${IMAGES[$i]} "${_FILE}"
     echo "read/size=800/ra=${RA}/dec=${DEC} ${_FILE}" >> $OUT_FILE
     echo 'sum_image'                              >> $OUT_FILE
     echo 'save_image'                             >> $OUT_FILE
