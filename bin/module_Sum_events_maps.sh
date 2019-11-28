@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set +u
 
+is_eventsfile_good(){
+    # check if file is good to use;
+    # Return '0' if it's good to go
+    FILE="$1"
+    [ -f "$FILE" ] || return 2
+    return 0
+}
+
 select_event_files(){
   DATA_ARCHIVE="$1"
   OBS_ADDR_LIST="$2"
@@ -22,6 +30,7 @@ select_event_files(){
     EVTDIR=${XRTDIR}/event
 
     for f in ${EVTDIR}/*xpc*po_cl.evt.gz; do
+      is_eventsfile_good "$f" || continue
       _fn="${TMPXRT}/${f##*/}"
       if [ -e "$f" ]; then
         cp ${f} ${_fn}
@@ -82,6 +91,10 @@ create_xselect_sum_script() {
   EVTLIST="$2"
   RESULT="$3"
   OUT_FILE="$4"
+  CENTER="$5"
+
+  RA=$(echo $CENTER | cut -d',' -f1)
+  DEC=$(echo $CENTER | cut -d',' -f2)
 
   TMPDIRREL="./${TMPDIR#$PWD}/xrt"
 
@@ -96,13 +109,13 @@ create_xselect_sum_script() {
   i=0
   _FILE=${EVTFILES[$i]##*/}
   # cp ${EVTFILES[$i]} "${TMPDIR}/${_FILE}"
-  echo "read ev $_FILE"                       >> $OUT_FILE
+  echo "read/ra=${RA}/dec=${DEC} ev $_FILE"                       >> $OUT_FILE
   echo "${TMPDIRREL}/"                        >> $OUT_FILE
   echo "yes"                                  >> $OUT_FILE
   for ((i=1; i<$NUMEVTFILES; i++)); do
     _FILE=${EVTFILES[$i]##*/}
     # cp ${EVTFILES[$i]} "${TMPDIR}/${_FILE}"
-    echo "read ev $_FILE"                     >> $OUT_FILE
+    echo "read/ra=${RA}/dec=${DEC} ev $_FILE"                     >> $OUT_FILE
     if [ $i -ge 19 ]; then
       echo 'yes'                              >> $OUT_FILE
     fi
