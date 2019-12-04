@@ -2,6 +2,7 @@
 set -ue
 
 SCRPT_DIR=$(cd `dirname $BASH_SOURCE`; pwd)
+export SCRPT_DIR
 
 # Number of simultaneous processing slots available
 # So far, this is being used only during data download
@@ -371,12 +372,13 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
 
   source ${SCRPT_DIR}/module_Sum_events_maps.sh
   source ${SCRPT_DIR}/module_Expomap_create.sh
+  source ${SCRPT_DIR}/compute_baricenter.sh
 
   # Create two files with filenames list of event-images and exposure-maps
   #
   print "# -> Querying archive for event-files:"
   EVENTSFILE="${TMPDIR}/${RUN_LABEL}_events.txt"
-  select_event_files $DATA_ARCHIVE $OBSLIST $EVENTSFILE 2> FILES_not_FOUND.events.txt #2> $LOGFILE
+  select_event_files $DATA_ARCHIVE $OBSLIST $RADIUS $EVENTSFILE 2> FILES_not_FOUND.events.txt #2> $LOGFILE
   print "  EVENTSFILE="`cat $EVENTSFILE`
 
   TMPEXPOS="${TMPDIR}/expomaps"
@@ -387,16 +389,7 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   select_exposure_maps $TMPEXPOS $OBSLIST $EXMAPSFILE 2> FILES_not_FOUND.expomaps.txt #2> $LOGFILE
   print "  EXMAPSFILE="`cat $EXMAPSFILE`
 
-  # Compute RA,Dec center for events/expomaps stacking
-  #
-  declare -a EXPOSURES=$(cat $EVENTSFILE | xargs -n1 -P1 -I{} fkeyprint {}+1 EXPOSURE exact=yes | grep "^EXPOSURE" | awk '{printf "%d\n",$2}')
-
-  declare -a RAS=$(cat $EVENTSFILE | xargs -n1 -P1 -I{} fkeyprint {}+1 RA_PNT exact=yes | grep "^RA" | awk '{printf "%f\n",$3}')
-
-  declare -a DECS=$(cat $EVENTSFILE | xargs -n1 -P1 -I{} fkeyprint {}+1 DEC_PNT exact=yes | grep "^DEC" | awk '{printf "%f\n",$3}')
-
-  CENTER=$(python ${SCRPT_DIR}/compute_weight_coordinates.py \
-          --expos ${EXPOSURES[@]} --ras ${RAS[@]} --decs ${DECS[@]})
+  CENTER=$(compute_baricenter $EVENTSFILE)
 
   # Create XSelect and XImage scripts to sum event-files and exposure-maps
   #
