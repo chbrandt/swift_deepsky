@@ -11,7 +11,7 @@ NPROCS=3
 
 # Upload final results
 #
-UPLOAD='yes'
+UPLOAD='no'
 
 # Make the script verbose by default
 VERBOSE=1
@@ -86,8 +86,8 @@ help() {
   echo "  -o|--outdir       : output directory; default is the current one."
   echo "                      In 'outdir', a directory for every file from this run is created."
   echo
-  echo "  -u|--upload       : upload final results to central archive (no personal data is taken). Default."
-  echo "  --noupload        : not to upload final results to central archive (no personal data is taken)"
+  echo "  -u|--upload       : upload final results to central archive (no personal data is taken)."
+  echo "  --noupload        : not to upload final results to central archive. Default."
   echo
   echo "  --start           : initial date to consider for observations selection. Format is 'yyyy-mm-dd hh:mm:ss'"
   echo "  --end             : final date to consider for observations selection. Format is 'yyyy-mm-dd hh:mm:ss'"

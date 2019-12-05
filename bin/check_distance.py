@@ -15,9 +15,8 @@ if __name__ == "__main__":
     except Exception as err:
         print(err)
         sep = 0
-    print('SEPARATION',sep)
+    # print('SEPARATION',sep)
     if sep < radius:
         sys.exit(0)
     else:
         sys.exit(1)
-    # print('{!s}'.format(sep))
