@@ -44,13 +44,18 @@ det2sosta() {
 
   back_expo=$(echo "$expo $back" | awk '{print $1 * $2}')
 
+  SMOOTH_LINE='smooth/wave/sigma=5'
+  if [ $expo -gt 1000 ]; then
+    SMOOTH_LINE="${SMOOTH_LINE}/back=1.0"
+  fi
+
   # echo "log test_$EMIN-$EMAX.txt"
   # echo "cpd ${NAME}_sum_band${EMIN}-${EMAX}daeV.gif/gif"        >> $OUTFILE
   echo "log ./${LOGFILE#$PWD}"                                  >> $OUTFILE
   echo "read/size=800/ecol=PI/emin=${EMIN}/emax=${EMAX} $file"  >> $OUTFILE
   if [[ $SMOOTH == yes ]]
   then
-    echo "smooth/wave/sigma=5/back=1.0"                           >> $OUTFILE
+    echo "$SMOOTH_LINE"                                           >> $OUTFILE
     echo "cpd ${NAME}_sum.smooth.band${EMIN}-${EMAX}daeV.gif/gif" >> $OUTFILE
     echo "disp"                                                   >> $OUTFILE
     echo "read/size=800/ecol=PI/emin=${EMIN}/emax=${EMAX} $file"  >> $OUTFILE
