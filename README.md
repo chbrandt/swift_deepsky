@@ -54,7 +54,7 @@ $ swift_deepsky
 
 ```
 
-* An example of `master_table` can be found at [docs/notebook/SwiftXrt_master.csv](docs/notebook/SwiftXrt_master.csv):
+* An example of `--master_table` can be found at [docs/notebook/SwiftXrt_master.csv](docs/notebook/SwiftXrt_master.csv):
   ```
   NAME;ORIG_TARGET_ID;TARGET_ID;RA;DEC;START_TIME;STOP_TIME;ORIG_OBS_SEGM;OBS_SEGMENT;ORIG_OBSID;OBSID;XRT_EXPOSURE;XRT_EXPO_PC;ARCHIVE_DATE;PROCESSING_DA;PROCESSING_DATE;PROCESSING_VE
   SAFE3-CURR;60002;60002;0.640524;0.2784;20/11/2004;21/11/2004;0;0;60002000;60002000;0;0;27/11/2004;HEA_20JULY2006_V6.1_SWIFT_REL2.5A(BLD19)_22SEP2006;14/11/2006;3.7.6
