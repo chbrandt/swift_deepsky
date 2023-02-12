@@ -54,49 +54,11 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
         obs = '{:011d}'.format(int(obsid))
         return '{}/{}'.format(dtf,obs)
 
-    # def conesearch(ra_centroid, dec_centroid, radius,
-    #                 ra_list, dec_list):
-    #     '''
-    #     Return a bool array signaling the entries around centroid
-    #
-    #     Input:
-    #      - ra_centroid : float
-    #         Reference position' right ascension, in 'degree'
-    #      - dec_centroid: float
-    #         Reference position' declination, in 'degree'
-    #      - radius : float
-    #         Radius, in 'arcmin', to consider around central position
-    #      - ra_list : list of floats
-    #         List of RA positions (in 'degree') to consider
-    #      - dec_list : list of floats
-    #         List of Dec positions (in 'degree') to consider
-    #
-    #     Output:
-    #      - Mask arrays : boolean one-dimensional array
-    #         True for (ra/dec_list) positions within 'radius' arcmin
-    #         from (ra/dec_centroid) reference, Flase otherwise
-    #     '''
-    #     from astropy.coordinates import Angle,SkyCoord
-    #     radius = Angle(radius,unit='arcmin')
-    #     coords = SkyCoord(ra_centroid, dec_centroid, unit='degree')
-    #     # ramin = coords.ra - radius
-    #     # ramax = coords.ra + radius
-    #     # raind = (ra_list > ramin.value) * (ra_list < ramax.value)
-    #     # decmin = coords.dec - radius
-    #     # decmax = coords.dec + radius
-    #     # decind = (dec_list > decmin.value) * (dec_list < decmax.value)
-    #     # ind = raind * decind
-    #     # ra_list = ra_list[ind]
-    #     # dec_list = dec_list[ind]
-    #     coords_search = SkyCoord(ra_list, dec_list, unit='degree')
-    #
-    #     match_mask = coords.separation(coords_search) < radius
-    #     return match_mask
 
     def timefilter(table_master, start_time, end_time):
         """
         Input:
-         - 'start_time' and 'end_time' are strings in format ISO
+         - 'start_time' and 'end_time' are strings in ISO format ('%Y-%m-%dT%H:%M:%S' or '%Y-%m-%d')
         """
         from datetime import datetime
         from astropy.time import Time
@@ -124,7 +86,7 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
                     dt_sel = Time(datetime.strptime(end_time+'T23:59:59', '%Y-%m-%dT%H:%M:%S')).mjd
                 dt_vec = table_master['start_time']
                 inds &= dt_vec <= dt_sel
-            except:
+            except Exception as e:
                 print('Given end-time format not understood:', end_time)
                 return table_master
         return table_master[inds]
@@ -154,10 +116,10 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
 
     print("Number of observations found: {:d}".format(len(table_object)))
 
-    # print(table_object.info)
-
     if len(table_object) > 0:
-        archive_addr = table_object.apply(lambda x:swift_archive_obs_path(x['start_time'],x['obsid']), axis=1)
+        archive_addr = table_object.apply(
+            lambda x:swift_archive_obs_path(x['start_time'],x['obsid']), 
+            axis=1)
         print("Observation addresses: {}".format(archive_addr.values))
     else:
         archive_addr = pandas.DataFrame()
