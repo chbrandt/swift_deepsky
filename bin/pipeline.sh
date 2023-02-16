@@ -106,7 +106,8 @@ trap help ERR
 
 # Swift-XRT master table defaults to the one packaged
 #
-TABLE_MASTER="${SCRPT_DIR}/SwiftXrt_master.csv"
+# TABLE_MASTER="${SCRPT_DIR}/SwiftXrt_master.csv"
+TABLE_MASTER=''
 
 # Default data archive to use if none given
 #
@@ -223,12 +224,14 @@ fi
 : ${RUN_LABEL:?'Oops! Label is not defined!?'}
 
 
-: ${TABLE_MASTER:?'Argument -f must be specified'}
+# : ${TABLE_MASTER:?'Argument -f must be specified'}
 : ${DATA_ARCHIVE:?'Argument -d must be specified'}
 
 # Guarantee input (table and data) files are in absolute-path format
 #
-[[ "${TABLE_MASTER}" = /* ]] || TABLE_MASTER="${PWD}/${TABLE_MASTER}"
+if [ ! -z "${TABLE_MASTER}" ]; then
+  [[ "${TABLE_MASTER}" = /* ]] || TABLE_MASTER="${PWD}/${TABLE_MASTER}"
+fi
 [[ "${DATA_ARCHIVE}" = /* ]] || DATA_ARCHIVE="${PWD}/${DATA_ARCHIVE}"
 [[ "${OUTDIR}" = /* ]] || OUTDIR="${PWD}/${OUTDIR}"
 
@@ -256,19 +259,19 @@ print "#==============================================================="
 print "# Swift (XRT) deep-sky pipeline"
 print "# -----------------------------"
 print "# Pipeline arguments:"
-print "#  * Swift master table: ${TABLE_MASTER}"
-print "#  * Swift archive:      ${DATA_ARCHIVE}"
-print "#  * Field:              ${OBJECT}"
-print "#    * RA:               ${POS_RA}"
-print "#    * Dec:              ${POS_DEC}"
-print "#    * Radius:           ${RADIUS}"
-print "#  * Start date:         ${START}"
-print "#  * End date:           ${END}"
-print "#  * Run-label:          ${RUN_LABEL}"
-print "#  * Output directory:   ${OUTDIR}"
-print "#    * Temporary files:  ${TMPDIR}"
-print "#  * Logfile:            ${LOGFILE}"
-print "#    * Error log:        ${LOGERROR}"
+print "#  * Swift master table: '${TABLE_MASTER}'"
+print "#  * Swift archive:      '${DATA_ARCHIVE}'"
+print "#  * Field:              '${OBJECT}'"
+print "#    * RA:               '${POS_RA}'"
+print "#    * Dec:              '${POS_DEC}'"
+print "#    * Radius:           '${RADIUS}'"
+print "#  * Start date:         '${START}'"
+print "#  * End date:           '${END}'"
+print "#  * Run-label:          '${RUN_LABEL}'"
+print "#  * Output directory:   '${OUTDIR}'"
+print "#    * Temporary files:  '${TMPDIR}'"
+print "#  * Logfile:            '${LOGFILE}'"
+print "#    * Error log:        '${LOGERROR}'"
 print "#..............................................................."
 
 print "# Workflow:"
@@ -319,22 +322,24 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   # Select rows/obserations from master table in the field
   #
   print "# -> Selecting observations.."
-  # python ${SCRPT_DIR}/select_observations.py $TABLE_MASTER \
-  #                                           $TABLE_SELECT \
-  #                                           --position "${POS_RA},${POS_DEC}" \
-  #                                           --radius "$RADIUS" \
-  #                                           --archive_addr_list $OBSLIST \
-  #                                           --start "$START" \
-  #                                           --end "$END" \
-  #                                           2>> $LOGERROR | tee -a $LOGFILE
-
-  python ${SCRPT_DIR}/select_observations_vo.py $TABLE_SELECT \
-                                            --position "${POS_RA},${POS_DEC}" \
-                                            --radius "$RADIUS" \
-                                            --archive_addr_list $OBSLIST \
-                                            --start "$START" \
-                                            --end "$END" \
-                                            #2>> $LOGERROR | tee -a $LOGFILE
+  if [ ! -z "${TABLE_MASTER}" ]; then
+    python ${SCRPT_DIR}/select_observations.py $TABLE_MASTER \
+                                              $TABLE_SELECT \
+                                              --position "${POS_RA},${POS_DEC}" \
+                                              --radius "$RADIUS" \
+                                              --archive_addr_list $OBSLIST \
+                                              --start "$START" \
+                                              --end "$END" 
+                                              # 2>> $LOGERROR | tee -a $LOGFILE
+  else
+    python ${SCRPT_DIR}/select_observations_vo.py $TABLE_SELECT \
+                                              --position "${POS_RA},${POS_DEC}" \
+                                              --radius "$RADIUS" \
+                                              --archive_addr_list $OBSLIST \
+                                              --start "$START" \
+                                              --end "$END" 
+                                              # 2>> $LOGERROR | tee -a $LOGFILE
+  fi
 
   [[ $? -eq 0 ]] || { 1>&2 echo "Observations selection failed. Exiting."; exit 1; }
 
