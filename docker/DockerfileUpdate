@@ -1,15 +1,16 @@
 FROM chbrandt/swift_deepsky:6.15
 
-RUN /usr/local/anaconda/bin/pip install https://github.com/chbrandt/eada/archive/0.9.7.3.tar.gz
+RUN /usr/local/anaconda/bin/pip install --upgrade pip && \
+    /usr/local/anaconda/bin/pip install https://github.com/chbrandt/eada/archive/0.9.7.3.tar.gz
 
 RUN cd / && rm -rf /swift_deepsky && \
     git clone https://github.com/chbrandt/swift_deepsky.git && \
     cd /swift_deepsky && rm -rf .git && ./install.sh
 
-RUN yum install -y epel-release   && \
-    yum install -y sshpass        && \
-    yum install -y openssl-devel  && \
-    yum clean all
+# RUN yum install -y epel-release   && \
+#     yum install -y sshpass        && \
+#     yum install -y openssl-devel  && \
+#     yum clean all
 
 # Do some workaround with CALDB.
 # This should allow a CALDB-volume to be attached (and not break if not attached).
