@@ -25,32 +25,38 @@ Besides all the options, it should be highlighted that only the `--object` _or_ 
 ```
 $ swift_deepsky
 
- Usage: swift_deepsky { --ra <degrees> --dec <degrees> | --object <name> }
+ Usage: pipeline.sh { --ra <degrees> --dec <degrees> | --object <name> }
 
  Arguments:
-  --ra     VALUE    : Right Ascension (in DEGREES)
-  --dec    VALUE    : Declination (in DEGREES)
-  --object NAME     : name of object to use as center of the field.
-                      If given, CDS/Simbad is queried for the position
-                      associated with 'NAME'
-  --radius VALUE    : Radius (in ARC-MINUTES) around RA,DEC to search for observations. Default is '12' (arcmin)
-  -d|--data_archive : data archive directory; Where Swift directories-tree is.
-                      This directory is supposed to contain the last 2 levels
-                      os Swift archive usual structure: 'data_archive'/START_TIME/OBSID
-  -l|--label LABEL  : Label output files. Otherwise object NAME or ra,dec VALUEs will be used.
+  --ra     VALUE      : Right Ascension (in DEGREES)
+  --dec    VALUE      : Declination (in DEGREES)
+  --object NAME       : name of object to use as center of the field.
+                        If given, CDS/Simbad is queried for the position
+                        associated with 'NAME'
+  --radius VALUE      : radius (in ARC-MINUTES) around RA,DEC to search for observations. Default is '12' (arcmin)
+  -d|--data_archive   : data archive directory; Where Swift directories-tree is.
+                        This directory is supposed to contain the last 2 levels
+                        os Swift archive usual structure: 'data_archive'/START_TIME/OBSID
+  -l|--label LABEL    : label output files. Otherwise object NAME or ra,dec VALUEs will be used.
 
  Options:
-  -f|--master_table : Swift master-table. This table relates RA,DEC,START_TIME,OBSID.
-                      The 'master_table' should be a CSV file with these columns
-  -o|--outdir       : output directory; default is the current one.
-                      In 'outdir', a directory for every file from this run is created.
-  -u|--upload       : upload final results to central archive (no personal data is taken). Default.
-  --noupload        : not to upload final results to central archive (no personal data is taken)
-  --start           : initial date to consider for observations selection. Format is 'dd/mm/yyyy'
-  --end             : final date to consider for observations selection. Format is 'dd/mm/yyyy'
+  -f|--master_table   : Swift master-table. This table relates RA,DEC,START_TIME,OBSID.
+                        The 'master_table' should be a CSV file with these columns
+  --table_time_format : master-table START_TIME/STOP_TIME format. Default is %y-%m-%d
 
-  -h|--help         : this help message
-  -q|--quiet        : verbose
+  -o|--outdir         : output directory; default is the current one.
+                        In 'outdir', a directory for every file from this run is created.
+
+  -u|--upload         : upload final results to central archive (no personal data is taken).
+  --noupload          : not to upload final results to central archive. Default.
+
+  --start             : initial date to consider for observations selection. Format is 'yyyy-mm-dd hh:mm:ss' or 'yyyy-mm-dd'
+  --end               : final date to consider for observations selection. Format is 'yyyy-mm-dd hh:mm:ss' or 'yyyy-mm-dd'
+
+  -s|--server         : options are 'UK' (default) and 'US'
+
+  -h|--help           : this help message
+  -q|--quiet          : verbose
 
 ```
 
