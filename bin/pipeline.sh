@@ -63,51 +63,15 @@ function print() {
 # data will there be searched; If not there yet, it is downloaded.
 #
 ########################################################################
-help() {
-  echo ""
-  echo " Usage: $(basename $0) { --ra <degrees> --dec <degrees> | --object <name> }"
-  echo ""
-  echo " Arguments:"
-  echo "  --ra     VALUE    : Right Ascension (in DEGREES)"
-  echo "  --dec    VALUE    : Declination (in DEGREES)"
-  echo "  --object NAME     : name of object to use as center of the field."
-  echo "                      If given, CDS/Simbad is queried for the position"
-  echo "                      associated with 'NAME'"
-  echo "  --radius VALUE    : Radius (in ARC-MINUTES) around RA,DEC to search for observations. Default is '$RADIUS' (arcmin)"
-  echo "  -d|--data_archive : data archive directory; Where Swift directories-tree is."
-  echo "                      This directory is supposed to contain the last 2 levels"
-  echo "                      os Swift archive usual structure: 'data_archive'/START_TIME/OBSID"
-  echo "  -l|--label LABEL  : Label output files. Otherwise object NAME or ra,dec VALUEs will be used."
-  echo ""
-  echo " Options:"
-  echo "  -f|--master_table : Swift master-table. This table relates RA,DEC,START_TIME,OBSID."
-  echo "                      The 'master_table' should be a CSV file with these columns"
-  echo
-  echo "  -o|--outdir       : output directory; default is the current one."
-  echo "                      In 'outdir', a directory for every file from this run is created."
-  echo
-  echo "  -u|--upload       : upload final results to central archive (no personal data is taken)."
-  echo "  --noupload        : not to upload final results to central archive. Default."
-  echo
-  echo "  --start           : initial date to consider for observations selection. Format is 'yyyy-mm-dd hh:mm:ss'"
-  echo "  --end             : final date to consider for observations selection. Format is 'yyyy-mm-dd hh:mm:ss'"
-  echo
-  echo "  -s|--server       : Options are 'UK' (default) and 'US'"
-  echo
-  echo "  -h|--help         : this help message"
-  echo "  -q|--quiet        : verbose"
-  echo ""
-}
-trap help ERR
-
-# If no arguments given, print Help and exit.
-[ "${#@}" -eq 0 ] && { help; exit 0; }
-
+#
+# DEFAULTS
+# --------
 
 # Swift-XRT master table defaults to the one packaged
 #
 # TABLE_MASTER="${SCRPT_DIR}/SwiftXrt_master.csv"
 TABLE_MASTER=''
+TABLE_TIME_FORMAT='%y-%m-%d'
 
 # Default data archive to use if none given
 #
@@ -132,6 +96,49 @@ LABEL=''
 START=''
 END=''
 
+########################################################################
+help() {
+  echo ""
+  echo " Usage: $(basename $0) { --ra <degrees> --dec <degrees> | --object <name> }"
+  echo ""
+  echo " Arguments:"
+  echo "  --ra     VALUE      : Right Ascension (in DEGREES)"
+  echo "  --dec    VALUE      : Declination (in DEGREES)"
+  echo "  --object NAME       : name of object to use as center of the field."
+  echo "                        If given, CDS/Simbad is queried for the position"
+  echo "                        associated with 'NAME'"
+  echo "  --radius VALUE      : radius (in ARC-MINUTES) around RA,DEC to search for observations. Default is '$RADIUS' (arcmin)"
+  echo "  -d|--data_archive   : data archive directory; Where Swift directories-tree is."
+  echo "                        This directory is supposed to contain the last 2 levels"
+  echo "                        os Swift archive usual structure: 'data_archive'/START_TIME/OBSID"
+  echo "  -l|--label LABEL    : label output files. Otherwise object NAME or ra,dec VALUEs will be used."
+  echo ""
+  echo " Options:"
+  echo "  -f|--master_table   : Swift master-table. This table relates RA,DEC,START_TIME,OBSID."
+  echo "                        The 'master_table' should be a CSV file with these columns"
+  echo "  --table_time_format : master-table START_TIME/STOP_TIME format. Default is ${TABLE_TIME_FORMAT}"
+  echo
+  echo "  -o|--outdir         : output directory; default is the current one."
+  echo "                        In 'outdir', a directory for every file from this run is created."
+  echo
+  echo "  -u|--upload         : upload final results to central archive (no personal data is taken)."
+  echo "  --noupload          : not to upload final results to central archive. Default."
+  echo
+  echo "  --start             : initial date to consider for observations selection. Format is 'yyyy-mm-dd hh:mm:ss' or 'yyyy-mm-dd'"
+  echo "  --end               : final date to consider for observations selection. Format is 'yyyy-mm-dd hh:mm:ss' or 'yyyy-mm-dd'"
+  echo
+  echo "  -s|--server         : options are 'UK' (default) and 'US'"
+  echo
+  echo "  -h|--help           : this help message"
+  echo "  -q|--quiet          : verbose"
+  echo ""
+}
+trap help ERR
+
+# If no arguments given, print Help and exit.
+[ "${#@}" -eq 0 ] && { help; exit 0; }
+
+
 while [[ $# -gt 0 ]]
 do
   case $1 in
@@ -153,6 +160,8 @@ do
       LABEL=$2; shift;;
     -f|--master_table)
       TABLE_MASTER=$2; shift;;
+    --table_time_format)
+      TABLE_TIME_FORMAT=$2; shift;;
     -d|--data_archive)
       DATA_ARCHIVE=$2; shift;;
     -o|--outdir)
@@ -325,6 +334,7 @@ OBSLIST="${TMPDIR}/${RUN_LABEL}.archive_addr.txt"
   if [ ! -z "${TABLE_MASTER}" ]; then
     python ${SCRPT_DIR}/select_observations.py $TABLE_MASTER \
                                               $TABLE_SELECT \
+                                              --table_time_format "${TABLE_TIME_FORMAT}" \
                                               --position "${POS_RA},${POS_DEC}" \
                                               --radius "$RADIUS" \
                                               --archive_addr_list $OBSLIST \

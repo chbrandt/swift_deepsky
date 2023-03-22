@@ -175,12 +175,13 @@ if __name__ == '__main__':
     parser.add_argument('--end', type=str, default='',
                         help='End time to select observations (datetime ISO format)')
 
+    parser.add_argument('--archive_addr_list', type=str, default='archive_addr_list.txt',
+                        help='List of (addresses) Swift Observations DATE/IDs')
+                        
     # parser.add_argument('table_in', type=str,
     #                     help='Table (Swift) to conesearch')
     parser.add_argument('table_out', type=str,
                         help='Filtered table by conesearch')
-    parser.add_argument('--archive_addr_list', type=str, default='archive_addr_list.txt',
-                        help='List of (addresses) Swift Observations DATE/IDs')
 
 
     args = parser.parse_args()
