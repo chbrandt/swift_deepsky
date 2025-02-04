@@ -122,7 +122,7 @@ Let me explain what we just saw:
 
 Once you digested the command-line(s) above, you may very well create an alias to simplify your life. For example,
 ```bash
-alias swift_deepsky='docker run --rm -it --volumes-from caldb -v $HOME/sds_output:/work chbrandt/swift_deepsky:latest'
+alias swift_deepsky='docker run --rm -it --volumes-from caldb -v $PWD/sds_output:/work chbrandt/swift_deepsky:latest'
 ```
 
 And now you could simply type:
@@ -161,7 +161,7 @@ $ docker run --rm -it --volumes-from caldb \
     --ra 22 --dec 33 --radius 15
 ```
 
-Again, if you always use the same directory to Input/Output data to/from the (SDS) container (eg, `$HOME/sds_runs`), you may very well create an alias:
+Again, if you always use the same directory to Input/Output data to/from the (SDS) container (eg, `$PWD/sds_runs`), you may very well create an alias:
 
 ```bash
 alias swift_deepsky='docker run --rm -it --volumes-from caldb -v $HOME/sds_runs:/work chbrandt/swift_deepsky'
