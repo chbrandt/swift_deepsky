@@ -106,7 +106,7 @@ docker run --name caldb chbrandt/heasoft_caldb:swift
 
 Now we can run the `swift_deepsky` container, supported by `caldb`:
 ```bash
-docker run --rm -it --volumes-from caldb -v $HOME/sds_output:/work chbrandt/swift_deepsky:latest
+docker run --rm -it --volumes-from caldb -v $PWD/sds_output:/work chbrandt/swift_deepsky:latest
 ```
 
 Let me explain what we just saw:
