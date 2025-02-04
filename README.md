@@ -75,13 +75,13 @@ The pipeline may either be manually installed in your own workstation -- to that
 
 If that is running fine, we may make a test:
 ```bash
-$ swift_deepsky --ra 34.2608 --dec 1.2455
+swift_deepsky --ra 34.2608 --dec 1.2455
 ```
 , which will process every observation it finds in the archive And that process the 12 arcmin (default radius) field around RA=34.2608 and Dec=1.2455.
 
 Or you can ask for a specific object, for example, the classic `3C279`. You can also ask for a specific time period, which we will do now by selecting only the observations in the first months of 2018:
 ```bash
-$ swift_deepsky --object 3c279 --start 1/1/2018 --end 28/2/2018
+swift_deepsky --object 3c279 --start 1/1/2018 --end 28/2/2018
 ```
 
 
@@ -101,12 +101,12 @@ The _CalDB_ container though is just a data volume: it's role is only to serve _
 There is _one_ information that is important about the `heasoft_caldb` container that we will use everytime we call
 `swift_deepsky`: the _name_ we give to the container. We will use simply `caldb`:
 ```bash
-$ docker run --name caldb chbrandt/heasoft_caldb:swift
+docker run --name caldb chbrandt/heasoft_caldb:swift
 ```
 
 Now we can run the `swift_deepsky` container, supported by `caldb`:
 ```bash
-$ docker run --rm -it --volumes-from caldb -v $HOME/sds_output:/work chbrandt/swift_deepsky:latest
+docker run --rm -it --volumes-from caldb -v $HOME/sds_output:/work chbrandt/swift_deepsky:latest
 ```
 
 Let me explain what we just saw:
@@ -122,18 +122,18 @@ Let me explain what we just saw:
 
 Once you digested the command-line(s) above, you may very well create an alias to simplify your life. For example,
 ```bash
-$ alias swift_deepsky='docker run --rm -it --volumes-from caldb -v $HOME/sds_output:/work chbrandt/swift_deepsky:latest'
+alias swift_deepsky='docker run --rm -it --volumes-from caldb -v $HOME/sds_output:/work chbrandt/swift_deepsky:latest'
 ```
 
 And now you could simply type:
 ```bash
-$ swift_deepsky [options]
+swift_deepsky [options]
 ```
 
 ### Test: dummy values
 Run the following to get some processing done and see outputs comming out:
 ```
-$ swift_deepsky --ra 22 --dec 33 --radius 15
+swift_deepsky --ra 22 --dec 33 --radius 15
 ```
 
 We are here asking the pipeline to sum all Swift-XRT images in the `15'` wide field around Right Ascension `22` and Declination `33`. The output should be in a directory called `22_33_15` in your current directory.
@@ -164,9 +164,9 @@ $ docker run --rm -it --volumes-from caldb \
 Again, if you always use the same directory to Input/Output data to/from the (SDS) container (eg, `$HOME/sds_runs`), you may very well create an alias:
 
 ```bash
-$ alias swift_deepsky='docker run --rm -it --volumes-from caldb -v $HOME/sds_runs:/work chbrandt/swift_deepsky'
-$
-$ swift_deepsky --ra 22 --dec 33 --radius 15 --master_table my_swift_master_table.csv
+alias swift_deepsky='docker run --rm -it --volumes-from caldb -v $HOME/sds_runs:/work chbrandt/swift_deepsky'
+
+swift_deepsky --ra 22 --dec 33 --radius 15 --master_table my_swift_master_table.csv
 ```
 
 > **Notice** that you do NOT specify the absolute path of `my_swift_master_table.csv` _in the host system terms_ (remember, the container doesn't know the host system's filesystem organization). You can, though, specify the absolute path _in the container terms_, `/work/my_swift_master_table.csv` in this case.
