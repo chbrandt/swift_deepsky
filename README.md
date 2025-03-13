@@ -33,7 +33,7 @@ Replace `$HOME/sds_output` with your desired output directory.
 **Tip:** Create an alias for simplicity:
 
 ```bash
-alias swift_deepsky='docker run --rm -it --volumes-from caldb -v $HOME/sds_output:/work chbrandt/swift_deepsky swift_deepsky'
+alias swift_deepsky='docker run --rm -it --volumes-from caldb -v $HOME/sds_output:/work chbrandt/swift_deepsky'
 ```
 
 ### Docker Configuration Details
