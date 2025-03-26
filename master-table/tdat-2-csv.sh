@@ -34,5 +34,6 @@ head -n200 "$input_file" \
     > "$output_file"
 
 perl -lne 'print if((/<DATA>/../<END>/) && !(/<DATA>/||/<END>/))' "$input_file"\
+    | sed "s/|$//" \
     >> "$output_file"
 
