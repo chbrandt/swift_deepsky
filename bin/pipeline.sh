@@ -71,7 +71,7 @@ function print() {
 #
 # TABLE_MASTER="${SCRPT_DIR}/SwiftXrt_master.csv"
 TABLE_MASTER=''
-TABLE_TIME_FORMAT='%y-%m-%d'
+TABLE_TIME_FORMAT='%d/%m/%Y'
 
 # Default data archive to use if none given
 #

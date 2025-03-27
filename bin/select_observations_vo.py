@@ -51,7 +51,7 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
 
         if dtf is None:
             return None
-        obs = '{:011d}'.format(int(obsid))
+        obs = '{:011d}'.format(int(float(obsid)))
         return '{}/{}'.format(dtf,obs)
 
 
@@ -115,6 +115,16 @@ def select_observations(swift_mstr_table,ra,dec,fileout,obsaddrfile,radius=12,
         table_object = timefilter(table_object, start_time, end_time)
 
     print("Number of observations found: {:d}".format(len(table_object)))
+
+    # Heasarc decided to call 'obsid' as 'datalinkid'.
+    # Let's work around that also through 'orig_obsid'
+    if not 'obsid' in table_object.columns:
+        if 'orig_obsid' in table_object.columns:
+            table_object['obsid'] = table_object['orig_obsid']
+        elif 'DataLinkID' in table_object.columns:
+            table_object['obsid'] = table_object['DataLinkID']
+        else:
+            raise KeyError("No 'obsid', 'orig_obsid', nor 'DataLinkID' column found in table")
 
     if len(table_object) > 0:
         archive_addr = table_object.apply(
