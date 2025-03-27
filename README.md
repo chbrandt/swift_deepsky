@@ -25,7 +25,7 @@ docker run --name caldb chbrandt/heasoft_caldb:swift
 Run the Swift DeepSky pipeline, binding the CalDB container and mounting a local directory (`$HOME/sds_output`) to store outputs:
 
 ```bash
-docker run --rm -it --volumes-from caldb -v $HOME/sds_output:/work chbrandt/swift_deepsky swift_deepsky --ra 34.2608 --dec 1.2455
+docker run --rm -it --volumes-from caldb -v $HOME/sds_output:/work chbrandt/swift_deepsky --ra 34.2608 --dec 1.2455
 ```
 
 Replace `$HOME/sds_output` with your desired output directory.
@@ -51,7 +51,7 @@ swift_deepsky --ra 22 --dec 33 --radius 15
 Process observations for a specific object and time period:
 
 ```bash
-swift_deepsky --object 3c279 --start 1/1/2018 --end 28/2/2018
+swift_deepsky --object 3c279 --start 2018-01-01 --end 2018-02-28
 ```
 
 ### Using a Local Master Table
